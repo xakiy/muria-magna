@@ -17,26 +17,20 @@
 import falcon
 import jwt
 
-from muria.schema import User_Schema
-from muria.entities import User
+from muria.base_resource import BaseResource
+from muria.schema import Pengguna_Schema
+from muria.entity import Pengguna
 from muria import libs
 
 from pony.orm import db_session
-from falcon_cors import CORS
 
 
-class Authentication(object):
-    """Resource Authentication
+class Authentication(BaseResource):
+    """
+    Resource Authentication
 
     Menangani otentifikasi pengguna, termasuk yang mengeluarkan jwt.
     """
-
-    def __init__(self, config):
-        self.config = config
-        self.cors = CORS(
-            allow_origins_list=self.config.sec('cors_allow_origins_list'),
-            allow_all_headers=True,
-            allow_all_methods=True)
 
     @db_session
     def on_get(self, req, resp):
@@ -56,8 +50,8 @@ class Authentication(object):
         print('media: ', req.media)
 
         if req.media:
-            us = User_Schema()
-            auth_user, error = us.load(req.media)
+            ps = Pengguna_Schema()
+            auth_user, error = ps.load(req.media)
             #print(user)
 
             if error:
@@ -65,15 +59,16 @@ class Authentication(object):
                                        title='Invalid Parameters',
                                        code=error)
 
-            if isinstance(auth_user, User):
+            if isinstance(auth_user, Pengguna):
                 # Isi payload
                 payload = {
-                    'name': str(auth_user.pid.nama),
-                    'pid': str(auth_user.pid.id),
-                    'roles': str('admin')
+                    'name': str(auth_user.orang.nama),
+                    'pid': str(auth_user.orang.id),
+                    'roles': auth_user.wewenang.nama
                     # iss: issuer
                     # iat: issued at
                 }
+                print(payload)
 
                 # Buat token
                 token = jwt.encode(
@@ -101,17 +96,12 @@ class Authentication(object):
         resp.status = falcon.HTTP_OK
 
 
-class Verification(object):
-    """Resource Verification
+class Verification(BaseResource):
+    """
+    Resource Verification
+
     Memverifikasi jwt yang dikirimkan oleh klien
     """
-
-    def __init__(self, config):
-        self.config = config
-        self.cors = CORS(
-            allow_origins_list=self.config.sec('cors_allow_origins_list'),
-            allow_all_headers=True,
-            allow_all_methods=True)
 
     @db_session
     def on_get(self, req, resp, **params):
@@ -133,7 +123,7 @@ class Verification(object):
         print(payload)
         # BUG
         # Need sanity check!
-        auth_user = User.get(pid=payload['pid'])
+        auth_user = Pengguna.get(pid=payload['pid'])
 
         if auth_user is not None:
             print('#TEST', payload)
@@ -144,3 +134,12 @@ class Verification(object):
             resp.status = falcon.HTTP_404
 
         resp.body = libs.dumpAsJSON(content)
+
+
+class Refresh(BaseResource):
+
+    def on_get(self, req, resp, **params):
+        pass
+
+    def on_post(self, req, resp, **params):
+        pass

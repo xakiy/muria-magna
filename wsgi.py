@@ -23,7 +23,7 @@ from settings import middleware_list
 from muria import auth
 from muria import personal
 #from muria import lembaga
-#from muria import asrama
+from muria import asrama
 #from muria import stats
 #from muria import downstreamer
 # from muria import devel
@@ -40,13 +40,14 @@ app.add_static_route('/web', '/home/zakiy/public_html/giriDashboard/')
 app.add_static_route('/ref', '/home/zakiy/public_html/sufee/')
 
 """ Path otentikasi pengguna """
-app.add_route('/auth', auth.Authentication(config))
-app.add_route('/verify', auth.Verification(config))
+app.add_route('/auth', auth.Authentication())
+app.add_route('/verify', auth.Verification())
+app.add_route('/refresh', auth.Refresh())
 
 # semua personal/warga, termasuk para santri, bahkan wali santri di rumah
-app.add_route('/persons', personal.ResPersons())
+app.add_route('/persons', personal.ResOrangs())
 # person by uuid
-app.add_route('/persons/{id:uuid}', personal.ResDataPerson())
+app.add_route('/persons/{id:uuid}', personal.ResDataOrang())
 
 # listing data semua santri, dengan paginasi
 app.add_route('/santri', personal.ResSantri())
@@ -67,8 +68,9 @@ app.add_route('/lembaga/{lid}/jabatan/{id}', lembaga.ResJabatanLembagaDetail())
 # app.add_route('/lembaga/karyawan/santri', lembaga.sebuahLembaga())
 # listing semua pegawai lembaga yang non-santri
 # app.add_route('/lembaga/karyawan/nonsantri', lembaga.sebuahLembaga())
-
-app.add_route('/wilayah', asrama.ResWilayah())
+'''
+app.add_route('/rayon', asrama.ResRayon())
+'''
 app.add_route('/wilayah/kepala', asrama.ResKepalaWilayah())
 app.add_route('/wilayah/{wid:int}', asrama.ResDataWilayah())
 app.add_route('/wilayah/{wid:int}/blok', asrama.ResBlok())

@@ -33,10 +33,10 @@ class Configuration(object):
         self.database = {
             'engine': 'mysql',  # bisa sqlite, postgresql, atau oracle'''
             'host': 'localhost',
-            'user': 'root',
-            'password': 'm4suk4j4',
+            'user': 'muria',
+            'password': 't4tt4r4t4',
             'port': 3306,
-            'database': 'db_monopony'
+            'database': 'db_muria'
         }
 
         try:

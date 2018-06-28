@@ -21,6 +21,7 @@ Policy_Config = {
         'admin',
         'manager',
         'pengguna',
+        'santriwan'
     ],
     # TODO:
     # verba yang digunakan disini kurang mewakili grup dari role-role terkait
@@ -29,10 +30,10 @@ Policy_Config = {
     # "update" -> "kontributor"
     # "hapus" -> "editor"
     'groups': {
-        'read': ['admin', 'manager', 'pengguna'],
-        'create': ['admin', 'manager'],
-        'update': ['admin', 'manager'],
-        'delete': ['admin'],
+        'reader': ['admin', 'manager', 'pengguna', 'santriwan'],
+        'creator': ['admin', 'manager', 'pengguna'],
+        'editor': ['admin', 'manager'],
+        'deleterr': ['admin']
     },
     'routes': {
         '/auth': {
@@ -45,84 +46,88 @@ Policy_Config = {
             'GET': ['@any-role'],
             'POST': ['@any-role']
         },
+        '/refresh': {
+            'GET': ['@any-role'],
+            'POST': ['@any-role']
+        },
         '/persons': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/persons/{id}': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/santri': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/santri/{id}': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/lembaga': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/lembaga/{lid}': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/lembaga/{lid}/jabatan': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/lembaga/{lid}/jabatan/{id}': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
-        '/wilayah': {
-            'GET': ['read'],
-            'POST': ['create'],
+        '/rayon': {
+            'GET': ['reader'],
+            'POST': ['creator'],
             'OPTIONS': ['@passthrough'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
-        '/wilayah/kepala': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+        '/rayon/kepala': {
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
-        '/wilayah/{wid:int}': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+        '/rayon/{wid:int}': {
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
-        '/wilayah/{wid:int}/blok': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+        '/rayon/{wid:int}/blok': {
+            'GET': ['reader'],
+            'POST': ['creator'],
+            'PUT': ['editor'],
+            'DELETE': ['deleter'],
         },
         '/stats/santri': {
             'GET': ['@any-role']
         },
         '/stats/santri/{jinshi}': {
-            'GET': ['read']
+            'GET': ['reader']
         },
         '/upload': {
             'POST': ['@passthrough']

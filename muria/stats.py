@@ -21,7 +21,7 @@ import falcon
 from muria.config import conf
 from muria import libs
 # from muria.database import Conn
-from muria.entities import Person, Santri
+from muria.entity import Orang, Santri
 from pony.orm import db_session, count
 from falcon_cors import CORS
 

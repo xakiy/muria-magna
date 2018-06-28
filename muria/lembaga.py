@@ -21,7 +21,7 @@ import uuid
 from muria.config import conf
 from muria import libs
 from muria.database import Conn
-from muria.entities import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
+from muria.entity import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
 from muria.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
 from pony.orm.core import TransactionIntegrityError, CacheIndexError
 from pony.orm import db_session

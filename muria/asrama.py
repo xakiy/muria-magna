@@ -18,21 +18,21 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from muria.config import conf
+from settings import config
+from settings import connection
 from muria import libs
-from muria.database import Conn
-from muria.entities import Asrama_Wilayah, Asrama_Blok
-from muria.schema import Asrama_Wilayah_Schema, Asrama_Blok_Schema
+from muria.entity import Asrama_Rayon
+from muria.schema import Asrama_Rayon_Schema
 from pony.orm import db_session
 from falcon_cors import CORS
 
 
-class ResWilayah(object):
-    """Resource Wilayah
-    Resource ini bertanggung jawab menampilkan daftar wilayah yang ada.
-    Selain itu juga menerima pembuatan resource wilayah baru.
+class ResRayon(object):
+    """Resource Rayon
+    Resource ini bertanggung jawab menampilkan daftar rayon yang ada.
+    Selain itu juga menerima pembuatan resource rayon baru.
     """
-    cors = CORS(allow_origins_list=conf.sec('cors_allow_origins_list'), allow_all_headers=True, allow_all_methods=True)
+    cors = CORS(allow_origins_list=config.sec('cors_allow_origins_list'), allow_all_headers=True, allow_all_methods=True)
     #cors = CORS(allow_all_origins=True)
 
     @db_session
@@ -46,12 +46,12 @@ class ResWilayah(object):
         #print('media: ', req.media)
 
         content = dict()
-        wilayah_list = Asrama_Wilayah.select()[:conf.app('page_limit')]
+        rayon_list = Asrama_Rayon.select()[:config.app('page_limit')]
 
-        ws = Asrama_Wilayah_Schema()
+        ars = Asrama_Rayon_Schema()
 
-        if len(wilayah_list) != 0:
-            content = {'wilayah': [ ws.dump( w.to_dict() )[0] for w in wilayah_list]}
+        if len(rayon_list) != 0:
+            content = {'rayon': [  r.getDict() for r in rayon_list]}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
@@ -73,19 +73,19 @@ class ResWilayah(object):
         resp.status = falcon.HTTP_OK
 
 
-class ResDataWilayah(object):
-    """Resouce sebuahWilayah
-    Bentuk tunggal dari resouce Wilayahs
+class ResDataRayon(object):
+    """Resouce sebuahRayon
+    Bentuk tunggal dari resouce Rayons
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
+    cors = CORS(allow_all_origins=config.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, wid, **params):
 
         wid = str(wid)
 
-        if Asrama_Wilayah.exists(id=wid):
-            content = Asrama_Wilayah[wid].to_dict()
+        if Asrama_Rayon.exists(id=wid):
+            content = Asrama_Rayon[wid].to_dict()
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
@@ -94,75 +94,32 @@ class ResDataWilayah(object):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResKepalaWilayah(object):
-    """Resource Kepala Wilayah
-    Resource ini bertanggung jawab menampilkan daftar para kepala wilayah.
+class ResKepalaRayon(object):
+    """Resource Kepala Rayon
+    Resource ini bertanggung jawab menampilkan daftar para kepala rayon.
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
+    cors = CORS(allow_all_origins=config.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, **params):
 
         content = dict()
-        wilayah_list = Asrama_Wilayah.select()[:conf.app('page_limit')]
+        rayon_list = Asrama_Rayon.select()[:config.app('page_limit')]
 
-        if len(wilayah_list) != 0:
+        if len(rayon_list) != 0:
 
-            content = {'kepala_wilayah': [{
-                'id_wilayah': w.id,
-                'kepala_wilayah': w.kepala_wilayah.nama,
-                'kepala_wilayah_id': w.kepala_wilayah.id,
-                'nama_wilayah': w.nama_wilayah,
-                'area_wilayah': w.area_wilayah
-            } for w in wilayah_list
+            content = {'kepala_rayon': [{
+                'id_rayon': w.id,
+                'kepala_rayon': w.kepala_rayon.nama,
+                'kepala_rayon_id': w.kepala_rayon.id,
+                'nama_rayon': w.nama_rayon,
+                'area_rayon': w.area_rayon
+            } for w in rayon_list
             ]}
 
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
             content = {'error': 'empty result'}
-
-        resp.body = libs.dumpAsJSON(content)
-
-
-class ResBlok(object):
-    """Resource Wilayah
-    Resource ini bertanggung jawab menampilkan daftar wilayah yang ada.
-    Selain itu juga menerima pembuatan resource wilayah baru.
-    """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
-
-    @db_session
-    def on_get(self, req, resp, wid, **params):
-
-        content = dict()
-        blok_list = Asrama_Blok.select(lambda b: b.wilayah == wid)[:conf.app('page_limit')]
-        bs = Asrama_Blok_Schema()
-
-        if len(blok_list) != 0:
-            content = {'blok': [ bs.dump( b.to_dict() )[0] for b in blok_list]}
-            resp.status = falcon.HTTP_200
-        else:
-            resp.status = falcon.HTTP_404
-            content = {'error':'empty result'}
-
-        resp.body = libs.dumpAsJSON(content)
-
-
-class ResDataBlok(object):
-    """Resouce sebuahBlok
-    Bentuk tunggal dari resouce Bloks
-    """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
-
-    @db_session
-    def on_get(self, req, resp, id, **params):
-
-        if Blok.exists(id=id):
-            content = blok = Blok[id].to_dict()
-            resp.status = falcon.HTTP_200
-        else:
-            resp.status = falcon.HTTP_404
-            content = ('Non-existant id request of #{0}'.format(id))
 
         resp.body = libs.dumpAsJSON(content)

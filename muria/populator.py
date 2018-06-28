@@ -9,7 +9,7 @@ import uuid
 
 class entryGenerator(object):
 
-    def __init__(self):        
+    def __init__(self):
         self.today = datetime.date.today().isoformat()
         self.now   = datetime.datetime.now().isoformat()
         self.next6years = str(int(self.today[:4])+6)+self.today[4:]
@@ -17,13 +17,13 @@ class entryGenerator(object):
         self.maleNames = ['Ahmad', 'Zairi', 'Zainur', 'Salim', 'Yanto', 'Qasim', 'Mundzir', 'Hasan', 'Husnan', 'Fanani', 'Benny', 'Afandi', 'Mukhlis', 'Ahmadi', 'Arianto', 'Suheri', 'Suparman', 'Suhaimi', 'Irwanto', 'Hamdan', 'Teguh', 'Wawan', 'Iwan', 'Herman', 'Hendra', 'Rijal', 'Fahmi', 'Rendy', 'Nurman', 'Reza', 'Anton', 'David', 'Zakaria', 'Andi', 'Yahya', 'Sukarman', 'Fatih', 'Agus', 'Heri', 'Arya', 'Hilman', 'Yosep', 'Zainul', 'Zein', 'Rahmat', 'Sutikno', 'Helmi', 'Rozik', 'Maftuh', 'Sulaiman', 'Rony', 'Indra', 'Hermawan', 'Hasyim', 'Rojabi', 'Wahyudi', 'Idham', 'Ryan', 'Fathoni', 'Sholeh', 'Purniadi', 'Husni', "Ma'arif", 'Huda', 'Burhan', 'Busyro', 'Jaka', 'Bagas', 'Arif', 'Hidayat', 'Reza', 'Muammar', 'Fery', 'Yani', 'Hendri', 'Sutrisno', 'Sukarno', 'Cecep', 'Kosasih', 'Entong', 'Ilham', 'Ishak', 'Habib', 'Surya', 'Mughni', 'Farhan', 'Hartono', 'Taufan', 'Tantowi', 'Sulhan', 'Abduh', 'Hariri', 'Fauzan', 'Lukman', 'Shiddiq', 'Enda', 'Priadi', 'Tukul', 'Saiful', 'Bima', 'Krisna', 'Bisma', 'Arya', 'Dwiki', 'Setiawan', 'Yulianto', 'Irwanto', 'Irwansyah', 'Ary', 'Aryadi', 'Hardi', 'Duta', 'Dino', 'Fadhil', 'Sutikno', 'Halim', 'Husain', 'Rifky', 'Sahid', 'Sadzhili', 'Ridwan', 'Mansyur', 'Ghozali', 'Zubair', 'Lubis', 'Muhsin', 'Tiyo', 'Edi', 'Sadewa', 'Rudy', 'Rizky', 'Hakim', 'Sukadi', 'Agung', 'Tohari', 'Arbain', 'Haekal', 'Syarif', 'Hidayat', 'Jamil', 'Fino']
         self.address = ['Semarang','Surabaya','Malang','Jember','Bali','Banten','Probolinggo','Purbalingga','Wonosobo','Sragen','Jombang','Mojokerto','Pontianak','Padang','Medan','Aceh','Palembang','Lampung','Riau','Bangka','Maluku','Samarinda','Banjarmasin','Makassar','Manado','NTB','NTT','Flores','Papua','Manowari','Salatiga','Solo','Madiun','Magetan','Trenggalek','Klaten','Nganjuk','Tuban','Bojonegoro','Kudus','Gresik','Lamongan','Pasuruan','Bangil','Banyuwangi','Lumajang','Blitar','Kediri','Situbondo','Bandung','Bogor','Batam','Halmahera']
 
-  
+
     def randomAddress(self):
         return self.address[random.randint(0,len(self.address)-1)]
 
 
     """ create random date """
-    def randomDate(self):    
+    def randomDate(self):
         try:
             date = datetime.date(random.randint(1980,2009), random.randint(1,12), random.randint(1,31)).isoformat()
         except ValueError:
@@ -33,7 +33,7 @@ class entryGenerator(object):
 
     def randomName(self, sex = 'male'):
         start = 0
-        if sex == 'female':        
+        if sex == 'female':
             names = self.femaleNames
         else:
             names = self.maleNames
@@ -54,7 +54,7 @@ class entryGenerator(object):
         pass
 
 
-    def makePerson(self, sex = 'male', jsonify=False):
+    def makeOrang(self, sex = 'male', jsonify=False):
 
         person = {
                 "id": str(uuid.uuid4()),

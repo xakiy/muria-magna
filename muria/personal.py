@@ -22,15 +22,14 @@ import uuid
 #from settings import connection
 from muria.base_resource import BaseResource
 from muria import libs
-from muria.entities import Person, Santri
-from muria.schema import Person_Schema, Santri_Schema
+from muria.entity import Orang, Santri
+from muria.schema import Orang_Schema, Santri_Schema
 from pony.orm import db_session
-#from falcon_cors import CORS
 
 
-class ResPersons(BaseResource):
+class ResOrangs(BaseResource):
     """
-    Resource Persons
+    Resource Orangs
 
     Menampilkan data person per halam
     """
@@ -39,8 +38,8 @@ class ResPersons(BaseResource):
     def on_get(self, req, resp, **params):
 
         content = dict()
-        persons = Person.select()[:self.config.app('page_limit')]
-        ps = Person_Schema()
+        persons = Orang.select()[:self.config.app('page_limit')]
+        ps = Orang_Schema()
         print('personal : ', params)
         if len(persons) != 0:
             content = {
@@ -58,7 +57,7 @@ class ResPersons(BaseResource):
     def on_post(self, req, resp, **params):
 
         if req.media:
-            ps = Person_Schema()
+            ps = Orang_Schema()
             person, error = ps.load(req.media)
 
             if error:
@@ -66,10 +65,10 @@ class ResPersons(BaseResource):
                                        title='Invalid Parameters',
                                        code=error)
 
-            if not Person.exists(nik=person['nik']):
+            if not Orang.exists(nik=person['nik']):
                 try:
-                    pe = Person(**person)
-                    if isinstance(pe, Person):
+                    pe = Orang(**person)
+                    if isinstance(pe, Orang):
                         content = {'message': 'Successfully inserted',
                                    'url': '/persons/{0}'.format(pe.id)}
                         resp.status = falcon.HTTP_201
@@ -90,9 +89,9 @@ class ResPersons(BaseResource):
 
 
 
-class ResDataPerson(BaseResource):
+class ResDataOrang(BaseResource):
     """
-    Resouce dataPerson
+    Resouce dataOrang
 
     Berisi data pribadi masing-masing warga, diacu dengan id(uuid) mereke
     """
@@ -101,9 +100,9 @@ class ResDataPerson(BaseResource):
     def on_get(self, req, resp, id, **params):
 
         id = str(id)
-        if Person.exists(id=id):
+        if Orang.exists(id=id):
 
-            content = Person[id].to_dict()
+            content = Orang[id].to_dict()
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404

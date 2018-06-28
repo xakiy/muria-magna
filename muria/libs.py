@@ -13,25 +13,31 @@
 # limitations under the License.
 """Pustaka Umum."""
 
-import json
-# import ujson
-import rapidjson as rjson
 import datetime
 import collections
 import hashlib
 
-
 from settings import config
 
 
-class DatetimeEncoder(json.JSONEncoder):
-    """Encoder pengubah datetime sebagai string biasa."""
+try:
+    import rapidjson as json
+except ModuleNotFoundError:
+    import json
+    class DatetimeEncoder(json.JSONEncoder):
+        """Encoder pengubah datetime sebagai string biasa."""
 
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime) or \
-           isinstance(obj, datetime.date):
-            return obj.isoformat()[:10]
-        return json.JSONEncoder.default(self, obj)
+        def default(self, obj):
+            if isinstance(obj, datetime.datetime) or \
+               isinstance(obj, datetime.date):
+                return obj.isoformat()[:10]
+            return json.JSONEncoder.default(self, obj)
+
+    class ExceptionErrorEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, dict):
+                return
+            return str(obj)
 
 
 def datetimeToISO(obj):
@@ -39,13 +45,6 @@ def datetimeToISO(obj):
     if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
         return obj.isoformat()[:10]
     return str(obj)[:10]
-
-
-class ExceptionErrorEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, dict):
-            return
-        return str(obj)
 
 
 # code by angstwad
@@ -94,13 +93,13 @@ def dumpAsJSON(data_in):
 
     if config.app('debug'):
         # pretty output, debug only
-        data_out = rjson.dumps(data_in, default=datetimeToISO, indent=4)
+        data_out = json.dumps(data_in, default=datetimeToISO, uuid_mode=json.UM_HEX, indent=4)
         # data_out = ujson.dumps(content)
         # data_out = json.dumps(content, cls=DatetimeEncoder, sort_keys=True, indent=4 * ' ')
         # data_out = json.dumps(content, ensure_ascii=False)
     else:
         # pure JSON
-        data_out = rjson.dumps(data_in, datetime_mode=rjson.DM_ISO8601) # speed 1.8xx
+        data_out = json.dumps(data_in, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_HEX) # speed 1.8xx
         # data_out = rjson.dumps(content, default=datetimeToISO) # speed 1.6xx
         # data_out = ujson.dumps(content)
         # data_out = json.dumps(content, cls=DatetimeEncoder) # speed 1.8xx
