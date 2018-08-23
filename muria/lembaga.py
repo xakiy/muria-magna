@@ -18,27 +18,24 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from muria.config import conf
+from muria.resource import Resource
 from muria import libs
-from muria.database import Conn
 from muria.entity import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
 from muria.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
 from pony.orm.core import TransactionIntegrityError, CacheIndexError
-from pony.orm import db_session
-from falcon_cors import CORS
 
-class ResLembaga(object):
+
+class ResLembaga(Resource):
     """Resource Lembaga
     Resource ini bertanggung jawab menampilkan daftar lembaga yang ada,
     termasuk menerima pembuatan resource lembaga baru.
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, **params):
 
         content = dict()
-        lembaga_list = Lembaga.select()[:conf.app('page_limit')]
+        lembaga_list = Lembaga.select()[:self.config.getint('app', 'page_limit')]
         ls = Lembaga_Schema()
 
         if len(lembaga_list) != 0:
@@ -88,11 +85,10 @@ class ResLembaga(object):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResDataLembaga(object):
+class ResDataLembaga(Resource):
     """Resouce dataLembaga
     Bentuk tunggal dari resouce Lembagas
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, lid, **params):
@@ -144,19 +140,18 @@ class ResDataLembaga(object):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResJabatanLembaga(object):
+class ResJabatanLembaga(Resource):
     """Resource Lembaga
     Resource ini bertanggung jawab menampilkan daftar lembaga yang ada,
     termasuk menerima pembuatan resource lembaga baru.
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, lid, **params):
 
         if Lembaga.exists(id=lid):
             content = dict()
-            jabatan_lembaga_list = Jabatan_Lembaga.select(lambda j: j.lembaga.id == lid)[:conf.app('page_limit')]
+            jabatan_lembaga_list = Jabatan_Lembaga.select(lambda j: j.lembaga.id == lid)[:self.config.getint('app', 'page_limit')]
             jls = Jabatan_Lembaga_Schema()
 
             content = {'jabatan': [ jls.dump( jl.to_dict() )[0] for jl in jabatan_lembaga_list]}
@@ -207,12 +202,11 @@ class ResJabatanLembaga(object):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResJabatanLembagaDetail(object):
+class ResJabatanLembagaDetail(Resource):
     """Resource Lembaga
     Resource ini bertanggung jawab menampilkan daftar lembaga yang ada,
     termasuk menerima pembuatan resource lembaga baru.
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, lid, id, **params):
@@ -235,5 +229,5 @@ class ResJabatanLembagaDetail(object):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResKaryawanLembaga(object):
+class ResKaryawanLembaga(Resource):
     pass

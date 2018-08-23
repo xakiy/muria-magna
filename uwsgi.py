@@ -14,9 +14,21 @@
 
 """ muria main app wrapper for uwsgi, uwsgi. """
 
-from wsgi import app
-from wsgiref import simple_server
+import os
 
 if __name__ == '__main__':
+
+    from wsgi import app
+    from wsgiref import simple_server
+
     httpd = simple_server.make_server('127.0.0.1', 8000, app)
-    httpd.serve_forever()
+
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print('')
+        print('Shutting down the server... ')
+        print('Bye!')
+        httpd.shutdown()
+else:
+    print('Please, run this "%s" file in command line!' % __name__)

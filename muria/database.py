@@ -22,17 +22,17 @@ class Connection(object):
 
         # tanpa try-except untuk menampakkan error saat pertama kali dijalankan
         self.link = Database(
-            self.config.db('engine'),
-            host=self.config.db('host'),
-            port=self.config.db('port'),
-            user=self.config.db('user'),
-            passwd=self.config.db('password'),
-            db=self.config.db('database'))
+            self.config.get('database', 'engine'),
+            host=self.config.get('database', 'host'),
+            port=self.config.getint('database', 'port'),
+            user=self.config.get('database', 'user'),
+            passwd=self.config.get('database', 'password'),
+            db=self.config.get('database', 'db'))
 
     def getLink(self):
         return self.link
 
     def generate(self):
-        sql_debug(self.config.app('debug'))
+        sql_debug(self.config.get('database', 'verbose'))
         self.link.generate_mapping(
-            create_tables=self.config.app('create_table'))
+            create_tables=self.config.get('database', 'create_table'))

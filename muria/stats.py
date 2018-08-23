@@ -15,22 +15,19 @@
 """muria statistics class."""
 
 import falcon
-# import rapidjson as rjson
-# import datetime
-# import uuid
-from muria.config import conf
+import rapidjson as rjson
+import datetime
+import uuid
+from muria.resource import Resource
 from muria import libs
-# from muria.database import Conn
 from muria.entity import Orang, Santri
 from pony.orm import db_session, count
-from falcon_cors import CORS
 
 
-class ResStatsSantri(object):
+class ResStatsSantri(Resource):
     """Resource Statistiks Santri
     Menampilkan data statistiks jumlah total santri aktif.
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, **params):
@@ -53,11 +50,10 @@ class ResStatsSantri(object):
 
 
 
-class ResStatsSantriByJinshi(object):
+class ResStatsSantriByJinshi(Resource):
     """Resource Statistiks Santri by Jinshi
     Menampilkan data statistiks santri berdasarkan jenis kelamin.
     """
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, jinshi='', **params):

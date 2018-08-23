@@ -16,8 +16,9 @@
 
 import falcon
 import jwt
-
-from muria.base_resource import BaseResource
+import datetime
+from init import DEBUG
+from muria.resource import Resource
 from muria.schema import Pengguna_Schema
 from muria.entity import Pengguna
 from muria import libs
@@ -25,7 +26,7 @@ from muria import libs
 from pony.orm import db_session
 
 
-class Authentication(BaseResource):
+class Authentication(Resource):
     """
     Resource Authentication
 
@@ -35,9 +36,10 @@ class Authentication(BaseResource):
     @db_session
     def on_get(self, req, resp):
 
-        content = {'username': 'your username', 'password': 'your password'}
         resp.status = falcon.HTTP_200
-        resp.body = libs.dumpAsJSON(content)
+        if DEBUG:
+            content = {'username': 'your username', 'password': 'your password'}
+            resp.body = libs.dumpAsJSON(content)
 
     @db_session
     def on_post(self, req, resp):
@@ -58,23 +60,33 @@ class Authentication(BaseResource):
                 raise falcon.HTTPError(falcon.HTTP_BAD_REQUEST,
                                        title='Invalid Parameters',
                                        code=error)
-
+            '''
+            JWT Reserved Claims
+            Claims    name          Format         Usage
+            -------   ----------    ------         ---------
+            ‘exp’     Expiration    int            The time after which the token is invalid.
+            ‘nbf’     Not before    int            The time before which the token is invalid.
+            ‘iss’     Issuer        str            The principal that issued the JWT.
+            ‘aud’     Audience      str/list(str)  The recipient that the JWT is intended for.
+            ‘iat’     Issued At     int            The time at which the JWT was issued.
+            '''
             if isinstance(auth_user, Pengguna):
-                # Isi payload
                 payload = {
-                    'name': str(auth_user.orang.nama),
-                    'pid': str(auth_user.orang.id),
-                    'roles': auth_user.wewenang.nama
-                    # iss: issuer
-                    # iat: issued at
+                    'name': auth_user.orang.nama,
+                    'pid': auth_user.orang.id.hex,
+                    'roles': auth_user.wewenang.nama,
+                    'iss': self.config.get('security', 'issuer'),
+                    'aud': self.config.get('security', 'audience'),
+                    'iat': datetime.datetime.utcnow(),
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=600)
                 }
-                print(payload)
+                print('payload: ', payload)
 
                 # Buat token
                 token = jwt.encode(
                     payload,
-                    self.config.sec('private_key'),
-                    algorithm=self.config.sec('algorithm')
+                    self.config.getbinary('security', 'private_key'),
+                    algorithm=self.config.get('security', 'algorithm')
                 )
 
                 content = {'token': token}
@@ -96,7 +108,7 @@ class Authentication(BaseResource):
         resp.status = falcon.HTTP_OK
 
 
-class Verification(BaseResource):
+class Verification(Resource):
     """
     Resource Verification
 
@@ -117,8 +129,8 @@ class Verification(BaseResource):
 
         payload = jwt.decode(
             token,
-            self.config.sec('public_key'),
-            self.config.sec('algorithm')
+            self.config.getbinary('security', 'public_key'),
+            self.config.get('security', 'algorithm')
         )
         print(payload)
         # BUG
@@ -130,13 +142,13 @@ class Verification(BaseResource):
             content = {"token": token}
             resp.status = falcon.HTTP_200
         else:
-            content = {"errot": 'Token invalid'}
+            content = {"error": 'Token invalid'}
             resp.status = falcon.HTTP_404
 
         resp.body = libs.dumpAsJSON(content)
 
 
-class Refresh(BaseResource):
+class Refresh(Resource):
 
     def on_get(self, req, resp, **params):
         pass

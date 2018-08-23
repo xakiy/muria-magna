@@ -17,16 +17,17 @@
 # import jwt
 import hashlib
 import binascii
-from muria.config import conf
+import secrets
+from init import config
 
 
 class Tokenizer(object):
 
     def __init__(self, ecdsa=True, rsa=False):
 
-        self.private_key = conf.sec('private_key')
-        self.public_key = conf.sec('public_key')
-        self.algorithm = conf.sec('algorithm')
+        self.private_key = config.getbinary('security', 'private_key')
+        self.public_key = config.getbinary('security', 'public_key')
+        self.algorithm = config.get('security', 'algorithm')
 
     def hashPassword(self, text):
         """ Hash password menyerupai MySQL password() bekerja,

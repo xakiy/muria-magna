@@ -63,11 +63,13 @@ policy_config = {
             'PUT': ['update'],
             'DELETE': ['delete'],
         },
+        # BUG: falcon-policy seems refuses to parse route with field-converter in it
         '/santri/{id}': {
-            'GET': ['read'],
-            'POST': ['create'],
-            'PUT': ['update'],
-            'DELETE': ['delete'],
+            'GET': ['@passthrough']
+            # 'GET': ['read'],
+            # 'POST': ['create'],
+            # 'PUT': ['update'],
+            # -- 'DELETE': ['delete'],
         },
         '/lembaga': {
             'GET': ['read'],

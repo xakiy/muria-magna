@@ -19,6 +19,7 @@ class GiriJwtChecker(JwtChecker):
         for which a jwt shall not be required.
 
         """
+        print('@JWT')
 
         self.secret = secret
         self.algorithm = algorithm
@@ -47,24 +48,19 @@ class GiriJwtChecker(JwtChecker):
             return
 
         token = req.headers.get('AUTHORIZATION', '').partition('Bearer ')[2]
-
         try:
             claims = jwt.decode(token,
                                 key=self.secret,
                                 issuer=self.issuer,
                                 audience=self.audience,
                                 leeway=self.leeway,
-                                algorithm=self.algorithm)
+                                algorithm=self.algorithm
+                                )
             params['jwt_claims'] = {}
-            print('claims: ', claims, resp)
-            y = {'X-Roles': claims['roles']}
-            resp.set_headers(y)
-            print(req.headers.get('X-Roles'))
             for claim in claims:
-                print(claim)
                 params['jwt_claims'][claim] = claims[claim]
 
         except jwt.InvalidTokenError as err:
             raise HTTPUnauthorized('Authentication Required',
-                                   'Please provide a valid auth token.',
-                                   None)
+                                   # 'Please provide a valid auth token.',
+                                   err)

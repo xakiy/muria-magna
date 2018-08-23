@@ -15,7 +15,7 @@
 
 from datetime import datetime, date
 from uuid import UUID
-from settings import connection
+from init import connection
 from muria.mixin import *
 from pony.orm import (PrimaryKey, Required, Optional, Set,
                       composite_key)  # composite_index)

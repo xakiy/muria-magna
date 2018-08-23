@@ -31,7 +31,7 @@ from streaming_form_data.targets import ValueTarget, FileTarget, NullTarget
 
 class DownStream(object):
 
-    cors = CORS(allow_all_origins=conf.sec('cors_allow_all_origins'))
+    cors = CORS(allow_all_origins=config.get('cors', 'allow_all_origins'))
     _fileStore = FileStore()
 
     def xon_post(self, req, resp, **params):

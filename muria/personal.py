@@ -18,16 +18,14 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-#from settings import config
-#from settings import connection
-from muria.base_resource import BaseResource
+from muria.resource import Resource
 from muria import libs
 from muria.entity import Orang, Santri
 from muria.schema import Orang_Schema, Santri_Schema
 from pony.orm import db_session
 
 
-class ResOrangs(BaseResource):
+class ResOrangs(Resource):
     """
     Resource Orangs
 
@@ -38,7 +36,7 @@ class ResOrangs(BaseResource):
     def on_get(self, req, resp, **params):
 
         content = dict()
-        persons = Orang.select()[:self.config.app('page_limit')]
+        persons = Orang.select()[:self.config.getint('app', 'page_limit')]
         ps = Orang_Schema()
         print('personal : ', params)
         if len(persons) != 0:
@@ -89,7 +87,7 @@ class ResOrangs(BaseResource):
 
 
 
-class ResDataOrang(BaseResource):
+class ResDataOrang(Resource):
     """
     Resouce dataOrang
 
@@ -112,7 +110,7 @@ class ResDataOrang(BaseResource):
 
 
 
-class ResSantri(BaseResource):
+class ResSantri(Resource):
     """
     Resource Santri
 
@@ -125,8 +123,8 @@ class ResSantri(BaseResource):
     def on_get(self, req, resp, **params):
 
         content = dict()
-        # santri_list = Santri.select()[:config.app('page_limit')]
-        santri_list = Santri.select()[:50]
+        # santri_list = Santri.select()[:config.get('app', 'page_limit')]
+        santri_list = Santri.select()[:self.config.getint('app', 'page_limit')]
         # paging akan disesuaikan menurut request
         sc = Santri_Schema()
 
@@ -176,7 +174,7 @@ class ResSantri(BaseResource):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResDataSantri(BaseResource):
+class ResDataSantri(Resource):
     """
     Resource Seorang Santri
 
@@ -186,8 +184,6 @@ class ResDataSantri(BaseResource):
 
     @db_session
     def on_get(self, req, resp, id, **params):
-
-        id = str(id)
         if Santri.exists(id=id):
             content = Santri[id].to_dict()
             resp.status = falcon.HTTP_200

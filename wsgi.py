@@ -16,9 +16,9 @@
 import falcon
 import os
 
-from settings import config
-from settings import connection
-from settings import middleware_list
+from init import config
+from init import connection
+from init import middleware_list
 # from muria import tokenizer
 from muria import auth
 from muria import personal

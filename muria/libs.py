@@ -17,7 +17,7 @@ import datetime
 import collections
 import hashlib
 
-from settings import config
+from init import config, DEBUG
 
 
 try:
@@ -91,7 +91,7 @@ def dumpAsJSON(data_in):
     NOTE: All date type is dumped in ISO8601 format
     """
 
-    if config.app('debug'):
+    if DEBUG:
         # pretty output, debug only
         data_out = json.dumps(data_in, default=datetimeToISO, uuid_mode=json.UM_HEX, indent=4)
         # data_out = ujson.dumps(content)

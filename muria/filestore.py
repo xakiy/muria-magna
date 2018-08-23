@@ -20,7 +20,7 @@ import shutil
 import os
 import mimetypes
 import magic
-from muria.config import conf
+from init import config
 from falcon_cors import CORS
 
 
@@ -32,7 +32,7 @@ class FileStore(object):
     only save one file per field name.
     """
 
-    _storage_path = conf.path('storage_path')
+    _storage_path = config.get('path', 'storage_path')
 
     def save(self, input_handler):
 

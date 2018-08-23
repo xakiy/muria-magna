@@ -18,22 +18,19 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from settings import config
-from settings import connection
 from muria import libs
+from muria.resource import Resource
 from muria.entity import Asrama_Rayon
 from muria.schema import Asrama_Rayon_Schema
 from pony.orm import db_session
 from falcon_cors import CORS
 
 
-class ResRayon(object):
+class ResRayon(Resource):
     """Resource Rayon
     Resource ini bertanggung jawab menampilkan daftar rayon yang ada.
     Selain itu juga menerima pembuatan resource rayon baru.
     """
-    cors = CORS(allow_origins_list=config.sec('cors_allow_origins_list'), allow_all_headers=True, allow_all_methods=True)
-    #cors = CORS(allow_all_origins=True)
 
     @db_session
     def on_get(self, req, resp, **params):
@@ -46,7 +43,7 @@ class ResRayon(object):
         #print('media: ', req.media)
 
         content = dict()
-        rayon_list = Asrama_Rayon.select()[:config.app('page_limit')]
+        rayon_list = Asrama_Rayon.select()[:self.config.getint('app', 'page_limit')]
 
         ars = Asrama_Rayon_Schema()
 
@@ -73,11 +70,10 @@ class ResRayon(object):
         resp.status = falcon.HTTP_OK
 
 
-class ResDataRayon(object):
+class ResDataRayon(Resource):
     """Resouce sebuahRayon
     Bentuk tunggal dari resouce Rayons
     """
-    cors = CORS(allow_all_origins=config.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, wid, **params):
@@ -94,17 +90,16 @@ class ResDataRayon(object):
         resp.body = libs.dumpAsJSON(content)
 
 
-class ResKepalaRayon(object):
+class ResKepalaRayon(Resource):
     """Resource Kepala Rayon
     Resource ini bertanggung jawab menampilkan daftar para kepala rayon.
     """
-    cors = CORS(allow_all_origins=config.sec('cors_allow_all_origins'))
 
     @db_session
     def on_get(self, req, resp, **params):
 
         content = dict()
-        rayon_list = Asrama_Rayon.select()[:config.app('page_limit')]
+        rayon_list = Asrama_Rayon.select()[:self.config.getint('app', 'page_limit')]
 
         if len(rayon_list) != 0:
 

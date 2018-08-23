@@ -14,23 +14,24 @@
 
 """muria base resource class."""
 
-from settings import config, CORS
+from init import config, CORS, connection
 from muria.libs import dumpAsJSON, getEtag
 
 
-class BaseResource(object):
+class Resource(object):
     """
     Base Resource Class.
 
     Super class untuk class resource dalam muria-magna
     """
 
-    def __init_subclass__(cls, config=config, **params):
+    def __init_subclass__(cls, config=config, connection=connection, **params):
         """Init class yang akan dijalankan otomatis oleh kelas turunannya."""
         super.__init_subclass__(**params)
         cls.config = config
+        cls.connection = connection
         cls.cors = CORS(
-            allow_origins_list=cls.config.sec('cors_allow_origins_list'),
+            allow_origins_list=cls.config.get('cors', 'allow_origins_list'),
             allow_all_headers=True,
             allow_all_methods=True)
 

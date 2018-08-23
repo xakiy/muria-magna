@@ -56,7 +56,7 @@ Policy_Config = {
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/persons/{id}': {
+        '/persons/{id:uuid}': {
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
@@ -68,7 +68,7 @@ Policy_Config = {
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/santri/{id}': {
+        '/santri/{id:uuid}': {
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],

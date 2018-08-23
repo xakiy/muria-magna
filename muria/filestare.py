@@ -33,7 +33,7 @@ class FileStore(object):
     _CHUNK_SIZE_BYTES = 4096
 
     def __init__(self):
-        self._storage_path = conf.path('storage_path')
+        self._storage_path = config.get('path', 'storage_path')
 
 
     def save(self, stream, content_type, content_length):
