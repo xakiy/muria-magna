@@ -1,13 +1,19 @@
 import pytest
 import falcon
 import json
+import os
 
 from falcon import testing
 from pony.orm import db_session
 # from urllib.parse import urlencode
 
+# os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test.ini')
+os.environ['MURIA_SETUP'] = '/home/zakiy/.config/muria/muria.ini'
+
 from wsgi import config
 from wsgi import app
+
+# from tests import database
 
 @pytest.fixture
 def client():
@@ -22,7 +28,7 @@ def test_auth_get(client):
 @db_session
 def test_auth_post(client):
     import jwt
-    from muria.entity import Pengguna
+    from db.model import Pengguna
 
     proto = 'http'  # 'https'
     headers = {"Content-Type": "application/json", "HOST": "api.krokod.net"}

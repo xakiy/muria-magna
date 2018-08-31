@@ -20,8 +20,8 @@ import datetime
 import uuid
 from muria.resource import Resource
 from muria import libs
-from muria.entity import Orang, Santri
-from muria.schema import Orang_Schema, Santri_Schema
+from db.model import Orang, Santri
+from db.schema import Orang_Schema, Santri_Schema
 from pony.orm import db_session
 
 

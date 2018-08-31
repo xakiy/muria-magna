@@ -20,8 +20,8 @@ import datetime
 import uuid
 from muria import libs
 from muria.resource import Resource
-from muria.entity import Asrama_Rayon
-from muria.schema import Asrama_Rayon_Schema
+from db.model import Asrama_Rayon
+from db.schema import Asrama_Rayon_Schema
 from pony.orm import db_session
 from falcon_cors import CORS
 
@@ -72,7 +72,7 @@ class ResRayon(Resource):
 
 class ResDataRayon(Resource):
     """Resouce sebuahRayon
-    Bentuk tunggal dari resouce Rayons
+    Bentuk tunggal d ari resouce Rayons
     """
 
     @db_session

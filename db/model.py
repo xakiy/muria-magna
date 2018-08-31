@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""muria entity class."""
+"""Entity class."""
 
 from datetime import datetime, date
 from uuid import UUID
 from init import connection
-from muria.mixin import *
+from db.mixin import *
 from pony.orm import (PrimaryKey, Required, Optional, Set,
                       composite_key)  # composite_index)
 
@@ -24,7 +24,7 @@ db = link = connection.getLink()
 
 
 class Orang(db.Entity, Mixin_Loader):
-    id = PrimaryKey(UUID, auto=True)
+    id = PrimaryKey(UUID)
     nik = Required(int, size=64, unique=True)
     nama = Required(str, 60)
     jinshi = Required('Jinshi')
@@ -268,7 +268,8 @@ class Grup_Wewenang(db.Entity, Mixin_Loader):
 
 
 class Online(db.Entity, Mixin_Loader):
-    id = Required(int, size=64, unsigned=True)
+    # id = Required(int, size=64, unsigned=True)
+    id = Required(int, size=64)
     rkey = Required(str, unique=True)
     akey = Required(str, unique=True)
     uakey = Required(str)
@@ -287,7 +288,8 @@ class Online(db.Entity, Mixin_Loader):
 
 class Offline(db.Entity, Mixin_Loader):
     """online blacklist"""
-    id = PrimaryKey(int, size=64, auto=True, unsigned=True)
+    # id = PrimaryKey(int, size=64, auto=True, unsigned=True)
+    id = PrimaryKey(int, size=64, auto=True)
     online = Required(Online)
     rkey = Optional(str)
     akey = Optional(str)

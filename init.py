@@ -11,16 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Init
+"""Init env dan konfigurasi lainnya."""
 
-Inisialisasi lingkungan dan berbagai konfigurasi
-"""
-
-import os
-from configparser import ConfigParser, ExtendedInterpolation
 from conf.policy import Policy_Config
-from muria.database import Connection
+from db.manager import DBManager
 
 # Middlewares
 # from falcon_auth import FalconAuthMiddleware, BasicAuthBackend
@@ -29,48 +23,20 @@ from muria.jwt_checker import GiriJwtChecker as JwtChecker
 from falcon_cors import CORS
 from falcon_policy import RoleBasedPolicy
 from falcon_multipart.middleware import MultipartMiddleware
+from lib.config import Config
 
-# ConfigParser modified
-class Config(ConfigParser):
-    def __init__(self, **kwargs):
-        super(Config, self).__init__(**kwargs)
-
-    def getlist(self, section, option, delim=' ', **kwargs):
-        return self.get(section, option, **kwargs).split(delim)
-
-    def getbinary(self, section, option, **kwargs):
-        return bytes(self.get(section, option, **kwargs), 'utf8')
-
-config = Config(interpolation=ExtendedInterpolation())
-if os.path.isdir(str(os.environ.get('MURIA_CONFIG_PATH'))):
-    config_file = os.path.join(os.environ['MURIA_CONFIG_PATH'], 'muria.ini')
-else:
-    raise EnvironmentError('MURIA_CONFIG_PATH belum diset!')
-
-if not bool(config.read(config_file).count(config_file)):
-    raise FileNotFoundError('File konfigurasi %s tidak ditemukan' % config_file)
-
-app_path = os.path.dirname(os.path.abspath(__file__))
-
-config.set('path', 'base_dir', app_path)
-config.set('path', 'config_dir', os.environ['MURIA_CONFIG_PATH'])
-
-priv_key = config.get('security', 'private_key')
-pub_key = config.get('security', 'public_key')
-
-if os.path.isfile(priv_key) and os.path.isfile(pub_key):
-    config.set('security', 'private_key', open(priv_key, 'r').read())
-    config.set('security', 'public_key', open(pub_key, 'r').read())
-else:
-    raise FileNotFoundError('File SSL tidak ditemukan!')
+# MURIA_SETUP merupakan env yang menunjuk ke berkas
+# konfigurasi produksi atau pengembangan.
+# seperti: export MURIA_SETUP=~/config/devel.ini
+config = Config(setup='MURIA_SETUP')
 
 DEBUG = config.getboolean('app', 'debug')
 
-connection = Connection(config)  # database connection
+connection = DBManager(config)  # database connection
 
 middleware_list = []
 
-if config.getboolean('security', 'strict'):
+if config.getboolean('security', 'secure'):
 
     cors = CORS(
         # log level

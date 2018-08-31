@@ -20,8 +20,8 @@ import datetime
 import uuid
 from muria.resource import Resource
 from muria import libs
-from muria.entity import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
-from muria.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
+from db.model import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
+from db.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
 from pony.orm.core import TransactionIntegrityError, CacheIndexError
 
 

@@ -20,7 +20,7 @@ import datetime
 import uuid
 from muria.resource import Resource
 from muria import libs
-from muria.entity import Orang, Santri
+from db.model import Orang, Santri
 from pony.orm import db_session, count
 
 

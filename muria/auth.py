@@ -19,8 +19,8 @@ import jwt
 import datetime
 from init import DEBUG
 from muria.resource import Resource
-from muria.schema import Pengguna_Schema
-from muria.entity import Pengguna
+from db.schema import Pengguna_Schema
+from db.model import Pengguna
 from muria import libs
 
 from pony.orm import db_session
