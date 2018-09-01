@@ -9,7 +9,7 @@ job building:
     stage: build
     script:
     # zypper in python3.6, python3-pip
-    - pip install -r requirement-dev.txt
+    - pip install -r requirement-devel.txt
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     only:
     - feature-init
