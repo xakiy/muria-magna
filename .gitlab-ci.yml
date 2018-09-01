@@ -1,3 +1,5 @@
+image: python:3.6
+
 stages:
    - build
    - test
@@ -6,7 +8,7 @@ stages:
 job building:
     stage: build
     script:
-    # zypper in python3.6, py
+    # zypper in python3.6, python3-pip
     - pip install -r requirement-dev.txt
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     only:
