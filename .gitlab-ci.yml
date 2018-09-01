@@ -1,0 +1,29 @@
+stages:
+   - build
+   - test
+   - deploy
+
+job building:
+    stage: build
+    script:
+    # zypper in python3.6, py
+    - pip install -r requirement-dev.txt
+    - export MURIA_SETUP=$MURIA_TEST_INI_FILE
+    only:
+    - feature-init
+
+job testing:
+    stage: test
+    script:
+    - py.test
+    only:
+    - feature-init
+
+job deploying:
+    stage: deploy
+    script:
+    - pip install -r requirement-dist.txt
+    - export MURIA_SETUP=$MURIA_DIST_INI_FILE
+    - python uwsgi.py
+    only:
+    - feature-init
