@@ -1,31 +1,23 @@
 image: python:3.6
 
 stages:
-   - build
    - test
-   - deploy
+   # - deploy
 
-job building:
-    stage: build
-    script:
-    # zypper in python3.6, python3-pip
-    - pip install -r requirement-devel.txt
-    - export MURIA_SETUP=$MURIA_TEST_INI_FILE
-    only:
-    - feature-init
+before_script:
+- apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
 
-job testing:
+testing:
     stage: test
     script:
+    - pip install -r requirement-devel.txt
+    - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
     - feature-init
 
-job deploying:
-    stage: deploy
-    script:
-    - pip install -r requirement-dist.txt
-    - export MURIA_SETUP=$MURIA_DIST_INI_FILE
-    - python uwsgi.py
-    only:
-    - feature-init
+# job produksi:
+#     stage: deploy
+#     script:
+#     only:
+#     - feature-init
