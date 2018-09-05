@@ -16,7 +16,7 @@
 from datetime import datetime, date
 from uuid import UUID
 from pony.orm import db_session, flush
-from db.model import Jinshi, Figur, Wewenang
+from muria.db.model import Jinshi, Figur, Wewenang
 
 def makeJinshi():
     data = list()

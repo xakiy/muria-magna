@@ -18,10 +18,10 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from muria.resource import Resource
+from muria.resource.base import Resource
 from muria import libs
-from db.model import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
-from db.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
+from muria.db.model import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
+from muria.schema.entity import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
 from pony.orm.core import TransactionIntegrityError, CacheIndexError
 
 

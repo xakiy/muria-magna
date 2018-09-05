@@ -18,9 +18,9 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from muria.resource import Resource
+from muria.resource.base import Resource
 from muria import libs
-from db.model import Orang, Santri
+from muria.db.model import Orang, Santri
 from pony.orm import db_session, count
 
 

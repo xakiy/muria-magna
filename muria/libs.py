@@ -17,7 +17,7 @@ import datetime
 import collections
 import hashlib
 
-from init import config, DEBUG
+from muria.init import config, DEBUG
 
 
 try:

@@ -8,7 +8,7 @@ import json
 import uuid
 import string
 
-from db.model import Jinshi
+from muria.db.model import Jinshi
 
 class DataGenerator(object):
 

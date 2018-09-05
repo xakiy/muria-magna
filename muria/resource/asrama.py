@@ -19,9 +19,9 @@ import rapidjson as rjson
 import datetime
 import uuid
 from muria import libs
-from muria.resource import Resource
-from db.model import Asrama_Rayon
-from db.schema import Asrama_Rayon_Schema
+from muria.resource.base import Resource
+from muria.db.model import Asrama_Rayon
+from muria.schema.entity import Asrama_Rayon_Schema
 from pony.orm import db_session
 from falcon_cors import CORS
 

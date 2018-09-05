@@ -14,7 +14,7 @@
 
 """muria base resource class."""
 
-from init import config, CORS, connection
+from muria.init import config, CORS, connection
 from muria.libs import dumpAsJSON, getEtag
 
 

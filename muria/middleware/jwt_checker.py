@@ -1,6 +1,6 @@
+import jwt
 from falcon import HTTPUnauthorized
 from falcon_jwt_checker import JwtChecker
-import jwt
 
 
 class GiriJwtChecker(JwtChecker):

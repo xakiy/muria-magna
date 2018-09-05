@@ -17,10 +17,10 @@
 import falcon
 import jwt
 import datetime
-from init import DEBUG
-from muria.resource import Resource
-from db.schema import Pengguna_Schema
-from db.model import Pengguna
+from muria.init import DEBUG
+from muria.resource.base import Resource
+from muria.schema.entity import Pengguna_Schema
+from muria.db.model import Pengguna
 from muria import libs
 
 from pony.orm import db_session

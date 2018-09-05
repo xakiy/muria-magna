@@ -4,14 +4,13 @@ import json
 import os
 
 from falcon import testing
-from pony.orm import db_session, flush, commit
+from pony.orm import db_session
 # from urllib.parse import urlencode
 
 os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test_setup.ini')
-# os.environ['MURIA_SETUP'] = '/home/zakiy/.config/muria/muria.ini'
 
-from wsgi import config
-from wsgi import app
+from muria.init import config
+from muria.wsgi import app
 
 
 @pytest.fixture
@@ -27,7 +26,7 @@ def test_auth_get(client):
 @db_session
 def test_auth_post(client):
     import jwt
-    from db.model import Orang, Pengguna
+    from muria.db.model import Orang, Pengguna
     from tests.data_generator import DataGenerator
 
     data_generator = DataGenerator()

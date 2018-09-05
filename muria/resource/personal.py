@@ -18,10 +18,10 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from muria.resource import Resource
+from muria.resource.base import Resource
 from muria import libs
-from db.model import Orang, Santri
-from db.schema import Orang_Schema, Santri_Schema
+from muria.db.model import Orang, Santri
+from muria.schema.entity import Orang_Schema, Santri_Schema
 from pony.orm import db_session
 
 

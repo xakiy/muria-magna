@@ -20,7 +20,7 @@ from marshmallow import (
     validates_schema,
     ValidationError)
 from marshmallow.validate import (Length, OneOf)
-from db.model import *
+from muria.db.model import *
 from muria.libs import json
 from htmllaundry import strip_markup
 from uuid import UUID

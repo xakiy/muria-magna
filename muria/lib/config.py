@@ -17,11 +17,11 @@ import os
 from configparser import ConfigParser, ExtendedInterpolation
 
 
-class Config(ConfigParser):
+class Parser(ConfigParser):
     """Extending ConfigParser with some special getters."""
 
     def __init__(self, setup, interpolation=ExtendedInterpolation(), **kwargs):
-        super(Config, self).__init__(interpolation=interpolation, **kwargs)
+        super(Parser, self).__init__(interpolation=interpolation, **kwargs)
         if os.path.isfile(str(os.environ.get(setup))):
             conf_file = str(os.environ.get(setup))
         else:

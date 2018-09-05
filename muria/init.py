@@ -13,29 +13,32 @@
 # limitations under the License.
 """Init env dan konfigurasi lainnya."""
 
-from conf.policy import Policy_Config
-from db.manager import DBManager
+from muria.lib.config import Parser
+from muria.conf.policy import Policy_Config
+from muria.db.manager import DBManager
+
 
 # Middlewares
 # from falcon_auth import FalconAuthMiddleware, BasicAuthBackend
 # from falcon_jwt_checker import JwtChecker
-from muria.jwt_checker import GiriJwtChecker as JwtChecker
+
 from falcon_cors import CORS
-from falcon_policy import RoleBasedPolicy
 from falcon_multipart.middleware import MultipartMiddleware
-from lib.config import Config
+from muria.middleware.jwt_checker import GiriJwtChecker
+from muria.middleware.rbac import RBAC
+
 
 
 # MURIA_SETUP merupakan env yang menunjuk ke berkas
 # konfigurasi produksi atau pengembangan.
 # seperti: export MURIA_SETUP=~/config/devel.ini
-config = Config(setup='MURIA_SETUP')
+config = Parser(setup='MURIA_SETUP')
 
 DEBUG = config.getboolean('app', 'debug')
 
 connection = DBManager(config)  # database connection
 
-from db import premise
+from muria.conf import premise
 
 middleware_list = []
 
@@ -57,7 +60,7 @@ if config.getboolean('security', 'secure'):
         # allow_all_headers=True
     )
 
-    jwt_checker = JwtChecker(
+    jwt_checker = GiriJwtChecker(
         secret=config.getbinary('security', 'public_key'),  # May be a public key
         algorithm=config.get('security', 'algorithm'),
         issuer=config.get('security', 'issuer'),
@@ -76,6 +79,6 @@ if config.getboolean('security', 'secure'):
 
     middleware_list.append(cors.middleware)
     middleware_list.append(jwt_checker)
-    middleware_list.append(RoleBasedPolicy(Policy_Config, check_jwt=True))
+    middleware_list.append(RBAC(Policy_Config, check_jwt=True))
 
 middleware_list.append(MultipartMiddleware())

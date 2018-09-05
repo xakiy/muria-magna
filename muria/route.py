@@ -13,13 +13,13 @@
 # limitations under the License.
 """Route of resources."""
 
-from muria import auth
-from muria import personal
-#from muria import lembaga
-from muria import asrama
-#from muria import stats
-#from muria import downstreamer
-# from muria import devel
+from muria.resource import auth
+from muria.resource import personal
+# from muria.resource import lembaga
+from muria.resource import asrama
+# from muria.resource import stats
+# from muria.resource import downstreamer
+# from muria.resource import devel
 
 static_route = []
 resource_route = []

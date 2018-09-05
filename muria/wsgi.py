@@ -11,24 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""muria main app, wsgi."""
 
-""" muria main app wrapper for uwsgi, uwsgi. """
+import falcon
 
-import os
+from muria.init import middleware_list
+# from muria import tokenizer
 
-if __name__ == '__main__':
 
-    from wsgi import app
-    from wsgiref import simple_server
+app = application = falcon.API(middleware=middleware_list)
 
-    httpd = simple_server.make_server('127.0.0.1', 8000, app)
+app.req_options.auto_parse_form_urlencoded = True
 
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print('')
-        print('Shutting down the server... ')
-        print('Bye!')
-        httpd.shutdown()
-else:
-    print('Please, run this "%s" file in command line!' % __name__)
+from muria.route import static_route, resource_route
+
+for (path, url) in static_route:
+    app.add_static_route(path, url)
+
+for (path, resource) in resource_route:
+    app.add_route(path, resource)
