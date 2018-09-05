@@ -37,8 +37,6 @@ from route import static_route, resource_route
 
 for (path, url) in static_route:
     app.add_static_route(path, url)
-# sr = map(app.add_static_route, static_route)
-# print(sr)
 
 for (path, resource) in resource_route:
     app.add_route(path, resource)

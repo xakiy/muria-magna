@@ -88,6 +88,7 @@ class Authentication(Resource):
                     self.config.getbinary('security', 'private_key'),
                     algorithm=self.config.get('security', 'algorithm')
                 )
+                print('token: ', token)
 
                 content = {'token': token}
                 resp.status = falcon.HTTP_OK

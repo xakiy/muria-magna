@@ -99,7 +99,6 @@ class ResDataOrang(Resource):
 
         id = str(id)
         if Orang.exists(id=id):
-
             content = Orang[id].to_dict()
             resp.status = falcon.HTTP_200
         else:

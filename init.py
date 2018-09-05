@@ -25,6 +25,7 @@ from falcon_policy import RoleBasedPolicy
 from falcon_multipart.middleware import MultipartMiddleware
 from lib.config import Config
 
+
 # MURIA_SETUP merupakan env yang menunjuk ke berkas
 # konfigurasi produksi atau pengembangan.
 # seperti: export MURIA_SETUP=~/config/devel.ini
@@ -33,6 +34,8 @@ config = Config(setup='MURIA_SETUP')
 DEBUG = config.getboolean('app', 'debug')
 
 connection = DBManager(config)  # database connection
+
+from db import premise
 
 middleware_list = []
 
@@ -55,7 +58,7 @@ if config.getboolean('security', 'secure'):
     )
 
     jwt_checker = JwtChecker(
-        secret=config.get('security', 'public_key'),  # May be a public key
+        secret=config.getbinary('security', 'public_key'),  # May be a public key
         algorithm=config.get('security', 'algorithm'),
         issuer=config.get('security', 'issuer'),
         audience=config.get('security', 'audience'),
