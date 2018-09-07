@@ -21,13 +21,13 @@ uploading:
     stage: deploy
     script:
     - apk update && apk add openssh && apk add sshpass
-    - ls -l
+    - ls -l ./muria/
     # since the hosting server use passenger phusion server
     - mv muria/wsgi.py muria/passenger_wsgi.py
+    - ls -l ./muria/
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - echo $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    - sshpass -e scp -v -P 64000 -r ./muria/* $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    - ls -l ./muria
+    - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r ./muria/* $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
     when: manual
     only:
     - feature-init
