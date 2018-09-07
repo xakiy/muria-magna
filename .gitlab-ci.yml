@@ -1,10 +1,9 @@
-image: python:3.6
-
 stages:
    - test
    - deploy
 
 testing:
+    image: python:3.6
     stage: test
     script:
     - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
@@ -18,15 +17,17 @@ testing:
     - feature-init
 
 uploading:
+    image: alpine:latest
     stage: deploy
     script:
-    - apt-get update -qq && apt-get install -y -qq sshpass
+    - apk update && apk add openssh && apk add sshpass
     - ls -l
     # since the hosting server use passenger phusion server
     - mv muria/wsgi.py muria/passenger_wsgi.py
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - echo $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    - sshpass -e scp -o stricthostkeychecking=no -P 64000 -r ./muria/* $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    - sshpass -e scp -v -P 64000 -r ./muria/* $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    - ls -l ./muria
     when: manual
     only:
     - feature-init
