@@ -1,10 +1,11 @@
+image: python:3.6
+
 stages:
    - test
    - deploy
 
 testing:
     stage: test
-    image: python:3.6
     script:
     - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
     - pip install -r requirement-devel.txt
@@ -12,8 +13,7 @@ testing:
     # internal setup defined
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
-    when:
-    - manual
+    when: manual
     only:
     - feature-init
 
@@ -26,8 +26,7 @@ uploading:
     - mv muria/wsgi.py muria/passenger_wsgi.py
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - echo $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    - sshpass -e scp -o stricthostkeychecking=no -P 64000 -r ./muria $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    when:
-    - manual
+    - sshpass -e scp -o stricthostkeychecking=no -P 64000 -r ./muria/* $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    when: manual
     only:
     - feature-init
