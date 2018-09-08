@@ -25,13 +25,11 @@ class Resource(object):
     Super class untuk class resource dalam muria-magna
     """
 
-    def __init_subclass__(cls, config=config, connection=connection, **params):
-        """Init class yang akan dijalankan otomatis oleh kelas turunannya."""
-        super.__init_subclass__(**params)
-        cls.config = config
-        cls.connection = connection
-        cls.cors = CORS(
-            allow_origins_list=cls.config.get('cors', 'allow_origins_list'),
+    def __init__(self, config=config, connection=connection, **params):
+        self.config = config
+        self.connection = connection
+        self.cors = CORS(
+            allow_origins_list=self.config.getlist('cors', 'allow_origins_list'),
             allow_all_headers=True,
             allow_all_methods=True)
 

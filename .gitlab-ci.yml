@@ -12,8 +12,9 @@ testing on python3.6:
     # internal setup defined
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
+    when: manual
     only:
-    - feature-init
+    - branch
 
 testing on python3.5:
     image: python:3.5
@@ -26,7 +27,7 @@ testing on python3.5:
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
-    - feature-init
+    - branch
 
 testing on python3.4:
     image: python:3.4
@@ -39,7 +40,7 @@ testing on python3.4:
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
-    - feature-init
+    - branch
 
 uploading:
     image: alpine:latest
@@ -55,4 +56,4 @@ uploading:
     - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r . $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
     when: manual
     only:
-    - feature-init
+    - master
