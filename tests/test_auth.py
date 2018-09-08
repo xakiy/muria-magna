@@ -37,8 +37,10 @@ def test_auth_post(client):
     user = Pengguna(**creds)
 
     proto = 'http'  # 'https'
-    headers = {"Content-Type": "application/json", "HOST": "api.krokod.net"}
-    # headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    headers = {
+        "Content-Type": "application/json",
+        "HOST": config.get('security', 'issuer'),
+        "Origin": config.get('security', 'audience')}
     credentials = {"username": creds['username'], "password": creds['password']}
 
     resp = client.simulate_post('/auth', body=json.dumps(credentials), headers=headers, protocol=proto)

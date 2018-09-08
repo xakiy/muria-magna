@@ -2,7 +2,7 @@ stages:
    - test
    - deploy
 
-testing:
+testing on python3.6:
     image: python:3.6
     stage: test
     script:
@@ -12,7 +12,32 @@ testing:
     # internal setup defined
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
-    when: manual
+    only:
+    - feature-init
+
+testing on python3.5:
+    image: python:3.5
+    stage: test
+    script:
+    - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
+    - pip install -r requirement-devel.txt
+    # somehow this will be passed as test has its own
+    # internal setup defined
+    - export MURIA_SETUP=$MURIA_TEST_INI_FILE
+    - py.test
+    only:
+    - feature-init
+
+testing on python3.4:
+    image: python:3.4
+    stage: test
+    script:
+    - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
+    - pip install -r requirement-devel.txt
+    # somehow this will be passed as test has its own
+    # internal setup defined
+    - export MURIA_SETUP=$MURIA_TEST_INI_FILE
+    - py.test
     only:
     - feature-init
 
@@ -20,14 +45,14 @@ uploading:
     image: alpine:latest
     stage: deploy
     script:
-    - apk update && apk add openssh && apk add sshpass
-    - ls -l ./muria/
+    - apk update && apk add openssh sshpass
+    - ls -l
     # since the hosting server use passenger phusion server
-    - mv muria/wsgi.py muria/passenger_wsgi.py
-    - ls -l ./muria/
+    - mv muria/wsgi.py passenger_wsgi.py
+    - ls -l
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - echo $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r ./muria/* $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r . $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
     when: manual
     only:
     - feature-init
