@@ -14,7 +14,7 @@ testing on python3.6:
     - py.test
     when: manual
     only:
-    - branch
+    - feature-resourceful
 
 testing on python3.5:
     image: python:3.5
@@ -27,7 +27,7 @@ testing on python3.5:
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
-    - branch
+    - feature-resourceful
 
 testing on python3.4:
     image: python:3.4
@@ -40,7 +40,7 @@ testing on python3.4:
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
-    - branch
+    - feature-resourceful
 
 uploading:
     image: alpine:latest
