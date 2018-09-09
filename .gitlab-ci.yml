@@ -51,9 +51,9 @@ uploading:
     - mv muria/wsgi.py passenger_wsgi.py
     - ls -l
     - export SSHPASS=$REMOTE_SCP_PASSWORD
-    - sshpass -e ssh -p 64000 $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
-    - sshpass -e ssh -p 64000 $REMOTE_SCP_USERNAME rm -fr $REMOTE_SCP_TARGET_PATH
+    - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
+    - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME rm -fr $REMOTE_SCP_TARGET_PATH
     - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r . $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    - sshpass -e ssh -p 64000 $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
+    - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     only:
     - feature-init
