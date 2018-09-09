@@ -19,7 +19,6 @@ class GiriJwtChecker(JwtChecker):
         for which a jwt shall not be required.
 
         """
-        print('@JWT')
 
         self.secret = secret
         self.algorithm = algorithm
