@@ -19,7 +19,6 @@ class GiriJwtChecker(JwtChecker):
         for which a jwt shall not be required.
 
         """
-        print('@JWT')
 
         self.secret = secret
         self.algorithm = algorithm
@@ -61,6 +60,4 @@ class GiriJwtChecker(JwtChecker):
                 params['jwt_claims'][claim] = claims[claim]
 
         except jwt.InvalidTokenError as err:
-            raise HTTPUnauthorized('Authentication Required',
-                                   # 'Please provide a valid auth token.',
-                                   err)
+            raise HTTPUnauthorized(description=str(err))
