@@ -12,9 +12,8 @@ testing on python3.6:
     # internal setup defined
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
-    when: manual
     only:
-    - feature-resourceful
+    - feature-init
 
 testing on python3.5:
     image: python:3.5
@@ -27,7 +26,7 @@ testing on python3.5:
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
-    - feature-resourceful
+    - feature-init
 
 testing on python3.4:
     image: python:3.4
@@ -40,7 +39,7 @@ testing on python3.4:
     - export MURIA_SETUP=$MURIA_TEST_INI_FILE
     - py.test
     only:
-    - feature-resourceful
+    - feature-init
 
 uploading:
     image: alpine:latest
@@ -52,8 +51,9 @@ uploading:
     - mv muria/wsgi.py passenger_wsgi.py
     - ls -l
     - export SSHPASS=$REMOTE_SCP_PASSWORD
-    - echo $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    - sshpass -e ssh -p 64000 girilabs@girilabs.com "ls -l $REMOTE_SCP_TARGET_PATH"
+    - sshpass -e ssh -p 64000 girilabs@girilabs.com "rm -fr $REMOTE_SCP_TARGET_PATH"
     - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r . $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
-    when: manual
+    - sshpass -e ssh -p 64000 girilabs@girilabs.com "ls -l $REMOTE_SCP_TARGET_PATH"
     only:
-    - master
+    - feature-init

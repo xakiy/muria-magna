@@ -61,6 +61,4 @@ class GiriJwtChecker(JwtChecker):
                 params['jwt_claims'][claim] = claims[claim]
 
         except jwt.InvalidTokenError as err:
-            raise HTTPUnauthorized('Authentication Required',
-                                   # 'Please provide a valid auth token.',
-                                   err)
+            raise HTTPUnauthorized(description=str(err))
