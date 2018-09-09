@@ -51,13 +51,19 @@ if config.getboolean('security', 'secure'):
         # WARN/WARNING = 30
         # ERROR = 40
         # CRITICAL/FATAL = 50
-        log_level = 10,
-        # allow_all_origins=True,
-        allow_origins_list=['api.krokod.net'], # config.getlist('cors', 'allow_origins_list'),
-        # allow_methods_list=config.getlist('cors', 'allow_methods_list'),
-        # allow_all_methods=True,
-        # expose_headers_list=['GET', 'OPTIONS', 'POST', 'HEAD', 'PUT', 'DELETE'],
-        # allow_all_headers=True
+        log_level=10,
+        # allow_all_origins=False,  # false means disallow any random host to connect
+        allow_origins_list=config.getlist('cors', 'allow_origins_list'),
+        allow_all_methods=True,  # whether all methods are allowed via CORS requests
+        # allow_methods_list=['GET', 'POST', 'TRACE', 'PUT', 'PATCH', 'HEAD', 'CONNECT', 'DELETE', 'OPTIONS'],
+        # exposed value sent as response to the Access-Control-Expose-Headers request
+        expose_headers_list=['HEAD', 'GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        allow_all_headers=True,  # preflight response
+        allow_headers_list=['HEAD', 'GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        allow_credentials_all_origins=True,
+        allow_credentials_origins_list=[],
+        # max_age=None
+        # TODO: move these values to config file
     )
 
     jwt_checker = GiriJwtChecker(

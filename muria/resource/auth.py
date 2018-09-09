@@ -44,17 +44,9 @@ class Authentication(Resource):
     @db_session
     def on_post(self, req, resp):
 
-        print('#DEBUG @auth')
-        # DEBUG
-        print('headers: ', req.headers)
-        print('acc_route: ', req.access_route)
-        print('params: ', req.params)
-        print('media: ', req.media)
-
         if req.media:
             ps = Pengguna_Schema()
             auth_user, error = ps.load(req.media)
-            #print(user)
 
             if error:
                 raise falcon.HTTPError(falcon.HTTP_BAD_REQUEST,
@@ -80,7 +72,6 @@ class Authentication(Resource):
                     'iat': datetime.datetime.utcnow(),
                     'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=600)
                 }
-                print('payload: ', payload)
 
                 # Buat token
                 token = jwt.encode(
@@ -88,21 +79,20 @@ class Authentication(Resource):
                     self.config.getbinary('security', 'private_key'),
                     algorithm=self.config.get('security', 'algorithm')
                 )
-                print('token: ', token)
 
                 content = {'token': token}
                 resp.status = falcon.HTTP_OK
             else:
                 content = {'message': 'Authentication failed'}
                 resp.status = falcon.HTTP_UNAUTHORIZED
-        else:
-            raise falcon.HTTPError(
-                falcon.HTTP_BAD_REQUEST,
-                'Invalid JSON',
-                'Could not decode the request body. The JSON was incorrect.'
-            )
 
-        resp.body = libs.dumpAsJSON(content)
+            resp.body = libs.dumpAsJSON(content)
+
+        else:
+            raise falcon.HTTP_BAD_REQUEST(
+                title='Invalid JSON',
+                description='Could not decode the request body. The JSON was incorrect.'
+            )
 
     def on_options(self, req, resp):
 
@@ -119,34 +109,22 @@ class Verification(Resource):
     @db_session
     def on_get(self, req, resp, **params):
 
-        # DEBUG
-        print('#DEBUG')
-        print(req.headers)
-        print(req.access_route)
-        print(req.params)
+        token = req.get_param('token')
 
-        token = req.get_header('Authorization').split(' ')[1]
-        print(token)
-
-        payload = jwt.decode(
-            token,
-            self.config.getbinary('security', 'public_key'),
-            self.config.get('security', 'algorithm')
-        )
-        print(payload)
-        # BUG
-        # Need sanity check!
-        auth_user = Pengguna.get(pid=payload['pid'])
-
-        if auth_user is not None:
-            print('#TEST', payload)
+        try:
+            payload = jwt.decode(
+                token,
+                key=self.config.getbinary('security', 'public_key'),
+                algorithm=self.config.get('security', 'algorithm'),
+                issuer=self.config.get('security', 'issuer'),
+                audience=self.config.get('security', 'audience')
+            )
             content = {"token": token}
             resp.status = falcon.HTTP_200
-        else:
-            content = {"error": 'Token invalid'}
-            resp.status = falcon.HTTP_404
+            resp.body = libs.dumpAsJSON(content)
 
-        resp.body = libs.dumpAsJSON(content)
+        except jwt.InvalidTokenError as err:
+            raise falcon.HTTPNotFound(description=str(err))
 
 
 class Refresh(Resource):
