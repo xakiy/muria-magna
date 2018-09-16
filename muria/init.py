@@ -42,7 +42,7 @@ connection = DBManager(config)  # database connection
 from muria.conf import premise
 
 tokenizer = Tokenizer(config)
-logger = Logger(config)
+# logger = Logger(config)
 
 middleware_list = []
 
