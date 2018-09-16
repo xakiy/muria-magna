@@ -1,7 +1,13 @@
+"""
+Testing Authentication
+"""
+
+import os
+import jwt
+import json
 import pytest
 import falcon
-import json
-import os
+import pickle
 
 from falcon import testing
 from pony.orm import db_session
@@ -12,60 +18,189 @@ os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test_setup.
 from muria.init import config
 from muria.wsgi import app
 
-
 @pytest.fixture
 def client():
     return testing.TestClient(app)
 
-def test_auth_get(client):
-    resp = client.simulate_get('/auth')
-    assert resp.status == falcon.HTTP_OK
-    if config.getboolean('app', 'debug'):
-        assert resp.json == {'password': 'your password', 'username': 'your username'}
+def pickling(stuff, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(stuff, f, pickle.HIGHEST_PROTOCOL)
 
-@db_session
-def test_auth_post(client):
-    import jwt
-    from muria.db.model import Orang, Pengguna
-    from tests.data_generator import DataGenerator
-
-    data_generator = DataGenerator()
-
-    someone = data_generator.makeOrang(sex='male')
-    person = Orang(**someone)
-    creds = data_generator.makePengguna(person)
-    user = Pengguna(**creds)
-
-    proto = 'http'  # 'https'
-    headers = {
-        "Content-Type": "application/json",
-        "HOST": config.get('security', 'issuer'),
-        "Origin": config.get('security', 'audience')}
-    credentials = {"username": creds['username'], "password": creds['password']}
-
-    resp = client.simulate_post('/auth', body=json.dumps(credentials), headers=headers, protocol=proto)
-
-    assert resp.status == falcon.HTTP_OK
-
-    token = resp.json.get('token')
-
-    payload = jwt.decode(
-        token,
-        key=config.getbinary('security', 'public_key'),
-        algorithm=config.get('security', 'algorithm'),
-        issuer=config.get('security', 'issuer'),
-        audience=config.get('security', 'audience'))
-
-    # user = Pengguna.get(**credentials)
-    # print(user.to_dict())
-    assert payload['name'] == user.orang.nama
-    assert payload['pid'] == user.orang.id.hex
-    assert payload['roles'] == user.wewenang.nama
+def unpickling(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
 
 
-'''
-def test_persons_head(client):
-    response = client.simulate_head('/persons')
+class TestAuth(object):
 
-    assert response.status == falcon.HTTP_200 #UNAUTHORIZED
-'''
+    @pytest.mark.order1
+    def test_auth_get(self, client):
+        """Testing Authentication via GET"""
+
+        resp = client.simulate_get('/auth')
+        assert resp.status == falcon.HTTP_OK
+        if config.getboolean('app', 'debug'):
+            assert resp.json == {'password': 'your password', 'username': 'your username'}
+
+    @db_session
+    @pytest.mark.order2
+    def test_auth_post_login_and_get_tokens(self, client):
+        """Testing Authentication via POST"""
+
+        from muria.db.model import Orang, Pengguna
+        from tests.data_generator import DataGenerator
+
+        data_generator = DataGenerator()
+
+        # generate random person
+        someone = data_generator.makeOrang(sex='male')
+        # populate him
+        person = Orang(**someone)
+        # generate a user based on previous person
+        creds = data_generator.makePengguna(person)
+        # populate him
+        user = Pengguna(**creds)
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience')
+        }
+        credentials = {
+            "username": creds['username'],
+            "password": creds['password']
+        }
+
+        resp = client.simulate_post(
+            '/auth',
+            body=json.dumps(credentials),
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_OK
+
+        # getting token
+        access_token = resp.json.get('access_token')
+        refresh_token = resp.json.get('refresh_token')
+
+        payload = jwt.decode(
+            access_token,
+            key=config.getbinary('security', 'public_key'),
+            algorithm=config.get('security', 'algorithm'),
+            issuer=config.get('security', 'issuer'),
+            audience=config.get('security', 'audience')
+        )
+
+        pickling(access_token, 'access_token')
+        pickling(refresh_token, 'refresh_token')
+
+        # user = Pengguna.get(**credentials)
+        # print(user.to_dict())
+        assert payload['name'] == user.orang.nama
+        assert payload['pid'] == user.orang.id.hex
+        assert payload['roles'] == user.wewenang.nama
+
+    @pytest.mark.order3
+    def test_auth_post_verify_token(self, client):
+
+        access_token = unpickling('access_token')
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience')
+        }
+        payload = {
+            "access_token": access_token
+        }
+
+        resp = client.simulate_post(
+            '/auth/verify',
+            body=json.dumps(payload),
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_OK
+        assert resp.json.get('access_token') == access_token
+
+    @pytest.mark.order4
+    def test_auth_post_refresh_token(self, client):
+
+        import time
+
+        old_access_token = unpickling('access_token')
+        old_refresh_token = unpickling('refresh_token')
+
+        # make sure that old tokens are few seconds earlier
+        time.sleep(1)
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience')
+        }
+        payload = {
+            "access_token": old_access_token,
+            "refresh_token": old_refresh_token
+        }
+
+        resp = client.simulate_post(
+            '/auth/refresh',
+            body=json.dumps(payload),
+            headers=headers, protocol=proto
+        )
+
+        new_access_token = resp.json.get('access_token')
+        new_refresh_token = resp.json.get('refresh_token')
+
+        assert resp.status == falcon.HTTP_OK
+        assert new_access_token != old_access_token
+        assert new_refresh_token != old_refresh_token
+
+        old_acc_token_payload = jwt.decode(
+            old_access_token,
+            key=config.getbinary('security', 'public_key'),
+            algorithm=config.get('security', 'algorithm'),
+            issuer=config.get('security', 'issuer'),
+            audience=config.get('security', 'audience'),
+            options={'verify_exp': False}
+        )
+
+        new_acc_token_payload = jwt.decode(
+            new_access_token,
+            key=config.getbinary('security', 'public_key'),
+            algorithm=config.get('security', 'algorithm'),
+            issuer=config.get('security', 'issuer'),
+            audience=config.get('security', 'audience'),
+            options={'verify_exp': False}
+        )
+
+        assert old_acc_token_payload['iat'] < new_acc_token_payload['iat']
+        assert old_acc_token_payload['exp'] < new_acc_token_payload['exp']
+
+        old_ref_token_payload = jwt.decode(
+            old_refresh_token,
+            key=config.getbinary('security', 'public_key'),
+            algorithm=config.get('security', 'algorithm'),
+            issuer=config.get('security', 'issuer'),
+            audience=config.get('security', 'audience'),
+            options={'verify_exp': False}
+        )
+
+        new_ref_token_payload = jwt.decode(
+            new_refresh_token,
+            key=config.getbinary('security', 'public_key'),
+            algorithm=config.get('security', 'algorithm'),
+            issuer=config.get('security', 'issuer'),
+            audience=config.get('security', 'audience'),
+            options={'verify_exp': False}
+        )
+
+        assert old_ref_token_payload['iat'] < new_ref_token_payload['iat']
+        assert old_ref_token_payload['exp'] < new_ref_token_payload['exp']

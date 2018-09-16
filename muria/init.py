@@ -26,7 +26,8 @@ from falcon_cors import CORS
 from falcon_multipart.middleware import MultipartMiddleware
 from muria.middleware.jwt_checker import GiriJwtChecker
 from muria.middleware.rbac import RBAC
-
+from muria.lib.tokenizer import Tokenizer
+from muria.lib.logger import Logger
 
 
 # MURIA_SETUP merupakan env yang menunjuk ke berkas
@@ -40,17 +41,14 @@ connection = DBManager(config)  # database connection
 
 from muria.conf import premise
 
+tokenizer = Tokenizer(config)
+logger = Logger(config)
+
 middleware_list = []
 
 if config.getboolean('security', 'secure'):
 
     cors = CORS(
-        # log level
-        # DEBUG = 10
-        # INFO = 20
-        # WARN/WARNING = 30
-        # ERROR = 40
-        # CRITICAL/FATAL = 50
         log_level=10,
         # allow_all_origins=False,  # false means disallow any random host to connect
         allow_origins_list=config.getlist('cors', 'allow_origins_list'),
@@ -71,10 +69,12 @@ if config.getboolean('security', 'secure'):
         algorithm=config.get('security', 'algorithm'),
         issuer=config.get('security', 'issuer'),
         audience=config.get('security', 'audience'),
-        leeway=30,
+        leeway=60,
         exempt_routes=[
             # excluded routes
             '/auth',
+            '/auth/verify',
+            '/auth/refresh',
             '/upload'
         ],
         exempt_methods=[

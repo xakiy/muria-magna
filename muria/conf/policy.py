@@ -42,13 +42,11 @@ Policy_Config = {
             'OPTIONS': ['@passthrough'],
             'POST': ['@passthrough']
         },
-        '/verify': {
-            'GET': ['@any-role'],
-            'POST': ['@any-role']
+        '/auth/verify': {
+            'POST': ['@passthrough']
         },
-        '/refresh': {
-            'GET': ['@any-role'],
-            'POST': ['@any-role']
+        '/auth/refresh': {
+            'POST': ['@passthrough']
         },
         '/persons': {
             'GET': ['reader'],
