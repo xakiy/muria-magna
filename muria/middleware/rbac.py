@@ -6,9 +6,13 @@ from falcon_policy.policy import PolicyManager
 
 
 class RBAC(RoleBasedPolicy):
-    ## Added check_jwt if roles are passed within jwt claims
-    ## as an alternative if we don't want to pass X-Roles
-    ## inside every request header
+    # NOTE:
+    # It requires jwt_checker middleware declared before itself
+    # in order to work.
+
+    # Added check_jwt if roles are passed within jwt claims
+    # as an alternative if we don't want to pass X-Roles
+    # inside every request header.
     def __init__(self, config_dict, check_jwt=False):
         self.config = PolicyConfig(config_dict)
         self.manager = PolicyManager(self.config)

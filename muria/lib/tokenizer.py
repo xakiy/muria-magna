@@ -14,20 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import jwt
+import jwt
 import hashlib
 import binascii
-import secrets
-from init import config
+import falcon
+from datetime import datetime, timedelta
+from calendar import timegm
 
 
 class Tokenizer(object):
 
-    def __init__(self, ecdsa=True, rsa=False):
+    def __init__(self, config, ecdsa=True, rsa=False):
 
         self.private_key = config.getbinary('security', 'private_key')
         self.public_key = config.getbinary('security', 'public_key')
         self.algorithm = config.get('security', 'algorithm')
+        self.token_issuer = config.get('security', 'issuer')
+        self.token_audience = config.get('security', 'audience')
+        self.access_token_exp = config.getint('security', 'access_token_exp')
+        self.refresh_token_exp = config.getint('security', 'refresh_token_exp')
 
     def hashPassword(self, text):
         """ Hash password menyerupai MySQL password() bekerja,
@@ -36,3 +41,103 @@ class Tokenizer(object):
         hashed_bin = binascii.unhexlify(hex_digested)
         hashed = hashlib.sha1(hashed_bin).hexdigest()
         return hashed
+
+    def isToken(self, token):
+        if isinstance(token, str) and token.count('.') == 2:
+            return True
+        else:
+            return False
+
+    def createAccessToken(self, payload):
+
+        '''
+        JWT Reserved Claims
+        Claims    name          Format         Usage
+        -------   ----------    ------         ---------
+        ‘exp’     Expiration    int            The time after which the token is invalid.
+        ‘nbf’     Not before    int            The time before which the token is invalid.
+        ‘iss’     Issuer        str            The principal that issued the JWT.
+        ‘aud’     Audience      str/list(str)  The recipient that the JWT is intended for.
+        ‘iat’     Issued At     int            The time at which the JWT was issued.
+
+        The time values will be converted automatically into int if it populated with datetime object.
+        '''
+
+        if isinstance(payload, dict):
+            tokens = dict()
+            now = datetime.utcnow()
+            access_token_default_claims = {
+                'iss': self.token_issuer,
+                'aud': self.token_audience,
+                'iat': now,
+                'exp': now + timedelta(seconds=self.access_token_exp)
+            }
+            access_token_payload = payload.copy()
+            access_token_payload.update(access_token_default_claims)
+
+            print('acc_token: ', access_token_payload)
+
+            tokens['access_token'] = jwt.encode(
+                access_token_payload,
+                self.private_key,
+                algorithm=self.algorithm
+            )
+
+            acc_token_sig = bytes(tokens['access_token']).decode('utf8').split('.')[2]
+
+            refresh_token_payload = {
+                'tsig': acc_token_sig,
+                # decode this unixtimestamp using datetime.utcfromtimestamp()
+                'tiat': timegm(now.utctimetuple()),
+                'iss': self.token_issuer,
+                'aud': self.token_audience,
+                'iat': now,
+                'exp': now + timedelta(seconds=self.refresh_token_exp)
+            }
+            tokens['refresh_token'] = jwt.encode(
+                refresh_token_payload,
+                self.private_key,
+                algorithm=self.algorithm
+            )
+            print('ref_token: ', refresh_token_payload)
+
+            return tokens
+        else:
+            return None
+
+    def refreshAccessToken(self, access_token, refresh_token):
+        if self.isToken(access_token) and self.isToken(refresh_token):
+            acc_token_sig = access_token.split('.')[2]
+
+            token_payload = jwt.decode(
+                access_token,
+                key=self.public_key,
+                algorithm=self.algorithm,
+                issuer=self.token_issuer,
+                audience=self.token_audience,
+                options={'verify_exp': False}
+            )
+
+            print('old token: ', token_payload)
+
+            try:
+                refresh_payload = jwt.decode(
+                    refresh_token,
+                    key=self.public_key,
+                    algorithm=self.algorithm,
+                    issuer=self.token_issuer,
+                    audience=self.token_audience
+                )
+                print('old ref_payload: ', refresh_payload)
+            except jwt.ExpiredSignatureError as err:
+                raise falcon.HTTPNotFound(
+                    title='Refresh Token Expired',
+                    description=str(err), code={'error_code': 5002}
+                )
+
+            return self.createAccessToken(token_payload)
+        else:
+            raise falcon.HTTPNotFound(
+                title='Token Refresh',
+                description='Invalid content', code={'error_code': 4004}
+            )

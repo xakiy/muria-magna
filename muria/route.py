@@ -32,8 +32,8 @@ static_route.append(('/ref', '/home/zakiy/public_html/sufee/'))
 
 """ Path otentikasi pengguna """
 resource_route.append(('/auth', auth.Authentication()))
-resource_route.append(('/verify', auth.Verification()))
-resource_route.append(('/refresh', auth.Refresh()))
+resource_route.append(('/auth/verify', auth.Verification()))
+resource_route.append(('/auth/refresh', auth.Refresh()))
 
 # semua personal/warga, termasuk para santri, bahkan wali santri di rumah
 resource_route.append(('/persons', personal.ResOrangs()))
