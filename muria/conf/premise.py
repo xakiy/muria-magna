@@ -124,6 +124,7 @@ def makeWewenang():
                 Wewenang(**w)
         flush()
 
-makeJinshi()
-makeFigur()
-makeWewenang()
+def setPremise():
+    makeJinshi()
+    makeFigur()
+    makeWewenang()

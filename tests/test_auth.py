@@ -13,7 +13,8 @@ from falcon import testing
 from pony.orm import db_session
 # from urllib.parse import urlencode
 
-os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test_setup.ini')
+if os.environ.get('MURIA_SETUP') is None:
+    os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test_setup.ini')
 
 from muria.init import config
 from muria.wsgi import app
