@@ -107,7 +107,7 @@ class Verification(Resource):
             jwt.decode(
                 access_token,
                 key=self.config.getbinary('security', 'public_key'),
-                algorithm=self.config.get('security', 'algorithm'),
+                algorithms=self.config.get('security', 'algorithm'),
                 issuer=self.config.get('security', 'issuer'),
                 audience=self.config.get('security', 'audience')
             )

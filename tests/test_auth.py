@@ -89,7 +89,7 @@ class TestAuth(object):
         payload = jwt.decode(
             access_token,
             key=config.getbinary('security', 'public_key'),
-            algorithm=config.get('security', 'algorithm'),
+            algorithms=config.get('security', 'algorithm'),
             issuer=config.get('security', 'issuer'),
             audience=config.get('security', 'audience')
         )
@@ -167,7 +167,7 @@ class TestAuth(object):
         old_acc_token_payload = jwt.decode(
             old_access_token,
             key=config.getbinary('security', 'public_key'),
-            algorithm=config.get('security', 'algorithm'),
+            algorithms=config.get('security', 'algorithm'),
             issuer=config.get('security', 'issuer'),
             audience=config.get('security', 'audience'),
             options={'verify_exp': False}
@@ -176,7 +176,7 @@ class TestAuth(object):
         new_acc_token_payload = jwt.decode(
             new_access_token,
             key=config.getbinary('security', 'public_key'),
-            algorithm=config.get('security', 'algorithm'),
+            algorithms=config.get('security', 'algorithm'),
             issuer=config.get('security', 'issuer'),
             audience=config.get('security', 'audience'),
             options={'verify_exp': False}
@@ -188,7 +188,7 @@ class TestAuth(object):
         old_ref_token_payload = jwt.decode(
             old_refresh_token,
             key=config.getbinary('security', 'public_key'),
-            algorithm=config.get('security', 'algorithm'),
+            algorithms=config.get('security', 'algorithm'),
             issuer=config.get('security', 'issuer'),
             audience=config.get('security', 'audience'),
             options={'verify_exp': False}
@@ -197,7 +197,7 @@ class TestAuth(object):
         new_ref_token_payload = jwt.decode(
             new_refresh_token,
             key=config.getbinary('security', 'public_key'),
-            algorithm=config.get('security', 'algorithm'),
+            algorithms=config.get('security', 'algorithm'),
             issuer=config.get('security', 'issuer'),
             audience=config.get('security', 'audience'),
             options={'verify_exp': False}

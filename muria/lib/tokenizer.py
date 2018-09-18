@@ -112,7 +112,7 @@ class Tokenizer(object):
             token_payload = jwt.decode(
                 access_token,
                 key=self.public_key,
-                algorithm=self.algorithm,
+                algorithms=self.algorithm,
                 issuer=self.token_issuer,
                 audience=self.token_audience,
                 options={'verify_exp': False}
@@ -124,7 +124,7 @@ class Tokenizer(object):
                 refresh_payload = jwt.decode(
                     refresh_token,
                     key=self.public_key,
-                    algorithm=self.algorithm,
+                    algorithms=self.algorithm,
                     issuer=self.token_issuer,
                     audience=self.token_audience
                 )

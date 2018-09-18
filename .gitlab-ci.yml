@@ -45,12 +45,15 @@ uploading:
     - apk update && apk add openssh sshpass
     - ls -l
     # since the hosting server use passenger phusion server
-    - mv muria/wsgi.py passenger_wsgi.py
+    - cp muria/wsgi.py passenger_wsgi.py
+    - chmod 755 */; chmod 755 */*/
+    - rm .gitlab-ci.yml
     - ls -l
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME rm -fr $REMOTE_SCP_TARGET_PATH/muria $REMOTE_SCP_TARGET_PATH/tests
-    - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r . $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r ./ $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
+    - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME touch $REMOTE_SCP_TARGET_PATH/tmp/restart.txt
     only:
     - feature-init
