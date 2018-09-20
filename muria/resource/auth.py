@@ -89,37 +89,23 @@ class Verification(Resource):
     Memverifikasi jwt yang dikirimkan oleh klien
     """
 
-    @db_session
     def on_post(self, req, resp, **params):
-
-        print('#DEBUG @auth/verify')
-        # DEBUG
-        print('headers: ', req.headers)
-        print('acc_route: ', req.access_route)
-        # print('params: ', req.params)
-        print('media: ', req.media)
 
         access_token = req.media.get('access_token')
 
         try:
             # TODO:
             # implement some cache validations on the user
-            jwt.decode(
-                access_token,
-                key=self.config.getbinary('security', 'public_key'),
-                algorithms=self.config.get('security', 'algorithm'),
-                issuer=self.config.get('security', 'issuer'),
-                audience=self.config.get('security', 'audience')
-            )
-            content = {"access_token": access_token}
-            resp.status = falcon.HTTP_200
-            resp.body = libs.dumpAsJSON(content)
-
+            token = tokenizer.verifyAccessToken(access_token)
         except jwt.InvalidTokenError as err:
             raise falcon.HTTPNotFound(
                 title='Token Verification',
                 description=str(err), code={'error_code': 4003}
             )
+        else:
+            content = {"access_token": token}
+            resp.status = falcon.HTTP_200
+            resp.body = libs.dumpAsJSON(content)
 
 
 class Refresh(Resource):
@@ -129,13 +115,19 @@ class Refresh(Resource):
         access_token = req.media.get('access_token')
         refresh_token = req.media.get('refresh_token')
 
-        tokens = tokenizer.refreshAccessToken(access_token, refresh_token)
-
-        content = {
-            'token_type': 'bearer',
-            'expires_in': self.config.getint('security', 'access_token_exp'),
-            'refresh_token': tokens['refresh_token'],
-            'access_token': tokens['access_token']
-        }
-        resp.status = falcon.HTTP_OK
-        resp.body = libs.dumpAsJSON(content)
+        try:
+            tokens = tokenizer.refreshAccessToken(access_token, refresh_token)
+        except jwt.InvalidTokenError as err:
+            raise falcon.HTTPNotFound(
+                title='Token Refresh',
+                description=str(err), code={'error_code': 4004}
+            )
+        else:
+            content = {
+                'token_type': 'bearer',
+                'expires_in': self.config.getint('security', 'access_token_exp'),
+                'refresh_token': tokens['refresh_token'],
+                'access_token': tokens['access_token']
+            }
+            resp.status = falcon.HTTP_OK
+            resp.body = libs.dumpAsJSON(content)

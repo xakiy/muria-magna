@@ -40,8 +40,12 @@ class Parser(ConfigParser):
             pub_key = self.get('security', 'public_key')
 
             if os.path.isfile(priv_key) and os.path.isfile(pub_key):
-                self.set('security', 'private_key', open(priv_key, 'r').read())
-                self.set('security', 'public_key', open(pub_key, 'r').read())
+                priv_key_file = open(priv_key, 'r')
+                pub_key_file = open(pub_key, 'r')
+                self.set('security', 'private_key', priv_key_file.read())
+                self.set('security', 'public_key', pub_key_file.read())
+                priv_key_file.close()
+                pub_key_file.close()
             else:
                 raise FileNotFoundError('File SSL tidak ditemukan!')
 

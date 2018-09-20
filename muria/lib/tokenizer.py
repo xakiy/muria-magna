@@ -75,8 +75,6 @@ class Tokenizer(object):
             access_token_payload = payload.copy()
             access_token_payload.update(access_token_default_claims)
 
-            print('acc_token: ', access_token_payload)
-
             tokens['access_token'] = jwt.encode(
                 access_token_payload,
                 self.private_key,
@@ -99,45 +97,82 @@ class Tokenizer(object):
                 self.private_key,
                 algorithm=self.algorithm
             )
-            print('ref_token: ', refresh_token_payload)
 
             return tokens
         else:
             return None
 
+    def verifyAccessToken(self, access_token):
+        if self.isToken(access_token):
+            try:
+                jwt.decode(
+                    access_token,
+                    key=self.public_key,
+                    algorithms=self.algorithm,
+                    issuer=self.token_issuer,
+                    audience=self.token_audience,
+                )
+                return access_token
+
+            except jwt.InvalidTokenError as err:
+                raise falcon.HTTPNotFound(
+                    title='Token Verification',
+                    description=str(err),
+                    code={'error_code': 4003}
+                )
+        else:
+            raise falcon.HTTPNotFound(
+                title='Token Verification',
+                description='Invalid content',
+                code={'error_code': 4001}
+            )
+
     def refreshAccessToken(self, access_token, refresh_token):
         if self.isToken(access_token) and self.isToken(refresh_token):
             acc_token_sig = access_token.split('.')[2]
 
-            token_payload = jwt.decode(
-                access_token,
-                key=self.public_key,
-                algorithms=self.algorithm,
-                issuer=self.token_issuer,
-                audience=self.token_audience,
-                options={'verify_exp': False}
-            )
-
-            print('old token: ', token_payload)
-
             try:
-                refresh_payload = jwt.decode(
-                    refresh_token,
+                token_payload = jwt.decode(
+                    access_token,
                     key=self.public_key,
                     algorithms=self.algorithm,
                     issuer=self.token_issuer,
-                    audience=self.token_audience
+                    audience=self.token_audience,
+                    options={'verify_exp': False}
                 )
-                print('old ref_payload: ', refresh_payload)
-            except jwt.ExpiredSignatureError as err:
+            except jwt.InvalidTokenError as err:
                 raise falcon.HTTPNotFound(
-                    title='Refresh Token Expired',
-                    description=str(err), code={'error_code': 5002}
+                    title='Token Verification',
+                    description=str(err),
+                    code={'error_code': 4003}
                 )
-
-            return self.createAccessToken(token_payload)
+            else:
+                try:
+                    refresh_payload = jwt.decode(
+                        refresh_token,
+                        key=self.public_key,
+                        algorithms=self.algorithm,
+                        issuer=self.token_issuer,
+                        audience=self.token_audience
+                    )
+                except jwt.ExpiredSignatureError as err:
+                    raise falcon.HTTPNotFound(
+                        title='Refresh Token Expired',
+                        description=str(err),
+                        code={'error_code': 5002}
+                    )
+                else:
+                    if acc_token_sig == refresh_payload['tsig']:
+                        return self.createAccessToken(token_payload)
+                    else:
+                        raise falcon.HTTPNotFound(
+                            title='Token Refresh',
+                            description='Token pair mismatch',
+                            code={'error_code': 4005}
+                        )
         else:
             raise falcon.HTTPNotFound(
                 title='Token Refresh',
-                description='Invalid content', code={'error_code': 4004}
+                description='Invalid content',
+                code={'error_code': 4001}
             )

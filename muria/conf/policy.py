@@ -43,6 +43,7 @@ Policy_Config = {
             'POST': ['@passthrough']
         },
         '/auth/verify': {
+            # 'GET': ['@passthrough'], # phusion server would hangup if this invoked
             'POST': ['@passthrough']
         },
         '/auth/refresh': {

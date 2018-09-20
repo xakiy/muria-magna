@@ -47,7 +47,7 @@ uploading:
     # since the hosting server use passenger phusion server
     - cp muria/wsgi.py passenger_wsgi.py
     - chmod 755 */; chmod 755 */*/
-    - rm .gitlab-ci.yml
+    - rm -fr .gitlab-ci.yml .git
     - ls -l
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
