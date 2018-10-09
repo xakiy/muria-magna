@@ -1,6 +1,4 @@
-"""
-Testing Authentication
-"""
+"""Testing Authentication."""
 
 import os
 import jwt
@@ -33,11 +31,16 @@ def unpickling(filename):
 
 
 class TestAuth(object):
+    """Authentication Test."""
 
     @pytest.mark.order1
-    def test_auth_get(self, client):
-        """Testing Authentication via GET"""
+    def test_simple_auth_get(self, client):
+        """
+        Testing Authentication via GET.
 
+        Return simple JSON template
+        that used as auth POST payload
+        """
         resp = client.simulate_get('/auth')
         assert resp.status == falcon.HTTP_OK
         if config.getboolean('app', 'debug'):
@@ -46,8 +49,7 @@ class TestAuth(object):
     @db_session
     @pytest.mark.order2
     def test_auth_post_login_and_get_tokens(self, client):
-        """Testing Authentication via POST"""
-
+        """Testing Authentication via POST."""
         from muria.db.model import Orang, Pengguna
         from tests.data_generator import DataGenerator
 
@@ -127,6 +129,10 @@ class TestAuth(object):
 
         assert resp.status == falcon.HTTP_OK
         assert resp.json.get('access_token') == access_token
+
+        random_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJyb2xlcyI6InNhbnRyaXdhbiIsImF1ZCI6ImFwcC5naXJpbGFicy5jb20iLCJleHAiOjE1MzcyODg1NTMsImlhdCI6MTUzNzI4ODI1MywibmFtZSI6IkFobWFkIFl1c3VmIiwicGlkIjoiMTI3NjhiMmQzZDdjNDQxN2JlNThlOTk2NmM5MGZkZDYiLCJpc3MiOiJhcGkuZ2lyaWxhYnMuY29tIn0.pnFKa3oeQLANdfoj8l6hp2iK4C5Oo3TiBHofE-DBU_Q8ssZfBng3fOouHDomAW1-ZG8vxJCxqhEFtFr6hJ-W0g"
+
+
 
     @pytest.mark.order4
     def test_auth_post_refresh_token(self, client):

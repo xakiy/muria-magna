@@ -112,14 +112,14 @@ class Tokenizer(object):
                     issuer=self.token_issuer,
                     audience=self.token_audience,
                 )
-                return access_token
-
             except jwt.InvalidTokenError as err:
                 raise falcon.HTTPNotFound(
                     title='Token Verification',
                     description=str(err),
                     code={'error_code': 4003}
                 )
+            else:
+                return access_token
         else:
             raise falcon.HTTPNotFound(
                 title='Token Verification',
