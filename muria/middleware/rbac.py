@@ -26,7 +26,10 @@ class RBAC(RoleBasedPolicy):
         else:
             roles_header = req.get_header('X-Roles', default='@unknown')
 
-        provided_roles = [role.strip() for role in roles_header.split(',')]
+        if isinstance(roles_header, str):
+            provided_roles = [role.strip() for role in roles_header.split(',')]
+        else:
+            provided_roles = roles_header
 
         route_policy = self.manager.policies.get(route, {})
         method_policy = route_policy.get(req.method.upper(), [])

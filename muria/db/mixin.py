@@ -350,6 +350,12 @@ class Jinshi_Schema(Base_Schema):
     def jumlah_rayon(self):
         return self.entity.rayon.count()
 
+    def daftar_jinshi(self):
+        return self.entity.getSet(self.entity.orang)
+
+    def daftar_rayon(self):
+        return self.entity.getSet(self.entity.rayon)
+
 
 class Pengguna_Schema(Base_Schema):
     def _collect(self):
@@ -358,11 +364,19 @@ class Pengguna_Schema(Base_Schema):
             'username': self.entity.username,
             'email': self.entity.email,
             'suspended': self.entity.suspended,
-            'wewenang': self.entity.wewenang.nama,
         }
+
+    def jumlah_koneksi(self):
+        return self.entity.koneksi.count()
+
+    def jumlah_kewenangan(self):
+        return self.entity.kewenangan.count()
 
     def daftar_koneksi(self):
         return self.entity.getSet(self.entity.koneksi)
+
+    def daftar_kewenangan(self):
+        return self.entity.getSet(self.entity.kewenangan)
 
 
 class Grup_Schema(Base_Schema):
@@ -448,11 +462,17 @@ class Wewenang_Schema(Base_Schema):
             'nama': self.entity.nama
         }
 
-    def jumlah_pengguna(self):
-        return self.pengguna.count()
+    def jumlah_kewenangan(self):
+        return self.kewenangan.count()
 
     def jumlah_grup(self):
         return self.grup.count()
+
+    def daftar_kewenangan(self):
+        return self.entity.getSet(self.entity.kewenangan)
+
+    def daftar_grup(self):
+        return self.entity.getSet(self.entity.grup)
 
 
 class Grup_Wewenang_Schema(Base_Schema):
@@ -493,4 +513,12 @@ class Offline_Schema(Base_Schema):
             'rkey': self.entity.rkey,
             'akey': self.entity.akey,
             'uakey': self.entity.uakey
+        }
+
+
+class Kewenangan_Schema(Base_Schema):
+    def _collect(self):
+        self.template = {
+            'pengguna': self.entity.pengguna,
+            'wewenang': self.entity.wewenang
         }

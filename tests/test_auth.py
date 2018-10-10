@@ -6,6 +6,7 @@ import json
 import pytest
 import falcon
 import pickle
+import time
 
 from falcon import testing
 from pony.orm import db_session
@@ -50,7 +51,7 @@ class TestAuth(object):
     @pytest.mark.order2
     def test_auth_post_login_and_get_tokens(self, client):
         """Testing Authentication via POST."""
-        from muria.db.model import Orang, Pengguna
+        from muria.db.model import Orang, Pengguna, Kewenangan
         from tests.data_generator import DataGenerator
 
         data_generator = DataGenerator()
@@ -63,6 +64,10 @@ class TestAuth(object):
         creds = data_generator.makePengguna(person)
         # populate him
         user = Pengguna(**creds)
+        # generate a wewenang
+        wewenang = data_generator.makeKewenangan(person)
+        # grant kewenangan
+        kewenangan = Kewenangan(**wewenang)
 
         proto = 'http'  # 'https'
         # headers updated based on header requirements
@@ -103,7 +108,7 @@ class TestAuth(object):
         # print(user.to_dict())
         assert payload['name'] == user.orang.nama
         assert payload['pid'] == user.orang.id.hex
-        assert payload['roles'] == user.wewenang.nama
+        assert payload['roles'] == [ x for x in user.kewenangan.wewenang.nama ]
 
     @pytest.mark.order3
     def test_auth_post_verify_token(self, client):

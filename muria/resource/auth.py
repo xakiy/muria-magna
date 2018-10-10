@@ -59,7 +59,7 @@ class Authentication(Resource):
                 token_payload = {
                     'name': auth_user.orang.nama,
                     'pid': auth_user.orang.id.hex,
-                    'roles': auth_user.wewenang.nama
+                    'roles': [ x for x in auth_user.kewenangan.wewenang.nama ]
                 }
 
                 tokens = tokenizer.createAccessToken(token_payload)

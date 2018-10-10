@@ -205,11 +205,15 @@ class Pengguna(db.Entity, Mixin_Loader):
     email = Required(str, 60, unique=True)
     password = Required(str)
     suspended = Required(bool, default=False)
-    wewenang = Required('Wewenang')
+    kewenangan = Set('Kewenangan')
     koneksi = Set('Online')
 
 
 class Grup(db.Entity, Mixin_Loader):
+    """
+    Grup mewakili dan menghimpun apa saja yang dimiliki
+    oleh sebuah resource berdasarkan verba HTTP yang ada.
+    """
     id = PrimaryKey(int, auto=True)
     nama = Required(str, 30, unique=True)
     keterangan = Optional(str, nullable=True)
@@ -257,14 +261,14 @@ class Wewenang(db.Entity, Mixin_Loader):
     """roles of users"""
     id = PrimaryKey(int, auto=True)
     nama = Optional(str)
-    pengguna = Set(Pengguna)
+    kewenangan = Set('Kewenangan')
     grup = Set('Grup_Wewenang')
 
 
 class Grup_Wewenang(db.Entity, Mixin_Loader):
-    grup = Required(Grup)
     wewenang = Required(Wewenang)
-    PrimaryKey(grup, wewenang)
+    grup = Required(Grup)
+    PrimaryKey(wewenang, grup)
 
 
 class Online(db.Entity, Mixin_Loader):
@@ -294,5 +298,11 @@ class Offline(db.Entity, Mixin_Loader):
     rkey = Optional(str)
     akey = Optional(str)
     uakey = Optional(str)
+
+
+class Kewenangan(db.Entity, Mixin_Loader):
+    pengguna = Required(Pengguna)
+    wewenang = Required(Wewenang)
+    PrimaryKey(pengguna, wewenang)
 
 connection.generate()

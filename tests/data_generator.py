@@ -144,6 +144,7 @@ class DataGenerator(object):
 
         return santri
 
+
     def makePengguna(self, orang, jsonify=False):
 
         pengguna = {
@@ -151,11 +152,23 @@ class DataGenerator(object):
             "username": orang.nama.replace(' ', '.').lower(),
             "email": orang.nama.replace(' ', '.').lower() + '@' + self.randomDomain(),
             "password": self.randomChar(size=10),
-            "suspended": 0,
-            "wewenang": 4
+            "suspended": 0
         }
 
         if jsonify:
             pengguna = json.dumps(pengguna)
 
         return pengguna
+
+
+    def makeKewenangan(self, orang, jsonify=False):
+
+        kewenangan = {
+            "pengguna": str(orang.id),
+            "wewenang": 5 if orang.jinshi.id == 'l' else 6
+        }
+
+        if jsonify:
+            kewenangan = json.dumps(kewenangan)
+
+        return kewenangan

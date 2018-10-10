@@ -52,7 +52,7 @@ class Orang_Schema(Skema):
         only=('jenis', 'alamat', 'default'), many=True)
     pekerjaan = fields.Nested("Pekerjaan_Schema", only=('nama'))
     tanggal_masuk = fields.Date(default="datetime.now")
-    pengguna = fields.Nested("Pengguna_Schema", only=('username', 'wewenang'))
+    pengguna = fields.Nested("Pengguna_Schema", only=('username'))
 
     def getIsoFormat(field):
         if isinstance(field, datetime.date):
@@ -243,7 +243,6 @@ class Pengguna_Schema(Skema):
         required=True,
         validate=Length(min=8, error="too short"))
     suspended = fields.Boolean(required=True, missing=False)
-    wewenang = fields.Nested('Wewenang_Schema')
     koneksi = fields.Nested('Online_Schema')
 
     @post_load()
@@ -328,3 +327,8 @@ class Offline_Schema(Skema):
     rkey = fields.String(allow_none=True, missing=None)
     akey = fields.String(allow_none=True, missing=None)
     uakey = fields.String(allow_none=True, missing=None)
+
+
+class Kewenangan_Schema(Skema):
+    pengguna = fields.Nested('Pengguna_Schema')
+    wewenang = fields.Nested('Wewenang_Schema')

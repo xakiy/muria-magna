@@ -33,7 +33,7 @@ Policy_Config = {
         'reader': ['admin', 'manager', 'pengguna', 'santriwan'],
         'creator': ['admin', 'manager', 'pengguna'],
         'editor': ['admin', 'manager'],
-        'deleterr': ['admin']
+        'deleter': ['admin']
     },
     'routes': {
         '/auth': {
