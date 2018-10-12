@@ -38,8 +38,7 @@ class ResOrangs(Resource):
         content = dict()
         persons = Orang.select()[:self.config.getint('app', 'page_limit')]
         ps = Orang_Schema()
-        print('personal : ', params)
-        if len(persons) != 0:
+        if len(persons) > 0:
             content = {
                 'persons':
                 [ps.dump(p.to_dict())[0] for p in persons]}
@@ -50,6 +49,26 @@ class ResOrangs(Resource):
 
         resp.body = libs.dumpAsJSON(content)
 
+
+class ResDataOrang(Resource):
+    """
+    Resouce dataOrang
+
+    Berisi data pribadi masing-masing warga, diacu dengan id(uuid) mereke
+    """
+
+    @db_session
+    def on_get(self, req, resp, id, **params):
+
+        id = str(id)
+        if Orang.exists(id=id):
+            content = Orang[id].to_dict()
+            resp.status = falcon.HTTP_200
+        else:
+            resp.status = falcon.HTTP_404
+            content = ('Non-existant id request of #{0}'.format(id))
+
+        resp.body = libs.dumpAsJSON(content)
 
     @db_session
     def on_post(self, req, resp, **params):
@@ -84,29 +103,6 @@ class ResOrangs(Resource):
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
 
         resp.body = libs.dumpAsJSON(content)
-
-
-
-class ResDataOrang(Resource):
-    """
-    Resouce dataOrang
-
-    Berisi data pribadi masing-masing warga, diacu dengan id(uuid) mereke
-    """
-
-    @db_session
-    def on_get(self, req, resp, id, **params):
-
-        id = str(id)
-        if Orang.exists(id=id):
-            content = Orang[id].to_dict()
-            resp.status = falcon.HTTP_200
-        else:
-            resp.status = falcon.HTTP_404
-            content = ('Non-existant id request of #{0}'.format(id))
-
-        resp.body = libs.dumpAsJSON(content)
-
 
 
 class ResSantri(Resource):

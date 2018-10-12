@@ -4,11 +4,11 @@
 import random
 import datetime
 import re
-import json
 import uuid
 import string
 
 from muria.db.model import Jinshi
+from muria.libs import dumpAsJSON
 
 class DataGenerator(object):
 
@@ -72,7 +72,7 @@ class DataGenerator(object):
     def makeOrang(self, sex='male', jsonify=False):
 
         person = {
-            "id": str(uuid.uuid4()),
+            "id": uuid.uuid4().hex,
             "nik": str(self.randomNIK()),
             "nama": self.randomName(sex),
             "jinshi": self.jinshi(sex),
@@ -96,7 +96,7 @@ class DataGenerator(object):
         }
 
         if jsonify:
-            person = json.dumps(person)
+            person = dumpAsJSON(person)
 
         return person
 
@@ -106,7 +106,7 @@ class DataGenerator(object):
         """
 
         santri = {
-            "id": str(uuid.uuid4()),
+            "id": uuid.uuid4().hex,
             "nik": str(self.randomNIK()),
             "nama": self.randomName(sex),
             "jenis_kelamin": self.jinshi(sex),
@@ -140,7 +140,7 @@ class DataGenerator(object):
         }
 
         if jsonify:
-            santri = json.dumps(santri)
+            santri = dumpAsJSON(santri)
 
         return santri
 
@@ -148,7 +148,7 @@ class DataGenerator(object):
     def makePengguna(self, orang, jsonify=False):
 
         pengguna = {
-            "orang": str(orang.id),
+            "orang": orang.id.hex,
             "username": orang.nama.replace(' ', '.').lower(),
             "email": orang.nama.replace(' ', '.').lower() + '@' + self.randomDomain(),
             "password": self.randomChar(size=10),
@@ -156,19 +156,24 @@ class DataGenerator(object):
         }
 
         if jsonify:
-            pengguna = json.dumps(pengguna)
+            pengguna = dumpAsJSON(pengguna)
 
         return pengguna
 
 
-    def makeKewenangan(self, orang, jsonify=False):
-
+    def makeKewenangan(self, orang, wewenang=4, jsonify=False):
+        """
+        Dalam RBAC Policy, beberapa kewenangan diberi hak
+        untuk melakukan POST/PUT/DELETE resource terntentu.
+        Sedangkan kewenangan lain tidak bisa melakukannya.
+        """
         kewenangan = {
-            "pengguna": str(orang.id),
-            "wewenang": 5 if orang.jinshi.id == 'l' else 6
+            "pengguna": orang.id.hex,
+            "wewenang": wewenang if ( 0 < wewenang < 5 ) else ( 5 if orang.jinshi.id == 'l' else 6 )
+            # 4 == kontributor, 5 == santriwan, 6 == santriwati
         }
 
         if jsonify:
-            kewenangan = json.dumps(kewenangan)
+            kewenangan = dumpAsJSON(kewenangan)
 
         return kewenangan

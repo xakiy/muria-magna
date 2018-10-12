@@ -44,33 +44,32 @@ class Orang_Schema(Skema):
     tempat_lahir = fields.String(required=True)
     tanggal_lahir = fields.Date(required=True)
     telepon = fields.Nested("Telepon_Schema", only=('id', 'jenis'), many=True)
-    pendidikan_terakhir = fields.Nested(
+    pendidikan_akhir = fields.Nested(
         "Pendidikan_Akhir_Schema",
         only=('nama', 'singkatan'))
     alamat = fields.Nested(
         "Alamat_Schema",
         only=('jenis', 'alamat', 'default'), many=True)
     pekerjaan = fields.Nested("Pekerjaan_Schema", only=('nama'))
-    tanggal_masuk = fields.Date(default="datetime.now")
-    pengguna = fields.Nested("Pengguna_Schema", only=('username'))
+    # tanggal_masuk = fields.Date(default="datetime.now")
 
-    def getIsoFormat(field):
+    def getIsoFormat(self, field):
         if isinstance(field, datetime.date):
             return field.isoformat()[:10]
         else:
             return field
 
-    def getStrUUID(field):
+    def getStrUUID(self, field):
         if isinstance(field, UUID):
-            return str(field)
+            return field.hex
         else:
             return field
 
     @post_load
     def nativesToStr(self, in_data):
-        in_data['id'] = getStrUUID(in_data['id'])
-        in_data['tanggal_lahir'] = getIsoFormat(in_data['tanggal_lahir'])
-        in_data['tanggal_masuk'] = getIsoFormat(in_data['tanggal_masuk'])
+        in_data['id'] = self.getStrUUID(in_data['id'])
+        in_data['tanggal_lahir'] = self.getIsoFormat(in_data['tanggal_lahir'])
+        # in_data['tanggal_masuk'] = self.getIsoFormat(in_data['tanggal_masuk'])
         return in_data
 
 

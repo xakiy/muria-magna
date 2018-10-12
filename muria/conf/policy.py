@@ -17,11 +17,16 @@
 # from falcon_policy import RoleBasedPolicy
 
 Policy_Config = {
+    # Menyesuaikan dengan isi makeWewenang di berkas premise.py
     'roles': [
+        'root',
         'admin',
-        'manager',
-        'pengguna',
-        'santriwan'
+        'editor',
+        'kontributor',
+        'santriwan',
+        'santriwati',
+        'wali',
+        'umum'
     ],
     # TODO:
     # verba yang digunakan disini kurang mewakili grup dari role-role terkait
@@ -30,10 +35,10 @@ Policy_Config = {
     # "update" -> "kontributor"
     # "hapus" -> "editor"
     'groups': {
-        'reader': ['admin', 'manager', 'pengguna', 'santriwan'],
-        'creator': ['admin', 'manager', 'pengguna'],
-        'editor': ['admin', 'manager'],
-        'deleter': ['admin']
+        'reader': ['root', 'admin', 'editor', 'kontributor', 'santriwan', 'santriwati', 'wali'],
+        'creator': ['root', 'admin', 'editor', 'kontributor'],
+        'editor': ['root', 'admin', 'editor'],
+        'deleter': ['root', 'admin']
     },
     'routes': {
         '/auth': {
@@ -44,16 +49,20 @@ Policy_Config = {
         },
         '/auth/verify': {
             # 'GET': ['@passthrough'], # phusion server would hangup if this invoked
+            # TODO:
+            # Bila @passthrough maka itu membuka celah bagi siapa saja bahkan cracker untuk melakukan
+            # verifiksi token.
+            # Karena bagaimana pun, sebelum verifikasi berlangsung, RBAC middleware
+            # akan bekerja terlebih dahulu sebelum custom verifikasi token terjadi.
             'POST': ['@passthrough']
         },
         '/auth/refresh': {
+            # TODO:
+            # Idem dengan di atas.
             'POST': ['@passthrough']
         },
         '/persons': {
-            'GET': ['reader'],
-            'POST': ['creator'],
-            'PUT': ['editor'],
-            'DELETE': ['deleter'],
+            'GET': ['reader']
         },
         '/persons/{id:uuid}': {
             'GET': ['reader'],
@@ -62,10 +71,7 @@ Policy_Config = {
             'DELETE': ['deleter'],
         },
         '/santri': {
-            'GET': ['reader'],
-            'POST': ['creator'],
-            'PUT': ['editor'],
-            'DELETE': ['deleter'],
+            'GET': ['reader']
         },
         '/santri/{id:uuid}': {
             'GET': ['reader'],

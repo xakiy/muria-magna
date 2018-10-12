@@ -198,6 +198,9 @@ class Jinshi(db.Entity, Mixin_Loader):
     orang = Set(Orang)
     rayon = Set(Asrama_Rayon)
 
+    def __str__(self):
+        return self.id
+
 
 class Pengguna(db.Entity, Mixin_Loader):
     orang = PrimaryKey(Orang)

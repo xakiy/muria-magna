@@ -2,7 +2,6 @@
 
 import os
 import jwt
-import json
 import pytest
 import falcon
 import pickle
@@ -17,6 +16,7 @@ if os.environ.get('MURIA_SETUP') is None:
 
 from muria.init import config
 from muria.wsgi import app
+from muria.libs import dumpAsJSON
 
 @pytest.fixture
 def _client():
@@ -52,7 +52,7 @@ class Auth(object):
     def post_login_and_get_tokens(self, _client):
         """Testing Authentication via POST."""
         from muria.db.model import Orang, Pengguna, Kewenangan
-        from tests.data_generator import DataGenerator
+        from tests._data_generator import DataGenerator
 
         data_generator = DataGenerator()
 
@@ -83,7 +83,7 @@ class Auth(object):
 
         resp = _client.simulate_post(
             '/auth',
-            body=json.dumps(credentials),
+            body=dumpAsJSON(credentials),
             headers=headers, protocol=proto
         )
 
@@ -111,35 +111,6 @@ class Auth(object):
         assert payload['roles'] == [ x for x in user.kewenangan.wewenang.nama ]
 
     @pytest.mark.order3
-    def auth_post_verify_token(self, _client):
-
-        access_token = _unpickling('access_token')
-
-        proto = 'http'  # 'https'
-        # headers updated based on header requirements
-        headers = {
-            "Content-Type": "application/json",
-            "Host": config.get('security', 'issuer'),
-            "Origin": config.get('security', 'audience')
-        }
-        payload = {
-            "access_token": access_token
-        }
-
-        resp = _client.simulate_post(
-            '/auth/verify',
-            body=json.dumps(payload),
-            headers=headers, protocol=proto
-        )
-
-        assert resp.status == falcon.HTTP_OK
-        assert resp.json.get('access_token') == access_token
-
-        random_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJyb2xlcyI6InNhbnRyaXdhbiIsImF1ZCI6ImFwcC5naXJpbGFicy5jb20iLCJleHAiOjE1MzcyODg1NTMsImlhdCI6MTUzNzI4ODI1MywibmFtZSI6IkFobWFkIFl1c3VmIiwicGlkIjoiMTI3NjhiMmQzZDdjNDQxN2JlNThlOTk2NmM5MGZkZDYiLCJpc3MiOiJhcGkuZ2lyaWxhYnMuY29tIn0.pnFKa3oeQLANdfoj8l6hp2iK4C5Oo3TiBHofE-DBU_Q8ssZfBng3fOouHDomAW1-ZG8vxJCxqhEFtFr6hJ-W0g"
-
-
-
-    @pytest.mark.order4
     def auth_post_refresh_token(self, _client):
 
         import time
@@ -164,7 +135,7 @@ class Auth(object):
 
         resp = _client.simulate_post(
             '/auth/refresh',
-            body=json.dumps(payload),
+            body=dumpAsJSON(payload),
             headers=headers, protocol=proto
         )
 
@@ -216,3 +187,29 @@ class Auth(object):
 
         assert old_ref_token_payload['iat'] < new_ref_token_payload['iat']
         assert old_ref_token_payload['exp'] < new_ref_token_payload['exp']
+
+
+    @pytest.mark.order4
+    def auth_post_verify_token(self, _client):
+
+        access_token = _unpickling('access_token')
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience')
+        }
+        payload = {
+            "access_token": access_token
+        }
+
+        resp = _client.simulate_post(
+            '/auth/verify',
+            body=dumpAsJSON(payload),
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_OK
+        assert resp.json.get('access_token') == access_token

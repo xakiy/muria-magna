@@ -117,6 +117,8 @@ def makeWewenang():
     data.append({'id': 4, 'nama': 'kontributor'})
     data.append({'id': 5, 'nama': 'santriwan'})
     data.append({'id': 6, 'nama': 'santriwati'})
+    data.append({'id': 7, 'nama': 'wali'})
+    data.append({'id': 8, 'nama': 'umum'})
 
     with db_session:
         for w in data:
