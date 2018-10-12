@@ -11,8 +11,6 @@ testing on python3.6:
     - ls -l tests
     - pip install -r requirement-devel.txt
     - py.test
-    only:
-    - feature-init
 
 testing on python3.5:
     image: python:3.5
@@ -23,8 +21,6 @@ testing on python3.5:
     - ls -l tests
     - pip install -r requirement-devel.txt
     - py.test
-    only:
-    - feature-init
 
 testing on python3.4:
     image: python:3.4
@@ -35,8 +31,6 @@ testing on python3.4:
     - ls -l tests
     - pip install -r requirement-devel.txt
     - py.test
-    only:
-    - feature-init
 
 uploading:
     image: alpine:latest
@@ -55,5 +49,3 @@ uploading:
     - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r ./ $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME touch $REMOTE_SCP_TARGET_PATH/tmp/restart.txt
-    only:
-    - feature-init
