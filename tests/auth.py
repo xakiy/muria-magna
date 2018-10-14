@@ -1,34 +1,19 @@
 """Testing Authentication."""
 
-import os
 import jwt
 import pytest
 import falcon
-import pickle
 import time
 
 from falcon import testing
 from pony.orm import db_session
 # from urllib.parse import urlencode
 
-if os.environ.get('MURIA_SETUP') is None:
-    os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test.setup.ini')
+import tests._config
 
 from muria.init import config
-from muria.wsgi import app
 from muria.libs import dumpAsJSON
-
-@pytest.fixture
-def _client():
-    return testing.TestClient(app)
-
-def _pickling(stuff, filename):
-    with open(filename, 'wb') as f:
-        pickle.dump(stuff, f, pickle.HIGHEST_PROTOCOL)
-
-def _unpickling(filename):
-    with open(filename, 'rb') as f:
-        return pickle.load(f)
+from tests._pickles import _pickling, _unpickling
 
 
 class Auth(object):
@@ -112,8 +97,6 @@ class Auth(object):
 
     @pytest.mark.order3
     def auth_post_refresh_token(self, _client):
-
-        import time
 
         old_access_token = _unpickling('access_token')
         old_refresh_token = _unpickling('refresh_token')

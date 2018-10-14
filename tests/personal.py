@@ -1,34 +1,17 @@
-"""Testing Authentication."""
+"""Testing Personal Resource."""
 
-import os
-import jwt
 import pytest
 import falcon
-import pickle
-import time
 
-from falcon import testing
 from pony.orm import db_session
 # from urllib.parse import urlencode
 
-if os.environ.get('MURIA_SETUP') is None:
-    os.environ['MURIA_SETUP'] = os.path.join(os.path.dirname(__file__), 'test.setup.ini')
+import tests._config
 
 from muria.init import config
-from muria.wsgi import app
 from muria.libs import dumpAsJSON
+from tests._pickles import _unpickling
 
-@pytest.fixture
-def _client():
-    return testing.TestClient(app)
-
-def _pickling(stuff, filename):
-    with open(filename, 'wb') as f:
-        pickle.dump(stuff, f, pickle.HIGHEST_PROTOCOL)
-
-def _unpickling(filename):
-    with open(filename, 'rb') as f:
-        return pickle.load(f)
 
 class Personal(object):
 
