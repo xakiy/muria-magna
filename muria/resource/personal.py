@@ -35,17 +35,33 @@ class ResOrangs(Resource):
     @db_session
     def on_get(self, req, resp, **params):
 
-        content = dict()
-        persons = Orang.select()[:self.config.getint('app', 'page_limit')]
-        ps = Orang_Schema()
-        if len(persons) > 0:
-            content = {
-                'persons':
-                [ps.dump(p.to_dict())[0] for p in persons]}
-            resp.status = falcon.HTTP_200
+        req_params = req.params
+        if req_params.get('search') is not None:
+            content = dict()
+            ps = Orang_Schema()
+            query = Orang.select(lambda o: req_params.get('search') in o.nama)
+            if query.count() > 0:
+                content = {
+                    'count': query.count(),
+                    'persons':
+                    [ps.dump(p.to_dict())[0] for p in query]}
+                resp.status = falcon.HTTP_200
+            else:
+                resp.status = falcon.HTTP_404
+                content = {'error': 'No data found!'}
         else:
-            resp.status = falcon.HTTP_404
-            content = {'error': 'No data found!'}
+            content = dict()
+            persons = Orang.select()[:self.config.getint('app', 'page_limit')]
+            ps = Orang_Schema()
+            if len(persons) > 0:
+                content = {
+                    'count': len(persons),
+                    'persons':
+                    [ps.dump(p.to_dict())[0] for p in persons]}
+                resp.status = falcon.HTTP_200
+            else:
+                resp.status = falcon.HTTP_404
+                content = {'error': 'No data found!'}
 
         resp.body = libs.dumpAsJSON(content)
 

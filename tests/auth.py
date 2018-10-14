@@ -5,11 +5,8 @@ import pytest
 import falcon
 import time
 
-from falcon import testing
 from pony.orm import db_session
 # from urllib.parse import urlencode
-
-import tests._config
 
 from muria.init import config
 from muria.libs import dumpAsJSON

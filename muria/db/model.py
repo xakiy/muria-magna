@@ -35,7 +35,7 @@ class Orang(db.Entity, Mixin_Loader):
     alamat = Set('Alamat')
     pekerjaan = Optional('Pekerjaan')
     tanggal_masuk = Optional(date, default=lambda: date.today())
-    pengguna = Optional('Pengguna')
+    pengguna = Optional('Pengguna', lazy=True)
 
 
 class Santri(Orang, Mixin_Loader):

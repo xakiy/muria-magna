@@ -6,8 +6,6 @@ import falcon
 from pony.orm import db_session
 # from urllib.parse import urlencode
 
-import tests._config
-
 from muria.init import config
 from muria.libs import dumpAsJSON
 from tests._pickles import _unpickling
@@ -41,7 +39,7 @@ class Personal(object):
         assert len(content) > 0
 
     @db_session
-    def post_person(self, _client):
+    def post_person(self, _client, cache):
         from muria.db.model import Orang, Pengguna, Kewenangan
         from tests._data_generator import DataGenerator
 
@@ -49,6 +47,7 @@ class Personal(object):
 
         # generate random person
         someone = data_generator.makeOrang(sex='male')
+        cache.set('posted_person', dumpAsJSON(someone))
 
         access_token = _unpickling('access_token')
 
@@ -67,5 +66,34 @@ class Personal(object):
             headers=headers, protocol=proto
         )
 
-        # assert 'foo' == '/persons/' + someone['id']
         assert resp.status == falcon.HTTP_201
+
+    @db_session
+    def search_person(self, _client, cache):
+
+        import json
+        from urllib.parse import urlencode
+
+        someone = json.loads(cache.get('posted_person', "{}"))
+
+        access_token = _unpickling('access_token')
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience'),
+            "Authorization": 'Bearer ' + access_token
+        }
+
+        resp = _client.simulate_get(
+            path='/persons',
+            params={'search': someone.get('nama')},
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_200
+        assert resp.json.get('count') == 1
+        assert resp.json.get('persons')[0]['nik'] == someone.get('nik')
+        assert resp.json.get('persons')[0]['tanggal_lahir'] == someone.get('tanggal_lahir')
