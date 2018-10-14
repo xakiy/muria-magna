@@ -17,7 +17,9 @@
 # from falcon_policy import RoleBasedPolicy
 
 Policy_Config = {
-    # Menyesuaikan dengan isi makeWewenang di berkas premise.py
+    # Roles atau peran adalah kewenangan seorang pengguna terhadap sebuah resource.
+    # Seorang pengguna bisa memiliki lebih dari satu kewenangan/peran/role.
+    # Catatan: menyesuaikan dengan makeWewenang di berkas premise.py
     'roles': [
         'root',
         'admin',
@@ -28,14 +30,9 @@ Policy_Config = {
         'wali',
         'umum'
     ],
-    # TODO:
-    # verba yang digunakan disini kurang mewakili grup dari role-role terkait
-    # grup "read" mungkin lebih cocok bila diganti menjadi "umum",
-    # "create" -> "creator"
-    # "update" -> "kontributor"
-    # "hapus" -> "editor"
+    #  Group lebih berupa jabatan kepengurusan terhadap suatu resource.
     'groups': {
-        'reader': ['root', 'admin', 'editor', 'kontributor', 'santriwan', 'santriwati', 'wali'],
+        'reader': ['root', 'admin', 'editor', 'kontributor', 'santriwan', 'santriwati', 'wali', 'umum'],
         'creator': ['root', 'admin', 'editor', 'kontributor'],
         'editor': ['root', 'admin', 'editor'],
         'deleter': ['root', 'admin']
