@@ -43,6 +43,11 @@ from muria.conf import premise
 
 premise.setPremise()
 
+if DEBUG:
+    print('---------------------------------')
+    print('# WARNING: DEBUG MODE IS ACTIVE #')
+    print('---------------------------------')
+
 tokenizer = Tokenizer(config)
 logger = Logger(config)
 
@@ -52,15 +57,15 @@ if config.getboolean('security', 'secure'):
 
     cors = CORS(
         log_level=10,
-        # allow_all_origins=False,  # false means disallow any random host to connect
+        allow_all_origins=False,  # false means disallow any random host to connect
         allow_origins_list=config.getlist('cors', 'allow_origins_list'),
-        allow_all_methods=True,  # whether all methods are allowed via CORS requests
-        # allow_methods_list=['GET', 'POST', 'TRACE', 'PUT', 'PATCH', 'HEAD', 'CONNECT', 'DELETE', 'OPTIONS'],
+        allow_all_methods=False,  # allow all methods incl. custom ones are allowed via CORS requests
+        allow_methods_list=['GET', 'POST', 'TRACE', 'PUT', 'PATCH', 'HEAD', 'CONNECT', 'DELETE', 'OPTIONS'],
         # exposed value sent as response to the Access-Control-Expose-Headers request
-        expose_headers_list=['HEAD', 'GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        allow_all_headers=True,  # preflight response
-        allow_headers_list=['HEAD', 'GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        allow_credentials_all_origins=True,
+        # expose_headers_list=['authorization'],
+        allow_all_headers=False,  # for preflight response
+        allow_headers_list=['authorization', 'crsf-token', 'etag', 'content-length', 'content-type', 'cache-control'],
+        allow_credentials_all_origins=False,
         allow_credentials_origins_list=[],
         # max_age=None
         # TODO: move these values to config file
@@ -90,3 +95,4 @@ if config.getboolean('security', 'secure'):
     middleware_list.append(RBAC(Policy_Config, check_jwt=True))
 
 middleware_list.append(MultipartMiddleware())
+print('Initto...!')

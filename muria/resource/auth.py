@@ -34,7 +34,7 @@ class Authentication(Resource):
 
     @db_session
     def on_get(self, req, resp):
-
+        print('AUTH GET: ', req)
         resp.status = falcon.HTTP_200
         if DEBUG:
             content = {'username': 'your username', 'password': 'your password'}
@@ -42,6 +42,7 @@ class Authentication(Resource):
 
     @db_session
     def on_post(self, req, resp):
+        print('AUTH POST: ', req, req.media)
         # any invalid JSON would be cought within falcon's
         # req.media deserialization
         if req.media:
@@ -49,10 +50,10 @@ class Authentication(Resource):
             auth_user, error = ps.load(req.media)
 
             if error:
-                raise falcon.HTTPError(
-                    falcon.HTTP_BAD_REQUEST,
-                    title='Invalid Params',
-                    code=error)
+                # entity is received but unable to process, may due to:
+                # blank entity, or invalid one.
+                raise falcon.HTTPUnprocessableEntity(code=422)
+
 
             if isinstance(auth_user, Pengguna):
 
@@ -64,6 +65,10 @@ class Authentication(Resource):
 
                 tokens = tokenizer.createAccessToken(token_payload)
 
+                if tokens is None:
+                    # unable to create token
+                    raise falcon.HTTPInternalServerError(code=500)
+
                 content = {
                     'token_type': 'bearer',
                     'expires_in': self.config.getint('security', 'access_token_exp'),
@@ -72,14 +77,11 @@ class Authentication(Resource):
                 }
                 resp.status = falcon.HTTP_OK
             else:
-                content = {'message': 'Authentication failed'}
-                resp.status = falcon.HTTP_UNAUTHORIZED
+                # entity is received but not authorized by the server
+                # due to invalid credentials.
+                 raise falcon.HTTPUnauthorized(code=401)
 
             resp.body = libs.dumpAsJSON(content)
-
-    def on_options(self, req, resp):
-
-        resp.status = falcon.HTTP_OK
 
 
 class Verification(Resource):
@@ -93,19 +95,23 @@ class Verification(Resource):
 
         access_token = req.media.get('access_token')
 
-        try:
-            # TODO:
-            # implement some cache validations on the user
-            token = tokenizer.verifyAccessToken(access_token)
-        except jwt.InvalidTokenError as err:
-            raise falcon.HTTPNotFound(
-                title='Token Verification',
-                description=str(err), code={'error_code': 4003}
-            )
-        else:
+        # TODO:
+        # implement some cache validations on the user
+        token = tokenizer.verifyAccessToken(access_token)
+
+        if tokenizer.isToken(token):
             content = {"access_token": token}
             resp.status = falcon.HTTP_200
             resp.body = libs.dumpAsJSON(content)
+
+        elif token[0] == 422:
+            raise falcon.HTTPUnprocessableEntity(
+                title='Token Verification',
+                description=str(token[1]), code=422)
+        else:
+            raise falcon.HTTPBadRequest(
+                title='Token Verification',
+                description=str(token[1]), code=400)
 
 
 class Refresh(Resource):
@@ -115,14 +121,9 @@ class Refresh(Resource):
         access_token = req.media.get('access_token')
         refresh_token = req.media.get('refresh_token')
 
-        try:
-            tokens = tokenizer.refreshAccessToken(access_token, refresh_token)
-        except jwt.InvalidTokenError as err:
-            raise falcon.HTTPNotFound(
-                title='Token Refresh',
-                description=str(err), code={'error_code': 4004}
-            )
-        else:
+        tokens = tokenizer.refreshAccessToken(access_token, refresh_token)
+
+        if isinstance(tokens, dict):
             content = {
                 'token_type': 'bearer',
                 'expires_in': self.config.getint('security', 'access_token_exp'),
@@ -131,3 +132,17 @@ class Refresh(Resource):
             }
             resp.status = falcon.HTTP_OK
             resp.body = libs.dumpAsJSON(content)
+
+        elif tokens[0] == 422:
+            raise falcon.HTTPUnprocessableEntity(
+                title='Renew Access Token',
+                description=str(tokens[1]), code=422)
+        elif tokens[0] == 432:
+            raise falcon.HTTPUnprocessableEntity(
+                title='Renew Refresh Token Expired',
+                description=str(tokens[1]), code=432)
+        else:
+            raise falcon.HTTPBadRequest(
+                title='Renew Tokens Pair',
+                description=str(token[1]), code=400)
+

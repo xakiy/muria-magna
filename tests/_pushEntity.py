@@ -1,11 +1,12 @@
 import datetime, sys, random
-# from muria.init import config
-from muria.db import model as Models
+
+from muria.init import config
+from muria.db.model import Orang, Pengguna, Kewenangan
 # import db.schema as Schemas
 from pony.orm import db_session, flush, commit
-from tests.data_generator import DataGenerator
+from tests._data_generator import DataGenerator
 
-exit(config.get('path', 'config_dir'))
+# exit(config.get('path', 'config_dir'))
 
 data_generator = DataGenerator()
 
@@ -15,14 +16,18 @@ def pushOrang(count=20):
         for i in range(0, count):
             if random.randint(0,1) == 0:
                 someone = data_generator.makeOrang(sex='male')
-                person = Models.Orang(**someone)
+                person = Orang(**someone)
                 creds = data_generator.makePengguna(person)
-                pengguna = Models.Pengguna(**creds)
+                pengguna = Pengguna(**creds)
+                wewenang = data_generator.makeKewenangan(person)
+                kewenangan = Kewenangan(**wewenang)
             else:
                 someone = data_generator.makeOrang(sex='female')
-                person = Models.Orang(**someone)
+                person = Orang(**someone)
                 creds = data_generator.makePengguna(person)
-                pengguna = Models.Pengguna(**creds)
+                pengguna = Pengguna(**creds)
+                wewenang = data_generator.makeKewenangan(person)
+                kewenangan = Kewenangan(**wewenang)
         flush()
 
 '''

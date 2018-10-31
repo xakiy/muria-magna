@@ -45,6 +45,7 @@ Policy_Config = {
             'POST': ['@passthrough']
         },
         '/auth/verify': {
+            'OPTIONS': ['@passthrough'],
             # 'GET': ['@passthrough'], # phusion server would hangup if this invoked
             # TODO:
             # Bila @passthrough maka itu membuka celah bagi siapa saja bahkan cracker untuk melakukan
@@ -54,53 +55,63 @@ Policy_Config = {
             'POST': ['@passthrough']
         },
         '/auth/refresh': {
+            'OPTIONS': ['@passthrough'],
             # TODO:
             # Idem dengan di atas.
             'POST': ['@passthrough']
         },
         '/persons': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
         '/persons/{id:uuid}': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/santri': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
         '/santri/{id:uuid}': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/lembaga': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/lembaga/{lid}': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/lembaga/{lid}/jabatan': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/lembaga/{lid}/jabatan/{id}': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/rayon': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'OPTIONS': ['@passthrough'],
@@ -108,30 +119,44 @@ Policy_Config = {
             'DELETE': ['deleter'],
         },
         '/rayon/kepala': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/rayon/{wid:int}': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
         '/rayon/{wid:int}/blok': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
+        '/stats/orang': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['reader']
+        },
+        '/stats/wali': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['reader']
+        },
         '/stats/santri': {
-            'GET': ['@any-role']
+            'OPTIONS': ['@passthrough'],
+            'GET': ['reader']
         },
         '/stats/santri/{jinshi}': {
+            'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
         '/upload': {
+            'OPTIONS': ['@passthrough'],
             'POST': ['@passthrough']
         }
     },

@@ -16,6 +16,7 @@
 
 from muria.init import config, CORS, connection
 from muria.libs import dumpAsJSON, getEtag
+from falcon import HTTP_OK
 
 
 class Resource(object):
@@ -28,10 +29,7 @@ class Resource(object):
     def __init__(self, config=config, connection=connection, **params):
         self.config = config
         self.connection = connection
-        self.cors = CORS(
-            allow_origins_list=self.config.getlist('cors', 'allow_origins_list'),
-            allow_all_headers=True,
-            allow_all_methods=True)
+        # self.cors = CORS
 
     def __resp__(self):
         self.resp.body = dumpAsJSON(self.content)

@@ -17,7 +17,7 @@ from muria.resource import auth
 from muria.resource import personal
 # from muria.resource import lembaga
 from muria.resource import asrama
-# from muria.resource import stats
+from muria.resource import stats
 # from muria.resource import downstreamer
 # from muria.resource import devel
 
@@ -65,10 +65,13 @@ resource_route.append(('/rayon', asrama.ResRayon()))
 resource_route.append(('/wilayah/kepala', asrama.ResKepalaWilayah()))
 resource_route.append(('/wilayah/{wid:int}', asrama.ResDataWilayah()))
 resource_route.append(('/wilayah/{wid:int}/blok', asrama.ResBlok()))
-
+'''
 # data statistik dalam angka
+resource_route.append(('/stats/orang', stats.ResStatsOrang()))
+resource_route.append(('/stats/wali', stats.ResStatsWali()))
 resource_route.append(('/stats/santri', stats.ResStatsSantri()))
 resource_route.append(('/stats/santri/{jinshi}', stats.ResStatsSantriByJinshi()))
+'''
 # resource_route.append(('/stats/pengurus/putra'))
 # resource_route.append(('/stats/pengurus/putri'))
 # resource_route.append(('/stats/pengurus/wilayah'))

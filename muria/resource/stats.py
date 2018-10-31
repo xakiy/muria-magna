@@ -20,8 +20,58 @@ import datetime
 import uuid
 from muria.resource.base import Resource
 from muria import libs
-from muria.db.model import Orang, Santri
+from muria.db.model import Orang, Ortu, Santri
 from pony.orm import db_session, count
+
+
+class ResStatsOrang(Resource):
+    """Resource Statistiks Santri
+    Menampilkan data statistiks jumlah total santri aktif.
+    """
+
+    @db_session
+    def on_get(self, req, resp, **params):
+
+        orang_total = count(s for s in Orang)
+
+        if orang_total != 0:
+
+            content = {'statistiks_orang': orang_total}
+            resp.status = falcon.HTTP_200
+        else:
+            resp.status = falcon.HTTP_404
+            content = ('Stats error!')
+
+        resp.body = libs.dumpAsJSON(content)
+        resp.etag = libs.getEtag(resp.body)
+
+        if req.if_none_match == resp.etag:
+            resp.status = falcon.HTTP_304
+
+
+class ResStatsWali(Resource):
+    """Resource Statistiks Wali Santri
+    Menampilkan data statistiks jumlah total wali santri.
+    """
+
+    @db_session
+    def on_get(self, req, resp, **params):
+
+        ortu_total = count(s for s in Ortu)
+
+        if ortu_total != 0:
+
+            content = {'statistiks_wali': ortu_total}
+            resp.status = falcon.HTTP_200
+        else:
+            resp.status = falcon.HTTP_404
+            content = ('Stats error!')
+
+        resp.body = libs.dumpAsJSON(content)
+        resp.etag = libs.getEtag(resp.body)
+
+        if req.if_none_match == resp.etag:
+            resp.status = falcon.HTTP_304
 
 
 class ResStatsSantri(Resource):
@@ -49,7 +99,6 @@ class ResStatsSantri(Resource):
             resp.status = falcon.HTTP_304
 
 
-
 class ResStatsSantriByJinshi(Resource):
     """Resource Statistiks Santri by Jinshi
     Menampilkan data statistiks santri berdasarkan jenis kelamin.
@@ -60,10 +109,10 @@ class ResStatsSantriByJinshi(Resource):
 
         try:
             if jinshi == 'putra':
-                total = count(s for s in Santri if s.jenis_kelamin == 'L')
+                total = count(s for s in Santri if s.jinshi.id == 'l')
                 key = 'statistiks_santri_putra'
             elif jinshi == 'putri':
-                total = count(s for s in Santri if s.jenis_kelamin == 'P')
+                total = count(s for s in Santri if s.jinshi.id == 'p')
                 key = 'statistiks_santri_putri'
 
             content = {key: total}

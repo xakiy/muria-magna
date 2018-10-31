@@ -236,11 +236,11 @@ class Pengguna_Schema(Skema):
     orang = fields.Nested('Orang_Schema')
     username = fields.String(
         required=True,
-        validate=Length(min=8, error="too short"))
+        validate=lambda x: x.strip() is not '')
     email = fields.String(missing=None, allow_none=True)
     password = fields.String(
         required=True,
-        validate=Length(min=8, error="too short"))
+        validate=lambda x: x.strip() is not '')
     suspended = fields.Boolean(required=True, missing=False)
     koneksi = fields.Nested('Online_Schema')
 
