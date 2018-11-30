@@ -22,15 +22,15 @@ testing on python3.5:
     - pip install -r requirement-devel.txt
     - py.test ./tests/
 
-testing on python3.4:
-    image: python:3.4
-    stage: test
-    script:
-    - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
-    - ls -l
-    - ls -l tests
-    - pip install -r requirement-devel.txt
-    - py.test ./tests/
+# testing on python3.4:
+#     image: python:3.4
+#     stage: test
+#     script:
+#     - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
+#     - ls -l
+#     - ls -l tests
+#     - pip install -r requirement-devel.txt
+#     - py.test ./tests/
 
 uploading:
     image: alpine:latest
