@@ -69,11 +69,15 @@ class Auth(object):
 
         _pickling(access_token, 'access_token')
         _pickling(refresh_token, 'refresh_token')
+        _pickling(self.creds, 'creds')
+        _pickling(self.someone, 'someone')
+        _pickling(self.digest_pass, 'digest_pass')
 
         # self.user is from pytest fixture within the conftest.py
         assert payload['name'] == self.user.orang.nama
         assert payload['pid'] == str(self.user.orang.id)
         assert payload['roles'] == [ x for x in self.user.kewenangan.wewenang.nama ]
+
 
     @pytest.mark.order3
     def auth_post_refresh_token(self, _client):

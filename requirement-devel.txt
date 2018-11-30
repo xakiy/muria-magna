@@ -25,7 +25,7 @@ lxml==4.2.4
 marshmallow==2.14.0
 parsec==3.3
 pluggy==0.6.0
-pony==0.7.3
+pony==0.7.6
 py==1.6.0
 pycparser==2.18
 pycryptodome==3.5.1
