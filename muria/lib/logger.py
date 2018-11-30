@@ -23,9 +23,9 @@ class Logger(object):
     def __init__(self, config):
         self.config = config
 
-    def get_logger(self, name):
-        logger = logging.getLogger(name)
-        logger.setLevel(self.config.getint('app', 'log_level'))
+    def getLogger(self):
+        logger = logging.getLogger(self.config.get('app', 'logger_name'))
+        logger.setLevel(self.config.getint('app', 'logger_level'))
         logger.propogate = False
         if not logger.handlers:
             handler = logging.StreamHandler()

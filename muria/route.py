@@ -14,6 +14,8 @@
 """Route of resources."""
 
 from muria.resource import auth
+from muria.resource import account
+from muria.resource import profile
 from muria.resource import personal
 # from muria.resource import lembaga
 from muria.resource import asrama
@@ -34,6 +36,12 @@ static_route.append(('/ref', '/home/zakiy/public_html/sufee/'))
 resource_route.append(('/auth', auth.Authentication()))
 resource_route.append(('/auth/verify', auth.Verification()))
 resource_route.append(('/auth/refresh', auth.Refresh()))
+
+resource_route.append(('/profile', profile.Profile()))
+resource_route.append(('/profile/security', profile.Security()))
+
+resource_route.append(('/accounts', account.Accounts()))
+# resource_route.append(('/accounts/{id:uuid}', res_account))
 
 # semua personal/warga, termasuk para santri, bahkan wali santri di rumah
 resource_route.append(('/persons', personal.ResOrangs()))

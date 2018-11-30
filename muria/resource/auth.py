@@ -15,12 +15,11 @@
 """muria auth class file."""
 
 import falcon
-import jwt
 from muria.init import DEBUG, tokenizer
 from muria.resource.base import Resource
-from muria.schema.entity import Pengguna_Schema
+from muria.db.schema import Pengguna_Schema
 from muria.db.model import Pengguna
-from muria import libs
+from muria.lib.misc import dumpAsJSON
 
 from pony.orm import db_session
 
@@ -34,54 +33,55 @@ class Authentication(Resource):
 
     @db_session
     def on_get(self, req, resp):
-        print('AUTH GET: ', req)
-        resp.status = falcon.HTTP_200
+
+        resp.status = falcon.HTTP_OK
+        resp.set_header('WWW-Authenticate', 'Bearer')
         if DEBUG:
-            content = {'username': 'your username', 'password': 'your password'}
-            resp.body = libs.dumpAsJSON(content)
+            content = {'WWW-Authenticate': 'Bearer'}
+            resp.body = dumpAsJSON(content)
 
     @db_session
     def on_post(self, req, resp):
-        print('AUTH POST: ', req, req.media)
-        # any invalid JSON would be cought within falcon's
-        # req.media deserialization
-        if req.media:
-            ps = Pengguna_Schema()
-            auth_user, error = ps.load(req.media)
 
-            if error:
-                # entity is received but unable to process, may due to:
-                # blank entity, or invalid one.
-                raise falcon.HTTPUnprocessableEntity(code=422)
+        data, error = Pengguna_Schema(only=('username', 'password')).load(req.media)
+        if error:
+            # entity is received but unable to process, may due to:
+            # blank entity, or invalid one.
+            raise falcon.HTTPUnprocessableEntity(description=str(error), code=422)
 
+        if not Pengguna.exists(username=data['username']):
+            raise falcon.HTTPUnauthorized(code=401)
 
-            if isinstance(auth_user, Pengguna):
+        auth_user = Pengguna.get(username=data['username'])
 
-                token_payload = {
-                    'name': auth_user.orang.nama,
-                    'pid': auth_user.orang.id.hex,
-                    'roles': [ x for x in auth_user.kewenangan.wewenang.nama ]
-                }
+        if auth_user.checkPassword(data['password']):
 
-                tokens = tokenizer.createAccessToken(token_payload)
+            token_payload = {
+                'name': auth_user.orang.nama,
+                'pid': str(auth_user.orang.id),
+                'roles': [x for x in auth_user.kewenangan.wewenang.nama]
+            }
 
-                if tokens is None:
-                    # unable to create token
-                    raise falcon.HTTPInternalServerError(code=500)
+            tokens = tokenizer.createAccessToken(token_payload)
 
-                content = {
-                    'token_type': 'bearer',
-                    'expires_in': self.config.getint('security', 'access_token_exp'),
-                    'refresh_token': tokens['refresh_token'],
-                    'access_token': tokens['access_token']
-                }
-                resp.status = falcon.HTTP_OK
-            else:
-                # entity is received but not authorized by the server
-                # due to invalid credentials.
-                 raise falcon.HTTPUnauthorized(code=401)
+            if tokens is None:
+                # unable to create token
+                raise falcon.HTTPInternalServerError(code=500)
 
-            resp.body = libs.dumpAsJSON(content)
+            content = {
+                # some clients do not recognize the token type if
+                # not properly titled case as in RFC6750 section-2.1
+                'token_type': 'Bearer',
+                'expires_in': self.config.getint('security', 'access_token_exp'),
+                'refresh_token': tokens['refresh_token'],
+                'access_token': tokens['access_token']
+            }
+            resp.status = falcon.HTTP_OK
+            resp.body = dumpAsJSON(content)
+        else:
+            # entity is received but not authorized by the server
+            # due to invalid credentials.
+            raise falcon.HTTPUnauthorized(code=401)
 
 
 class Verification(Resource):
@@ -102,7 +102,7 @@ class Verification(Resource):
         if tokenizer.isToken(token):
             content = {"access_token": token}
             resp.status = falcon.HTTP_200
-            resp.body = libs.dumpAsJSON(content)
+            resp.body = dumpAsJSON(content)
 
         elif token[0] == 422:
             raise falcon.HTTPUnprocessableEntity(
@@ -121,28 +121,29 @@ class Refresh(Resource):
         access_token = req.media.get('access_token')
         refresh_token = req.media.get('refresh_token')
 
-        tokens = tokenizer.refreshAccessToken(access_token, refresh_token)
+        # on success it will be dict of tokens, otherwise it will
+        # tuple of error
+        content = tokenizer.refreshAccessToken(access_token, refresh_token)
 
-        if isinstance(tokens, dict):
-            content = {
-                'token_type': 'bearer',
+        if isinstance(content, dict):
+            payload = {
+                'token_type': 'Bearer',
                 'expires_in': self.config.getint('security', 'access_token_exp'),
-                'refresh_token': tokens['refresh_token'],
-                'access_token': tokens['access_token']
+                'refresh_token': content['refresh_token'],
+                'access_token': content['access_token']
             }
             resp.status = falcon.HTTP_OK
-            resp.body = libs.dumpAsJSON(content)
-
-        elif tokens[0] == 422:
+            resp.body = dumpAsJSON(payload)
+        # tuple of error
+        elif content[0] == 422:
             raise falcon.HTTPUnprocessableEntity(
                 title='Renew Access Token',
-                description=str(tokens[1]), code=422)
-        elif tokens[0] == 432:
+                description=str(content[1]), code=422)
+        elif content[0] == 432:
             raise falcon.HTTPUnprocessableEntity(
                 title='Renew Refresh Token Expired',
-                description=str(tokens[1]), code=432)
+                description=str(content[1]), code=432)
         else:
             raise falcon.HTTPBadRequest(
                 title='Renew Tokens Pair',
                 description=str(token[1]), code=400)
-

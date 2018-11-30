@@ -21,7 +21,6 @@ bisa Redis atau Memcache.
 """
 
 from init import config
-from muria import libs
 
 
 class Cache(object):

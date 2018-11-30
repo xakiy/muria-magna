@@ -19,9 +19,9 @@ import rapidjson as rjson
 import datetime
 import uuid
 from muria.resource.base import Resource
-from muria import libs
+from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Orang, Santri
-from muria.schema.entity import Orang_Schema, Santri_Schema
+from muria.db.schema import Orang_Schema, Santri_Schema
 from pony.orm import db_session
 
 
@@ -63,7 +63,7 @@ class ResOrangs(Resource):
                 resp.status = falcon.HTTP_404
                 content = {'error': 'No data found!'}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResDataOrang(Resource):
@@ -84,7 +84,7 @@ class ResDataOrang(Resource):
             resp.status = falcon.HTTP_404
             content = ('Non-existant id request of #{0}'.format(id))
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
     @db_session
     def on_post(self, req, resp, **params):
@@ -118,7 +118,7 @@ class ResDataOrang(Resource):
         else:
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResSantri(Resource):
@@ -146,7 +146,7 @@ class ResSantri(Resource):
             resp.status = falcon.HTTP_404
             content = {'error': 'empty result'}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 
@@ -182,7 +182,7 @@ class ResSantri(Resource):
         else:
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResDataSantri(Resource):
@@ -202,4 +202,4 @@ class ResDataSantri(Resource):
             resp.status = falcon.HTTP_404
             content = ('Invalid id #{0}'.format(id))
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)

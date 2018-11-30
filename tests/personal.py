@@ -7,7 +7,7 @@ from pony.orm import db_session
 # from urllib.parse import urlencode
 
 from muria.init import config
-from muria.libs import dumpAsJSON
+from muria.lib.misc import dumpAsJSON
 from tests._pickles import _unpickling
 
 

@@ -60,6 +60,31 @@ Policy_Config = {
             # Idem dengan di atas.
             'POST': ['@passthrough']
         },
+        '/accounts': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['editor'],
+            'POST': ['editor'],
+            'PATCH': ['editor'],
+            'DELETE': ['deleter'],
+        },
+        '/accounts/{id:uuid}': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['editor'],
+            'POST': ['editor'],
+            'PATCH': ['editor'],
+            'DELETE': ['deleter'],
+        },
+        '/profile': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['reader'],
+            'POST': ['reader'],
+            'PATCH': ['reader']
+        },
+        '/profile/security': {
+            'OPTIONS': ['@passthrough'],
+            'POST': ['reader'],
+            'PATCH': ['reader']
+        },
         '/persons': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader']

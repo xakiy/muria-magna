@@ -18,10 +18,10 @@ import falcon
 import rapidjson as rjson
 import datetime
 import uuid
-from muria import libs
+from muria.lib.misc import dumpAsJSON, getEtag
 from muria.resource.base import Resource
 from muria.db.model import Asrama_Rayon
-from muria.schema.entity import Asrama_Rayon_Schema
+from muria.db.schema import Asrama_Rayon_Schema
 from pony.orm import db_session
 from falcon_cors import CORS
 
@@ -54,8 +54,8 @@ class ResRayon(Resource):
             resp.status = falcon.HTTP_404
             content = {'error': 'empty result'}
 
-        resp.body = libs.dumpAsJSON(content)
-        resp.etag = libs.getEtag(resp.body)
+        resp.body = dumpAsJSON(content)
+        resp.etag = getEtag(resp.body)
 
         if req.if_none_match == resp.etag:
             resp.status = falcon.HTTP_304
@@ -87,7 +87,7 @@ class ResDataRayon(Resource):
             resp.status = falcon.HTTP_404
             content = ('Non-existant id request of #{0}'.format(id))
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResKepalaRayon(Resource):
@@ -117,4 +117,4 @@ class ResKepalaRayon(Resource):
             resp.status = falcon.HTTP_404
             content = {'error': 'empty result'}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)

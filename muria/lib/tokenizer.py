@@ -17,7 +17,7 @@
 import jwt
 import hashlib
 import binascii
-import falcon
+from os import urandom
 from datetime import datetime, timedelta
 from calendar import timegm
 
@@ -34,19 +34,26 @@ class Tokenizer(object):
         self.access_token_exp = config.getint('security', 'access_token_exp')
         self.refresh_token_exp = config.getint('security', 'refresh_token_exp')
 
-    def hashPassword(self, text):
-        """ Hash password menyerupai MySQL password() bekerja,
-        select sha1(unhex(sha1('text'))) """
-        hex_digested = hashlib.sha1(bytes(text, 'utf8')).hexdigest()
-        hashed_bin = binascii.unhexlify(hex_digested)
-        hashed = hashlib.sha1(hashed_bin).hexdigest()
-        return hashed
+    def createSaltedPassword(self, digest):
+        """Create new password based on supplied digest.
+        Args:
+            digest (hex hashed string): sha256 hashed string in hex mode.
+        Return tuple of hex version of the salt and new password.
+        """
+
+        salt_bin = urandom(20)
+        hashed_bin = hashlib.sha256(bytes(digest, 'utf8')).digest()
+        hashed_bin_key = hashlib.pbkdf2_hmac('sha256', hashed_bin, salt_bin, 1000)
+        return (salt_bin.hex(), hashed_bin_key.hex())
+
+    def getSaltedPassword(self, salt, digest):
+        salt_bin = binascii.unhexlify(salt)
+        hashed_bin = hashlib.sha256(bytes(digest, 'utf8')).digest()
+        hashed_bin_key = hashlib.pbkdf2_hmac('sha256', hashed_bin, salt_bin, 1000)
+        return hashed_bin_key.hex()
 
     def isToken(self, token):
-        if isinstance(token, str) and token.count('.') == 2:
-            return True
-        else:
-            return False
+        return isinstance(token, str) and token.count('.') == 2
 
     def createAccessToken(self, payload):
 
@@ -97,7 +104,6 @@ class Tokenizer(object):
                 self.private_key,
                 algorithm=self.algorithm
             )
-
             return tokens
         else:
             return None
@@ -122,6 +128,9 @@ class Tokenizer(object):
 
 
     def refreshAccessToken(self, access_token, refresh_token):
+        # on success this will return pair of refreshed
+        # access token and refresh token, otherwise it
+        # will return tuple of error code
 
         if self.isToken(access_token) and self.isToken(refresh_token):
             acc_token_sig = access_token.split('.')[2]

@@ -19,9 +19,9 @@ import rapidjson as rjson
 import datetime
 import uuid
 from muria.resource.base import Resource
-from muria import libs
+from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
-from muria.schema.entity import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
+from muria.db.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
 from pony.orm.core import TransactionIntegrityError, CacheIndexError
 
 
@@ -45,7 +45,7 @@ class ResLembaga(Resource):
             resp.status = falcon.HTTP_404
             content = {'error': 'No lembaga found!'}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
     @db_session()
@@ -82,7 +82,7 @@ class ResLembaga(Resource):
         else:
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResDataLembaga(Resource):
@@ -100,7 +100,7 @@ class ResDataLembaga(Resource):
             resp.status = falcon.HTTP_404
             content = {'error': 'Resouce not found, eg. #{0}'.format(lid)}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
     @db_session()
     def on_put(self, req, resp, **params):
@@ -137,7 +137,7 @@ class ResDataLembaga(Resource):
         else:
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResJabatanLembaga(Resource):
@@ -161,7 +161,7 @@ class ResJabatanLembaga(Resource):
             resp.status = falcon.HTTP_404
             content = {'error': 'No lembaga found!'}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
     @db_session
@@ -199,7 +199,7 @@ class ResJabatanLembaga(Resource):
         else:
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResJabatanLembagaDetail(Resource):
@@ -226,7 +226,7 @@ class ResJabatanLembagaDetail(Resource):
         else:
             raise falcon.HTTPError(falcon.HTTP_400,'Invalid request','Data not found!')
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)
 
 
 class ResKaryawanLembaga(Resource):

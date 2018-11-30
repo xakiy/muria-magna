@@ -9,7 +9,7 @@ from pony.orm import db_session
 # from urllib.parse import urlencode
 
 from muria.init import config
-from muria.libs import dumpAsJSON
+from muria.lib.misc import dumpAsJSON
 from tests._pickles import _pickling, _unpickling
 
 
@@ -27,29 +27,13 @@ class Auth(object):
         resp = _client.simulate_get('/auth')
         assert resp.status == falcon.HTTP_OK
         if config.getboolean('app', 'debug'):
-            assert resp.json == {'password': 'your password', 'username': 'your username'}
+            assert resp.json == {'WWW-Authenticate': 'Bearer'}
+            assert resp.headers.get('www-authenticate') == 'Bearer'
 
-    @db_session
+
     @pytest.mark.order2
     def post_login_and_get_tokens(self, _client):
         """Testing Authentication via POST."""
-        from muria.db.model import Orang, Pengguna, Kewenangan
-        from tests._data_generator import DataGenerator
-
-        data_generator = DataGenerator()
-
-        # generate random person
-        someone = data_generator.makeOrang(sex='male')
-        # populate him
-        person = Orang(**someone)
-        # generate a user based on previous person
-        creds = data_generator.makePengguna(person)
-        # populate him
-        user = Pengguna(**creds)
-        # generate a wewenang
-        wewenang = data_generator.makeKewenangan(person)
-        # grant kewenangan
-        kewenangan = Kewenangan(**wewenang)
 
         proto = 'http'  # 'https'
         # headers updated based on header requirements
@@ -59,8 +43,8 @@ class Auth(object):
             "Origin": config.get('security', 'audience')
         }
         credentials = {
-            "username": creds['username'],
-            "password": creds['password']
+            "username": self.creds['username'],
+            "password": self.digest_pass
         }
 
         resp = _client.simulate_post(
@@ -86,11 +70,10 @@ class Auth(object):
         _pickling(access_token, 'access_token')
         _pickling(refresh_token, 'refresh_token')
 
-        # user = Pengguna.get(**credentials)
-        # print(user.to_dict())
-        assert payload['name'] == user.orang.nama
-        assert payload['pid'] == user.orang.id.hex
-        assert payload['roles'] == [ x for x in user.kewenangan.wewenang.nama ]
+        # self.user is from pytest fixture within the conftest.py
+        assert payload['name'] == self.user.orang.nama
+        assert payload['pid'] == str(self.user.orang.id)
+        assert payload['roles'] == [ x for x in self.user.kewenangan.wewenang.nama ]
 
     @pytest.mark.order3
     def auth_post_refresh_token(self, _client):
@@ -171,6 +154,7 @@ class Auth(object):
 
     @pytest.mark.order4
     def auth_post_verify_token(self, _client):
+        ## Veriy token whether it is valid or not
 
         access_token = _unpickling('access_token')
 
@@ -193,3 +177,18 @@ class Auth(object):
 
         assert resp.status == falcon.HTTP_OK
         assert resp.json.get('access_token') == access_token
+
+        # tamper the token
+        broken_token = access_token.replace('.', '')
+
+        payload = {
+            "access_token": broken_token
+        }
+
+        resp = _client.simulate_post(
+            '/auth/verify',
+            body=dumpAsJSON(payload),
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_400

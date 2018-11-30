@@ -19,7 +19,7 @@ import rapidjson as rjson
 import datetime
 import uuid
 from muria.resource.base import Resource
-from muria import libs
+from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Orang, Ortu, Santri
 from pony.orm import db_session, count
 
@@ -42,8 +42,8 @@ class ResStatsOrang(Resource):
             resp.status = falcon.HTTP_404
             content = ('Stats error!')
 
-        resp.body = libs.dumpAsJSON(content)
-        resp.etag = libs.getEtag(resp.body)
+        resp.body = dumpAsJSON(content)
+        resp.etag = getEtag(resp.body)
 
         if req.if_none_match == resp.etag:
             resp.status = falcon.HTTP_304
@@ -67,8 +67,8 @@ class ResStatsWali(Resource):
             resp.status = falcon.HTTP_404
             content = ('Stats error!')
 
-        resp.body = libs.dumpAsJSON(content)
-        resp.etag = libs.getEtag(resp.body)
+        resp.body = dumpAsJSON(content)
+        resp.etag = getEtag(resp.body)
 
         if req.if_none_match == resp.etag:
             resp.status = falcon.HTTP_304
@@ -92,8 +92,8 @@ class ResStatsSantri(Resource):
             resp.status = falcon.HTTP_404
             content = ('Stats error!')
 
-        resp.body = libs.dumpAsJSON(content)
-        resp.etag = libs.getEtag(resp.body)
+        resp.body = dumpAsJSON(content)
+        resp.etag = getEtag(resp.body)
 
         if req.if_none_match == resp.etag:
             resp.status = falcon.HTTP_304
@@ -121,5 +121,5 @@ class ResStatsSantriByJinshi(Resource):
             resp.status = falcon.HTTP_404
             content = ('Invalid Resource Request: #{0}'.format(jinshi))
 
-        resp.body = libs.dumpAsJSON(content)
-        resp.etag = libs.getEtag(resp.body)
+        resp.body = dumpAsJSON(content)
+        resp.etag = getEtag(resp.body)

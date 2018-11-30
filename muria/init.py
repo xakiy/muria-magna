@@ -37,6 +37,8 @@ config = Parser(setup='MURIA_SETUP')
 
 DEBUG = config.getboolean('app', 'debug')
 
+logger = Logger(config).getLogger()
+
 connection = DBManager(config)  # database connection
 
 from muria.conf import premise
@@ -44,31 +46,29 @@ from muria.conf import premise
 premise.setPremise()
 
 if DEBUG:
-    print('---------------------------------')
-    print('# WARNING: DEBUG MODE IS ACTIVE #')
-    print('---------------------------------')
+    logger.debug('---------------------------------')
+    logger.debug('# WARNING: DEBUG MODE IS ACTIVE #')
+    logger.debug('---------------------------------')
 
 tokenizer = Tokenizer(config)
-logger = Logger(config)
 
 middleware_list = []
 
 if config.getboolean('security', 'secure'):
 
     cors = CORS(
-        log_level=10,
-        allow_all_origins=False,  # false means disallow any random host to connect
+        log_level=config.getint('cors', 'log_level'),
+        allow_all_origins=config.getboolean('cors', 'allow_all_origins'),  # false means disallow any random host to connect
         allow_origins_list=config.getlist('cors', 'allow_origins_list'),
-        allow_all_methods=False,  # allow all methods incl. custom ones are allowed via CORS requests
-        allow_methods_list=['GET', 'POST', 'TRACE', 'PUT', 'PATCH', 'HEAD', 'CONNECT', 'DELETE', 'OPTIONS'],
+        allow_all_methods=config.getboolean('cors', 'allow_all_methods'),  # allow all methods incl. custom ones are allowed via CORS requests
+        allow_methods_list=config.getlist('cors', 'allow_methods_list'),
         # exposed value sent as response to the Access-Control-Expose-Headers request
-        # expose_headers_list=['authorization'],
-        allow_all_headers=False,  # for preflight response
-        allow_headers_list=['authorization', 'crsf-token', 'etag', 'content-length', 'content-type', 'cache-control'],
-        allow_credentials_all_origins=False,
-        allow_credentials_origins_list=[],
-        # max_age=None
-        # TODO: move these values to config file
+        expose_headers_list=config.getlist('cors', 'expose_headers_list'),
+        allow_all_headers=config.getboolean('cors', 'allow_all_headers'),  # for preflight response
+        allow_headers_list=config.getlist('cors', 'allow_headers_list'),
+        allow_credentials_all_origins=config.getboolean('cors', 'allow_credentials_all_origins'),
+        allow_credentials_origins_list=config.getlist('cors', 'allow_credentials_origins_list'),
+        max_age=config.getint('cors', 'max_age')
     )
 
     jwt_checker = GiriJwtChecker(
@@ -95,4 +95,5 @@ if config.getboolean('security', 'secure'):
     middleware_list.append(RBAC(Policy_Config, check_jwt=True))
 
 middleware_list.append(MultipartMiddleware())
-print('Initto...!')
+
+logger.debug('Initto...!')

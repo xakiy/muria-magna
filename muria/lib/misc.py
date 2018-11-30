@@ -15,7 +15,6 @@
 
 import datetime
 import collections
-import hashlib
 
 from muria.init import config, DEBUG
 
@@ -90,20 +89,34 @@ def dumpAsJSON(data_in):
 
     NOTE: All date type is dumped in ISO8601 format
     """
-
-    if DEBUG:
-        # pretty output, debug only
-        data_out = json.dumps(data_in, default=datetimeToISO, uuid_mode=json.UM_HEX, indent=4)
-        # data_out = ujson.dumps(content)
-        # data_out = json.dumps(content, cls=DatetimeEncoder, sort_keys=True, indent=4 * ' ')
-        # data_out = json.dumps(content, ensure_ascii=False)
+    if json.__name__ == 'rapidjson':
+        # UM_NONE = 0,
+        # UM_CANONICAL = 1<<0, // 4-dashed 32 hex chars: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        # UM_HEX = 1<<1 // canonical OR 32 hex chars in a row
+        if DEBUG:
+            # pretty output, debug only
+            data_out = json.dumps(data_in, default=datetimeToISO, uuid_mode=json.UM_CANONICAL, indent=4)
+        else:
+            # pure JSON
+            data_out = json.dumps(data_in, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_CANONICAL) # speed 1.8xx
+    elif json.__name__ == 'ujson':
+            data_out = ujson.dumps(content)
     else:
-        # pure JSON
-        data_out = json.dumps(data_in, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_HEX) # speed 1.8xx
-        # data_out = rjson.dumps(content, default=datetimeToISO) # speed 1.6xx
-        # data_out = ujson.dumps(content)
-        # data_out = json.dumps(content, cls=DatetimeEncoder) # speed 1.8xx
-        # data_out = sjson.dumps(sjson.loads(content), use_decimal=False)
-        # data_out = json.dumps(content) #not work for datetime.date field
+        if DEBUG:
+            # pretty output, debug only
+            # data_out = ujson.dumps(content)
+            data_out = json.dumps(content, cls=DatetimeEncoder, sort_keys=True, indent=4 * ' ')
+            # data_out = json.dumps(content, ensure_ascii=False)
+        else:
+            # pure JSON
+            # data_out = rjson.dumps(content, default=datetimeToISO) # speed 1.6xx
+            # data_out = ujson.dumps(content)
+            data_out = json.dumps(content, cls=DatetimeEncoder) # speed 1.8xx
+            # data_out = sjson.dumps(sjson.loads(content), use_decimal=False)
+            # data_out = json.dumps(content) #not work for datetime.date field
 
     return data_out
+
+
+def isJinshi(x):
+    return ('l', 'p').count(x)

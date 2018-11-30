@@ -16,19 +16,18 @@
 from marshmallow import (
     Schema,
     fields,
+    pre_dump,
     post_load,
     validates_schema,
-    ValidationError)
-from marshmallow.validate import (Length, OneOf)
+    ValidationError,
+    validates)
+from marshmallow.validate import (Length, Regexp)
 from muria.db.model import *
-from muria.libs import json
+from muria.lib.misc import json, isJinshi
 from htmllaundry import strip_markup
 from uuid import UUID
+import re
 import datetime
-
-
-def isJinshi(x):
-    return ('l', 'p').count(x)
 
 
 class Skema(Schema):
@@ -36,45 +35,60 @@ class Skema(Schema):
         json_module = json
 
 
+class UID(fields.UUID):
+    """A UUID field."""
+
+    def _serialize(self, value, attr, obj):
+        validated = str(self._validated(value)) if value is not None else None
+        return str(validated)
+
+
+class Tanggal(fields.Date):
+    """Bare ISO8601-formatted date string without time. """
+
+    def _serialize(self, value, attr, obj):
+        if value is None:
+            return None
+        try:
+            return value.isoformat()[:10]
+        except AttributeError:
+            self.fail('format', input=value)
+        return value
+
+
 class Orang_Schema(Skema):
-    id = fields.UUID(required=True)
-    nik = fields.String(required=True)
+    id = UID(required=True, default=uuid.uuid4)
+    nik = fields.String(required=True, validate=Length(min=16, max=16, error='NIK harus 16 digit'))
     nama = fields.String(required=True)
     jinshi = fields.String(required=True, validate=isJinshi)
     tempat_lahir = fields.String(required=True)
-    tanggal_lahir = fields.Date(required=True)
+    tanggal_lahir = Tanggal(required=True)
     telepon = fields.Nested("Telepon_Schema", only=('id', 'jenis'), many=True)
     pendidikan_akhir = fields.Nested(
         "Pendidikan_Akhir_Schema",
-        only=('nama', 'singkatan'))
+        only=('nama', 'singkatan'), allow_none=True)
     alamat = fields.Nested(
         "Alamat_Schema",
         only=('jenis', 'alamat', 'default'), many=True)
     pekerjaan = fields.Nested("Pekerjaan_Schema", only=('nama'))
-    # tanggal_masuk = fields.Date(default="datetime.now")
-
-    def getIsoFormat(self, field):
-        if isinstance(field, datetime.date):
-            return field.isoformat()[:10]
-        else:
-            return field
-
-    def getStrUUID(self, field):
-        if isinstance(field, UUID):
-            return field.hex
-        else:
-            return field
-
-    @post_load
-    def nativesToStr(self, in_data):
-        in_data['id'] = self.getStrUUID(in_data['id'])
-        in_data['tanggal_lahir'] = self.getIsoFormat(in_data['tanggal_lahir'])
-        # in_data['tanggal_masuk'] = self.getIsoFormat(in_data['tanggal_masuk'])
-        return in_data
+    tanggal_masuk = Tanggal(dump_only=True)
 
 
 class Santri_Schema(Orang_Schema):
-    nis = fields.String(required=True)
+    # 2004-12-51-16-41-9999
+    # aaaa bb cc dd ee ffff
+    # aaaa = tahun kelahiran
+    # bb   = bulan kelahiran
+    # cc   = tanggal kelahiran tambah 50 bila perempuan
+    # dd   = tahun masuk pesantren
+    # ee   = e[pertama: nomor jenjang pendidikan]
+    #        e[kedua: tahun angkatan]
+    #        4 = TMI, 1 = kelas 1
+    #        4 = TMI, 2 = intensif
+    #        4 = TMI, 4 = intensif kelas 4
+    #        5 = Strata 1, 2 = tahun ke 2
+    # ffff = nomor urut pendaftaran
+    nis = fields.String(required=True, validate=Length(min=16, max=16, error='NIS tidak tepat'))
     anak_ke = fields.Integer(allow_none=True)
     jumlah_saudara = fields.Integer(allow_none=True)
     tinggal_bersama = fields.String(allow_none=True)
@@ -93,7 +107,7 @@ class Ortu_Schema(Orang_Schema):
 
 
 class Alumni_Schema(Santri_Schema):
-    tanggal_lulus = fields.Date(allow_none=True)
+    tanggal_lulus = Tanggal(allow_none=True)
     ijazah_akhir = fields.Nested("Pendidikan_Akhir_Schema", only='jenjang')
 
 
@@ -198,8 +212,8 @@ class Penghuni_Kamar_Schema(Skema):
     aktif = Required(bool, default=True)
     santri = fields.Nested('Santri_Schema')
     asrama_kamar = fields.Nested('Asrama_Kamar_Schema')
-    tanggal_masuk = fields.Date()
-    tanggal_keluar = fields.Date()
+    tanggal_masuk = Tanggal()
+    tanggal_keluar = Tanggal()
 
 
 class Pendidikan_Akhir_Schema(Skema):
@@ -233,22 +247,11 @@ class Jinshi_Schema(Skema):
 
 
 class Pengguna_Schema(Skema):
-    orang = fields.Nested('Orang_Schema')
-    username = fields.String(
-        required=True,
-        validate=lambda x: x.strip() is not '')
-    email = fields.String(missing=None, allow_none=True)
-    password = fields.String(
-        required=True,
-        validate=lambda x: x.strip() is not '')
+    orang = fields.Nested('Orang_Schema', dump_to='profile', only=('id', 'nama', 'jinshi', 'tempat_lahir', 'tanggal_lahir', 'tanggal_masuk'))
+    username = fields.String(required=True, validate=Regexp(r'^[a-z]+(?:[_.]?[a-zA-Z0-9]){7,28}$', re.U & re.I))
+    email = fields.Email(missing=None, allow_none=True)
+    password = fields.String(required=True, validate=Length(min=64, max=64), load_only=True)
     suspended = fields.Boolean(required=True, missing=False)
-    koneksi = fields.Nested('Online_Schema')
-
-    @post_load()
-    def make_object(self, data):
-        return Pengguna.get(
-            username=strip_markup(data['username']),
-            password=data['password'])
 
 
 class Grup_Schema(Skema):

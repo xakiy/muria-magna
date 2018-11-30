@@ -22,7 +22,7 @@ import io
 import os
 import mimetypes
 from muria.config import conf
-from muria import libs
+from muria.lib.misc import dumpAsJSON
 from muria.filestore import FileStore
 from falcon_cors import CORS
 from streaming_form_data import StreamingFormDataParser
@@ -79,4 +79,4 @@ class DownStream(object):
             resp.location = None
             content = {'error': "upload failed"}
 
-        resp.body = libs.dumpAsJSON(content)
+        resp.body = dumpAsJSON(content)

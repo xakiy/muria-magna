@@ -3,12 +3,16 @@
 
 import random
 import datetime
+import os
 import re
 import uuid
 import string
+import hashlib
+import binascii
 
+from muria.init import tokenizer
 from muria.db.model import Jinshi
-from muria.libs import dumpAsJSON
+from muria.lib.misc import dumpAsJSON
 
 class DataGenerator(object):
 
@@ -72,7 +76,7 @@ class DataGenerator(object):
     def makeOrang(self, sex='male', jsonify=False):
 
         person = {
-            "id": uuid.uuid4().hex,
+            "id": str(uuid.uuid4()),
             "nik": str(self.randomNIK()),
             "nama": self.randomName(sex),
             "jinshi": self.jinshi(sex),
@@ -106,7 +110,7 @@ class DataGenerator(object):
         """
 
         santri = {
-            "id": uuid.uuid4().hex,
+            "id": str(uuid.uuid4()),
             "nik": str(self.randomNIK()),
             "nama": self.randomName(sex),
             "jenis_kelamin": self.jinshi(sex),
@@ -146,31 +150,39 @@ class DataGenerator(object):
 
 
     def makePengguna(self, orang, jsonify=False):
+        digest_pass = hashlib.sha256(bytes(self.randomChar(10), 'utf8')).hexdigest()
+        salt, hashed = tokenizer.createSaltedPassword(digest_pass)
 
         pengguna = {
-            "orang": orang.id.hex,
+            "orang": str(orang.id),
             "username": orang.nama.replace(' ', '.').lower(),
             "email": orang.nama.replace(' ', '.').lower() + '@' + self.randomDomain(),
-            "password": self.randomChar(size=10),
+            "password": hashed,
+            "salt": salt,
             "suspended": 0
         }
 
         if jsonify:
             pengguna = dumpAsJSON(pengguna)
 
-        return pengguna
+        return (pengguna, digest_pass)
 
 
-    def makeKewenangan(self, orang, wewenang=4, jsonify=False):
+    def makeKewenangan(self, pengguna, wewenang=4, jsonify=False):
         """
         Dalam RBAC Policy, beberapa kewenangan diberi hak
         untuk melakukan POST/PUT/DELETE resource terntentu.
         Sedangkan kewenangan lain tidak bisa melakukannya.
         """
         kewenangan = {
-            "pengguna": orang.id.hex,
+            "pengguna": str(pengguna.orang.id),
             "wewenang": wewenang if ( 0 < wewenang < 5 ) else ( 5 if orang.jinshi.id == 'l' else 6 )
-            # 4 == kontributor, 5 == santriwan, 6 == santriwati
+            # 1 = root
+            # 2 = admin
+            # 3 = editor
+            # 4 = kontributor
+            # 5 = santriwan
+            # 6 = santriwati
         }
 
         if jsonify:

@@ -15,7 +15,7 @@
 """muria base resource class."""
 
 from muria.init import config, CORS, connection
-from muria.libs import dumpAsJSON, getEtag
+from muria.lib.misc import dumpAsJSON, getEtag
 from falcon import HTTP_OK
 
 
