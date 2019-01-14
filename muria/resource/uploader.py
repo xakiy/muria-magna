@@ -15,57 +15,26 @@
 """muria downstreamer class."""
 
 import falcon
-import rapidjson as rjson
-import uuid
-import re
-import io
-import os
-import mimetypes
-from muria.config import conf
+from muria.init import config
 from muria.lib.misc import dumpAsJSON
-from muria.filestore import FileStore
-from falcon_cors import CORS
-from streaming_form_data import StreamingFormDataParser
-from streaming_form_data.targets import ValueTarget, FileTarget, NullTarget
+from muria.lib.filestore import FileStore
 
 
-class DownStream(object):
+class Upload(object):
 
-    cors = CORS(allow_all_origins=config.get('cors', 'allow_all_origins'))
     _fileStore = FileStore()
 
-    def xon_post(self, req, resp, **params):
-        import shutil
-        # Retrieve input_file
-        input_file = req.get_param('foto')
-
-        # Retrieve filename
-        filename = input_file.filename
-
-        # Define file_path
-        file_path = os.path.join('/home/zakiy/appForge/muria/pub', filename)
-
-        # Write to a temporary file to prevent incomplete files from
-        # being used.
-        temp_file_path = file_path + '~'
-
-        # Finally write the data to a temporary file
-        with open(temp_file_path, 'wb') as output_file:
-            shutil.copyfileobj(input_file.file, output_file)
-
-        # Now that we know the file has been fully saved to disk
-        # move it into place.
-        os.rename(temp_file_path, file_path)
-
-        resp.status = falcon.HTTP_201
-
     def on_post(self, req, resp, **params):
-        print(req.headers, req.params)
+        print(req.headers, req.get_param('foto'))
+        # To prevent multiple repost, we need to use unique
+        # id checking, like generated uuid that will be
+        # compared to previous post
+        # uid = req.get_param('foto_id')
         foto = req.get_param('foto')
 
         if foto is not None:
-            name = self._fileStore.save(foto)
-
+            # name = self._fileStore.save(uid, foto, config.get('path', 'image_pub_dir'))
+            name = self._fileStore.save(foto, config.get('path', 'image_pub_dir'))
             if name is not None:
                 resp.status = falcon.HTTP_201
                 resp.location = name

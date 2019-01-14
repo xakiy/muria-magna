@@ -247,11 +247,17 @@ class Jinshi_Schema(Skema):
 
 
 class Pengguna_Schema(Skema):
-    orang = fields.Nested('Orang_Schema', dump_to='profile', only=('id', 'nama', 'jinshi', 'tempat_lahir', 'tanggal_lahir', 'tanggal_masuk'))
+    orang = fields.Nested('Orang_Schema', only=('id', 'nama', 'jinshi', 'tempat_lahir', 'tanggal_lahir', 'tanggal_masuk'), dump_to='profile')
     username = fields.String(required=True, validate=Regexp(r'^[a-z]+(?:[_.]?[a-zA-Z0-9]){7,28}$', re.U & re.I))
     email = fields.Email(missing=None, allow_none=True)
-    password = fields.String(required=True, validate=Length(min=64, max=64), load_only=True)
+    kewenangan = fields.Nested('Kewenangan_Schema', only=('wewenang'), dump_to='wewenang')
+    password = fields.String(validate=Length(min=64, max=64), load_only=True)
     suspended = fields.Boolean(required=True, missing=False)
+
+
+class Login_Schema(Skema):
+    username = fields.String(required=True, validate=Regexp(r'^[a-z]+(?:[_.]?[a-zA-Z0-9]){7,28}$', re.U & re.I))
+    password = fields.String(required=True, validate=Length(min=64, max=64))
 
 
 class Grup_Schema(Skema):
@@ -333,4 +339,4 @@ class Offline_Schema(Skema):
 
 class Kewenangan_Schema(Skema):
     pengguna = fields.Nested('Pengguna_Schema')
-    wewenang = fields.Nested('Wewenang_Schema')
+    wewenang = fields.Nested('Wewenang_Schema', only=('id', 'nama'), many=True)

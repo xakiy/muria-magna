@@ -17,7 +17,7 @@
 import falcon
 from muria.init import DEBUG, tokenizer
 from muria.resource.base import Resource
-from muria.db.schema import Pengguna_Schema
+from muria.db.schema import Login_Schema, Pengguna_Schema
 from muria.db.model import Pengguna
 from muria.lib.misc import dumpAsJSON
 
@@ -42,12 +42,11 @@ class Authentication(Resource):
 
     @db_session
     def on_post(self, req, resp):
-
-        data, error = Pengguna_Schema(only=('username', 'password')).load(req.media)
-        if error:
+        data, errors = Login_Schema().load(req.media)
+        if errors:
             # entity is received but unable to process, may due to:
             # blank entity, or invalid one.
-            raise falcon.HTTPUnprocessableEntity(description=str(error), code=422)
+            raise falcon.HTTPUnprocessableEntity(description=str(errors), code=422)
 
         if not Pengguna.exists(username=data['username']):
             raise falcon.HTTPUnauthorized(code=401)

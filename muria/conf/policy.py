@@ -85,6 +85,11 @@ Policy_Config = {
             'POST': ['reader'],
             'PATCH': ['reader']
         },
+        '/profile/picture': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['reader'],
+            'PUT': ['reader']
+        },
         '/persons': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader']
@@ -182,6 +187,15 @@ Policy_Config = {
         },
         '/upload': {
             'OPTIONS': ['@passthrough'],
+            'POST': ['@passthrough']
+        },
+        '/images': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['@passthrough']
+        },
+        '/images/{name}': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['@passthrough'],
             'POST': ['@passthrough']
         }
     },

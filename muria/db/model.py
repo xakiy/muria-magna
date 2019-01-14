@@ -208,11 +208,13 @@ class Pengguna(db.Entity):
     orang = PrimaryKey(Orang)
     username = Required(str, 40, unique=True)
     email = Required(str, 60, unique=True)
+    picture = Optional(str, 500, nullable=True)
     password = Required(str)
     salt = Required(str)
     suspended = Required(bool, default=False)
     kewenangan = Set('Kewenangan')
     koneksi = Set('Online')
+    # alter table pengguna add `picture` varchar(500) NULL after email;
     # alter table pengguna add `salt` varchar(255) NOT NULL after password;
 
     def checkPassword(self, password_digest):

@@ -20,7 +20,8 @@ from muria.resource import personal
 # from muria.resource import lembaga
 from muria.resource import asrama
 from muria.resource import stats
-# from muria.resource import downstreamer
+from muria.resource import uploader
+from muria.resource import image
 # from muria.resource import devel
 
 static_route = []
@@ -39,6 +40,7 @@ resource_route.append(('/auth/refresh', auth.Refresh()))
 
 resource_route.append(('/profile', profile.Profile()))
 resource_route.append(('/profile/security', profile.Security()))
+resource_route.append(('/profile/picture', profile.Picture()))
 
 resource_route.append(('/accounts', account.Accounts()))
 # resource_route.append(('/accounts/{id:uuid}', res_account))
@@ -85,6 +87,7 @@ resource_route.append(('/stats/santri/{jinshi}', stats.ResStatsSantriByJinshi())
 # resource_route.append(('/stats/pengurus/wilayah'))
 # resource_route.append(('/stats/pengurus/wilayah/putra'))
 # resource_route.append(('/stats/pengurus/wilayah/'))
-
-resource_route.append(('/upload', downstreamer.DownStream()))
 '''
+resource_route.append(('/upload', uploader.Upload()))
+resource_route.append(('/images/', image.Collection()))
+resource_route.append(('/images/{name}', image.Item()))

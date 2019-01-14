@@ -23,7 +23,9 @@ idna==2.6
 jwcrypto==0.4.2
 lxml==4.2.4
 marshmallow==2.14.0
+msgpack==0.6.0
 parsec==3.3
+Pillow==5.3.0
 pluggy==0.6.0
 pony==0.7.6
 py==1.6.0
@@ -34,6 +36,7 @@ pymemcache==1.4.4
 pytest==3.2.5
 pytest-relaxed==1.1.4
 python-jose==2.0.2
+python-magic==0.4.15
 python-mimeparse==1.6.0
 python-rapidjson==0.2.5
 simplejson==3.13.2

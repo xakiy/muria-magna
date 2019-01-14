@@ -51,6 +51,75 @@ class Profile(object):
 
     @db_session
     @pytest.mark.order2
+    def put_profile_picture(self, _client, cache):
+        from PIL import Image
+        from io import BytesIO, BufferedReader
+        from tests._lib import create_multipart
+
+        resource_path = '/profile/picture'
+
+        access_token = _unpickling('access_token')
+        creds = _unpickling('creds')
+        someone = _unpickling('someone')
+
+        img = Image.new('RGB', (400, 300), color='green')
+        # bytes_stream = BufferedReader()
+        bytes_stream = BytesIO()
+        img.save(bytes_stream, 'PNG')
+        bytes_stream.seek(0)
+
+        # Create the multipart data
+        data, headers = create_multipart(
+            bytes_stream.read(),
+            fieldname='foto',
+            filename='foo.png',
+            content_type='image/png')
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers.update({
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience'),
+            "Authorization": 'Bearer ' + access_token
+        })
+
+        resp = _client.simulate_put(
+            resource_path,
+            body=data,
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_CREATED
+        # assert resp.headers.get('location') == 'foo'
+        # assert resp.json.get('success') == 'foo'
+
+    @db_session
+    @pytest.mark.order3
+    def get_profile_picture(self, _client, cache):
+        resource_path = '/profile/picture'
+
+        access_token = _unpickling('access_token')
+        creds = _unpickling('creds')
+        someone = _unpickling('someone')
+
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience'),
+            "Authorization": 'Bearer ' + access_token
+        }
+
+        resp = _client.simulate_get(
+            resource_path,
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_OK
+
+    @db_session
+    @pytest.mark.order4
     def edit_profile(self, _client, cache):
         cached_content = cache.get('muria/account_content', None)
 
@@ -105,9 +174,8 @@ class Profile(object):
             assert response['email'] != old_cached['email']
             assert response['username'] != old_cached['username']
 
-
     @db_session
-    @pytest.mark.order3
+    @pytest.mark.order5
     def change_account_password(self, _client):
 
         resource_path = '/profile/security'
