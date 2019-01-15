@@ -19,32 +19,46 @@ from pony.orm import Database, sql_debug
 class DBManager(object):
     def __init__(self, config):
         self.config = config
-        engine = self.config.get('database', 'engine')
+        self.params = dict()
+        self.params.update({'provider': self.config.get('database', 'engine')})
         # tanpa try-except untuk menampakkan error saat pertama kali dijalankan
-        if engine in ('mysql', 'postgres'):
-            self.link = Database(
-                engine,
-                host=self.config.get('database', 'host'),
-                port=self.config.getint('database', 'port'),
-                user=self.config.get('database', 'user'),
-                passwd=self.config.get('database', 'password'),
-                db=self.config.get('database', 'db'))
-        elif engine == 'sqlite':
-            filename = self.config.get('database', 'filename')
-            create_db = self.config.getboolean('database', 'create_db')
-            if filename == ':memory:':
-                self.link = Database(engine, filename=filename)
+        # MySQL and PostgreSQL
+        if self.params['provider'] in ('mysql', 'postgres'):
+            self.params.update({
+                'host': self.config.get('database', 'host'),
+                'user': self.config.get('database', 'user'),
+                'passwd': self.config.get('database', 'password'),
+                'db': self.config.get('database', 'db')
+            })
+            if self.config.get('database', 'socket'):
+                self.params.update({
+                    'unix_socket':
+                    self.config.get('database', 'socket')
+                })
             else:
-                self.link = Database(
-                    engine,
-                    filename=filename,
-                    create_db=create_db)
-        elif engine == 'oracle':
-            self.link = Database(
-                engine,
-                user=self.config.get('database', 'user'),
-                passwd=self.config.get('database', 'password'),
-                dsn=self.config.get('database', 'dsn'))
+                self.params.update({
+                    'port':
+                    self.config.getint('database', 'port')
+                })
+        # SQLite
+        elif self.params['provider'] == 'sqlite':
+            self.params.update({
+                'filename': self.config.get('database', 'filename')
+            })
+            if self.params['filename'] != ':memory:':
+                self.params.update({
+                    'create_db':
+                    self.config.getboolean('database', 'create_db')
+                })
+        # Oracle
+        elif self.params['provider'] == 'oracle':
+            self.params.update({
+                'user': self.config.get('database', 'user'),
+                'passwd': self.config.get('database', 'password'),
+                'dsn': self.config.get('database', 'dsn')
+            })
+
+        self.link = Database(**self.params)
 
     def getLink(self):
         return self.link
