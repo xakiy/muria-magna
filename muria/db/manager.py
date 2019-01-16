@@ -21,7 +21,6 @@ class DBManager(object):
         self.config = config
         self.params = dict()
         self.params.update({'provider': self.config.get('database', 'engine')})
-        # tanpa try-except untuk menampakkan error saat pertama kali dijalankan
         # MySQL and PostgreSQL
         if self.params['provider'] in ('mysql', 'postgres'):
             self.params.update({
@@ -30,6 +29,7 @@ class DBManager(object):
                 'passwd': self.config.get('database', 'password'),
                 'db': self.config.get('database', 'db')
             })
+            # use socket if available prior to TCP connection
             if self.config.get('database', 'socket'):
                 self.params.update({
                     'unix_socket':
@@ -48,6 +48,7 @@ class DBManager(object):
             if self.params['filename'] != ':memory:':
                 self.params.update({
                     'create_db':
+
                     self.config.getboolean('database', 'create_db')
                 })
         # Oracle
