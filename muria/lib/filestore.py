@@ -22,6 +22,7 @@ import re
 import io
 import mimetypes
 import magic
+import pathlib
 from muria.init import config, logger
 
 
@@ -33,9 +34,17 @@ class FileStore(object):
     only save one file per field name.
     """
 
-    # def save(self, file_id, input_handler, dest_dir):
+    def __init__(self):
+        self.temp_dir = config.get('path', 'temp_dir')
+        self.ensure_dir(self.temp_dir)
+
+    # make sure destination dir is exist
+    def ensure_dir(self, dir):
+        pathlib.Path(dir).mkdir(parents=True, exist_ok=True)
+
     def save(self, input_handler, dest_dir):
 
+        self.ensure_dir(dest_dir)
         # We should sanitize dest_dir as if someone will
         # use in arbitrary way
         logger.info('Saving uploaded file...')
@@ -57,12 +66,12 @@ class FileStore(object):
 
         # To prevent incomplete files from being used we write it
         # first as temporary one.
-        tempfile_path = os.path.join(dest_dir, random_name) + '~'
-        logger.info('Temporary File Path: {0}'.format(tempfile_path))
+        temp_file_path = os.path.join(self.temp_dir, random_name) + '~'
+        logger.info('Temporary File Path: {0}'.format(temp_file_path))
 
         try:
             # Then write the stream data to that temporary file
-            output_file = open(tempfile_path, 'x+b')
+            output_file = open(temp_file_path, 'x+b')
 
             shutil.copyfileobj(raw, output_file)
 
@@ -74,20 +83,17 @@ class FileStore(object):
 
             ext = source_ext if source_ext in extensions else extensions[0]
             new_filename = random_name + ext
-            realfile_path = os.path.join(dest_dir, new_filename)
-
+            new_file_path = os.path.join(dest_dir, new_filename)
             # Now that we know the file has been fully saved to disk
-            # and we can rename it.
-            os.rename(tempfile_path, realfile_path)
-            # If temp_dir and dest_dir is different filesystem
-            # consider to use shutil
+            # and we can rename/move it.
+            shutil.move(temp_file_path, new_file_path)
 
         except FileNotFoundError as nof:
             logger.debug('Error: {0} of "{1}"'.format(nof.strerror, new_filename))
-            new_filename = None
+            new_file_path = None
 
-        logger.info('Real File Path: {0}'.format(realfile_path))
-        return new_filename
+        logger.info('New File Path: {0}'.format(new_file_path))
+        return new_file_path
 
 
 class ImageStore(object):

@@ -71,8 +71,8 @@ class Profile(object):
         # Create the multipart data
         data, headers = create_multipart(
             bytes_stream.read(),
-            fieldname='foto',
-            filename='foo.png',
+            fieldname='profile_image',
+            filename='pict_test.png',
             content_type='image/png')
 
         proto = 'http'  # 'https'
@@ -105,7 +105,6 @@ class Profile(object):
         proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
-            "Content-Type": "application/json",
             "Host": config.get('security', 'issuer'),
             "Origin": config.get('security', 'audience'),
             "Authorization": 'Bearer ' + access_token

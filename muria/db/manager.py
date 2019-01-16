@@ -15,13 +15,13 @@
 """ DBManager class """
 
 from pony.orm import Database, sql_debug
+from pony.orm.dbapiprovider import OperationalError
 
 class DBManager(object):
     def __init__(self, config):
         self.config = config
         self.params = dict()
         self.params.update({'provider': self.config.get('database', 'engine')})
-        # tanpa try-except untuk menampakkan error saat pertama kali dijalankan
         # MySQL and PostgreSQL
         if self.params['provider'] in ('mysql', 'postgres'):
             self.params.update({
@@ -30,15 +30,16 @@ class DBManager(object):
                 'passwd': self.config.get('database', 'password'),
                 'db': self.config.get('database', 'db')
             })
+            # use socket if available prior to TCP connection
             if self.config.get('database', 'socket'):
                 self.params.update({
                     'unix_socket':
                     self.config.get('database', 'socket')
                 })
-            else:
+            port = self.config.get('database', 'port')
+            if port is not None and port.isnumeric():
                 self.params.update({
-                    'port':
-                    self.config.getint('database', 'port')
+                    'port': int(port)
                 })
         # SQLite
         elif self.params['provider'] == 'sqlite':
@@ -58,7 +59,23 @@ class DBManager(object):
                 'dsn': self.config.get('database', 'dsn')
             })
 
-        self.link = Database(**self.params)
+        self._connect()
+
+    def _connect(self):
+        options = self.params
+        if options['provider'] in ('mysql', 'postgres'):
+            if options.get('unix_socket') is not None:
+                # try to connect using socket
+                try:
+                    if options.get('port'):
+                        options.pop('port')
+                    self.link = Database(**options)
+                # else using TCP port
+                except OperationalError as oe:
+                    self.params.pop('unix_socket')
+                    self.link = Database(**self.params)
+        else:
+            self.link = Database(**self.params)
 
     def getLink(self):
         return self.link

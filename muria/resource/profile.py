@@ -60,7 +60,6 @@ class Profile(Resource):
                 raise falcon.HTTPUnauthorized(code=401)
             ps = Pengguna_Schema()
             update, error = ps.load(req.media)
-            print(req.media, update, error)
             if error:
                 raise falcon.HTTPUnprocessableEntity(
                     title='Profile Update Error',
@@ -85,7 +84,7 @@ class Profile(Resource):
 
 class Picture(Resource):
 
-    profile_pict_dir = config.get('path', 'profile_pict_dir')
+    pict_dir = config.get('path', 'profile_pict_dir')
     file_store = FileStore()
 
     @db_session
@@ -93,13 +92,16 @@ class Picture(Resource):
         if params.get('jwt_claims') and params['jwt_claims'].get('pid'):
             try:
                 pid = params['jwt_claims']['pid']
-                profile = Pengguna[pid]
+                user_profile = Pengguna[pid]
             except ObjectNotFound:
                 raise falcon.HTTPUnauthorized(code=401)
 
-            if isinstance(profile, Pengguna) and profile.picture:
+            if user_profile.picture:
                 resp.status = falcon.HTTP_OK
-                resp.stream, resp.stream_len, resp.content_type = self._open(profile.picture)
+
+                resp.stream,
+                resp.stream_len,
+                resp.content_type = self._open_file(user_profile.picture)
 
         else:
             raise falcon.HTTPUnprocessableEntity(
@@ -110,41 +112,55 @@ class Picture(Resource):
     @db_session
     def on_put(self, req, resp, **params):
 
-        # To prevent multiple repost, we need to use unique
-        # id checking, like generated uuid that will be
-        # compared to previous post
-        # uid = req.get_param('foto_id')
-        foto = req.get_param('foto')
-        print(foto, req.headers, req.uri)
-        if foto is not None:
-            # name = self._fileStore.save(uid, foto, config.get('path', 'image_pub_dir'))
-            name = self.file_store.save(foto, self.profile_pict_dir)
-            if name is not None:
-                resp.status = falcon.HTTP_201
-                resp.location = req.uri
-                content = {'success': "file uploaded as {name}".format(name=name)}
+        if params.get('jwt_claims') and params['jwt_claims'].get('pid'):
+            try:
+                pid = params['jwt_claims']['pid']
+                user_profile = Pengguna[pid]
+            except ObjectNotFound:
+                raise falcon.HTTPUnauthorized(code=401)
+
+            # TODO:
+            # To prevent multiple repost, we need to use unique
+            # id checking, like generated uuid that will be
+            # compared to previous post
+            # uid = req.get_param('profile_image_id')
+            profile_image = req.get_param('profile_image')
+
+            if profile_image is not None:
+                name = self.file_store.save(profile_image, self.pict_dir)
+                if name is not None:
+                    resp.status = falcon.HTTP_201
+                    resp.location = req.uri
+                    user_profile.picture = name
+                    content = {'success': "file uploaded as {0}".format(name)}
+                else:
+                    resp.status = falcon.HTTP_404
+                    resp.location = None
+                    content = {'error': "file failed to upload"}
             else:
                 resp.status = falcon.HTTP_404
                 resp.location = None
-                content = {'error': "file failed to upload"}
-        else:
-            resp.status = falcon.HTTP_404
-            resp.location = None
-            content = {'error': "upload failed"}
+                content = {'error': "upload failed"}
 
-        resp.body = dumpAsJSON(content)
-
-    def _open(self, picture):
-        try:
-            path = os.path.join(config.get('path', 'profile_pict_dir'), picture)
-            stream_data = open(path, 'rb')
-            stream_len = os.path.getsize(path)
-            stream_type = mimetypes.guess_type(path)[0]
-        except FileNotFoundError as err:
-            # Should return default Blank/Not found picture
-            return (None, None, None)
+            resp.body = dumpAsJSON(content)
         else:
-            return (stream_data, stream_len, stream_type)
+            raise falcon.HTTPUnprocessableEntity(
+                title='Profile Update Error',
+                description='Incomplete data supplied',
+                code=422)
+
+    def _open_file(self, picture):
+        if os.path.exists(picture) and os.path.isfile(picture):
+            try:
+                stream_data = open(picture, 'rb')
+                stream_len = os.path.getsize(picture)
+                stream_type = mimetypes.guess_type(picture)[0]
+                return (stream_data, stream_len, stream_type)
+            except FileNotFoundError as err:
+                # Should return default Blank/Not found picture
+                pass
+        return (None, None, None)
+
 
     def _getEtag(self, fileHandler):
         md5 = hashlib.md5()
