@@ -98,10 +98,9 @@ class Picture(Resource):
 
             if user_profile.picture:
                 resp.status = falcon.HTTP_OK
-
-                resp.stream,
-                resp.stream_len,
-                resp.content_type = self._open_file(user_profile.picture)
+                (resp.stream,
+                 resp.stream_len,
+                 resp.content_type) = self._open_file(user_profile.picture)
 
         else:
             raise falcon.HTTPUnprocessableEntity(
@@ -150,15 +149,19 @@ class Picture(Resource):
                 code=422)
 
     def _open_file(self, picture):
+        print(picture)
         if os.path.exists(picture) and os.path.isfile(picture):
             try:
                 stream_data = open(picture, 'rb')
                 stream_len = os.path.getsize(picture)
                 stream_type = mimetypes.guess_type(picture)[0]
+                print('got it')
                 return (stream_data, stream_len, stream_type)
             except FileNotFoundError as err:
                 # Should return default Blank/Not found picture
+                print('nee')
                 pass
+        print('naa')
         return (None, None, None)
 
 

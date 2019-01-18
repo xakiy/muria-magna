@@ -15,6 +15,7 @@
 
 import datetime
 import collections
+import hashlib
 
 from muria.init import config, DEBUG
 
