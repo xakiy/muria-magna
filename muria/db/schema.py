@@ -42,6 +42,10 @@ class UID(fields.UUID):
         validated = str(self._validated(value)) if value is not None else None
         return str(validated)
 
+    def _deserialize(self, value, attr, obj):
+        validated = str(self._validated(value)) if value is not None else None
+        return str(validated)
+
 
 class Tanggal(fields.Date):
     """Bare ISO8601-formatted date string without time. """

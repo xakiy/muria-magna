@@ -22,7 +22,7 @@ from muria.resource.base import Resource
 from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Orang, Santri
 from muria.db.schema import Orang_Schema, Santri_Schema
-from pony.orm import db_session
+from pony.orm import db_session, OrmError
 
 
 class ResOrangs(Resource):
@@ -109,7 +109,7 @@ class ResDataOrang(Resource):
                         content = {'message': 'Data gagal dimasukkan karena sebab yang tidak jelas :('}
                         resp.status = falcon.HTTP_400
 
-                except err:
+                except OrmError:
                     content = {'message': 'Data gagal dimasukkan'}
                     resp.status = falcon.HTTP_400
             else:

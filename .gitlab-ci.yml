@@ -10,7 +10,7 @@ testing on python3.6:
     - ls -l
     - ls -l tests
     - pip install -r requirement-devel.txt
-    - py.test ./tests/
+    - pytest tests -vv
 
 testing on python3.5:
     image: python:3.5
@@ -20,7 +20,7 @@ testing on python3.5:
     - ls -l
     - ls -l tests
     - pip install -r requirement-devel.txt
-    - py.test ./tests/
+    - pytest tests -vv
 
 # testing on python3.4:
 #     image: python:3.4

@@ -27,9 +27,17 @@ class DBManager(object):
             self.params.update({
                 'host': self.config.get('database', 'host'),
                 'user': self.config.get('database', 'user'),
-                'passwd': self.config.get('database', 'password'),
                 'db': self.config.get('database', 'db')
             })
+            # mysql uses 'passwd' keyword argument instead of 'password'
+            if self.params['provider'] == 'mysql':
+                self.params.update({
+                    'passwd': self.config.get('database', 'password')
+                })
+            else:
+                self.params.update({
+                    'password': self.config.get('database', 'password')
+                })
             # use socket if available prior to TCP connection
             if self.config.get('database', 'socket'):
                 self.params.update({
@@ -55,7 +63,7 @@ class DBManager(object):
         elif self.params['provider'] == 'oracle':
             self.params.update({
                 'user': self.config.get('database', 'user'),
-                'passwd': self.config.get('database', 'password'),
+                'password': self.config.get('database', 'password'),
                 'dsn': self.config.get('database', 'dsn')
             })
 

@@ -26,7 +26,7 @@ db = link = connection.getLink()
 
 
 class Orang(db.Entity):
-    id = PrimaryKey(uuid.UUID, default=uuid.uuid4)
+    id = PrimaryKey(str, 36, default=uuid.uuid4)
     nik = Required(int, size=64, unique=True)
     nama = Required(str, 60)
     jinshi = Required('Jinshi')
