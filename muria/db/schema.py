@@ -60,6 +60,13 @@ class Tanggal(fields.Date):
         return value
 
 
+class Surel(fields.Email):
+    def _deserialize(self, value, attr, obj):
+        if not value:
+            return ''
+        return str(value).lower()
+
+
 class Orang_Schema(Skema):
     id = UID(required=True, default=uuid.uuid4)
     nik = fields.String(required=True, validate=Length(min=16, max=16, error='NIK harus 16 digit'))
@@ -253,7 +260,7 @@ class Jinshi_Schema(Skema):
 class Pengguna_Schema(Skema):
     orang = fields.Nested('Orang_Schema', only=('id', 'nama', 'jinshi', 'tempat_lahir', 'tanggal_lahir', 'tanggal_masuk'), dump_to='profile')
     username = fields.String(required=True, validate=Regexp(r'^[a-z]+(?:[_.]?[a-zA-Z0-9]){7,28}$', re.U & re.I))
-    email = fields.Email(missing=None, allow_none=True)
+    email = Surel(missing=None, allow_none=True)
     kewenangan = fields.Nested('Kewenangan_Schema', only=('wewenang'), dump_to='wewenang')
     password = fields.String(validate=Length(min=64, max=64), load_only=True)
     suspended = fields.Boolean(required=True, missing=False)
