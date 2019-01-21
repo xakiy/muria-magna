@@ -83,13 +83,18 @@ class FileStore(object):
 
             ext = source_ext if source_ext in extensions else extensions[0]
             new_filename = random_name + ext
-            new_file_path = os.path.join(dest_dir, new_filename)
             # Now that we know the file has been fully saved to disk
             # and we can rename/move it.
-            shutil.move(temp_file_path, new_file_path)
+            new_file_path = shutil.move(
+                temp_file_path,
+                os.path.join(dest_dir, new_filename)
+            )
 
         except FileNotFoundError as nof:
-            logger.debug('Error: {0} of "{1}"'.format(nof.strerror, new_filename))
+            logger.debug('Error: {0} of "{1}"'.format(
+                nof.strerror,
+                new_filename)
+            )
             new_file_path = None
 
         logger.info('New File Path: {0}'.format(new_file_path))

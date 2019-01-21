@@ -24,8 +24,6 @@ from marshmallow import (
 from marshmallow.validate import (Length, Regexp)
 from muria.db.model import *
 from muria.lib.misc import json, isJinshi
-from htmllaundry import strip_markup
-from uuid import UUID
 import re
 import datetime
 
@@ -37,7 +35,6 @@ class Skema(Schema):
 
 class UID(fields.UUID):
     """A UUID field."""
-
     def _serialize(self, value, attr, obj):
         validated = str(self._validated(value)) if value is not None else None
         return str(validated)
@@ -49,7 +46,6 @@ class UID(fields.UUID):
 
 class Tanggal(fields.Date):
     """Bare ISO8601-formatted date string without time. """
-
     def _serialize(self, value, attr, obj):
         if value is None:
             return None

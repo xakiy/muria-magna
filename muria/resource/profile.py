@@ -131,7 +131,8 @@ class Picture(Resource):
                     resp.status = falcon.HTTP_201
                     resp.location = req.uri
                     user_profile.picture = name
-                    content = {'success': "file uploaded as {0}".format(name)}
+                    flush()
+                    content = {'success': "file uploaded as {0}".format(user_profile.picture)}
                 else:
                     resp.status = falcon.HTTP_404
                     resp.location = None

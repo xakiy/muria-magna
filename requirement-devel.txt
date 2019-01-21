@@ -18,10 +18,8 @@ future==0.16.0
 gevent==1.2.2
 greenlet==0.4.12
 gunicorn==19.7.1
-htmllaundry==2.1
 idna==2.6
 jwcrypto==0.4.2
-lxml==4.2.4
 marshmallow==2.14.0
 msgpack==0.6.0
 parsec==3.3
@@ -33,6 +31,7 @@ pycparser==2.18
 pycryptodome==3.5.1
 PyJWT==1.5.3
 pymemcache==1.4.4
+PyMySQL==0.9.3
 pytest==3.2.5
 pytest-relaxed==1.1.4
 python-jose==2.0.2

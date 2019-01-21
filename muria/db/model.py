@@ -37,7 +37,7 @@ class Orang(db.Entity):
     alamat = Set('Alamat')
     pekerjaan = Optional('Pekerjaan')
     tanggal_masuk = Optional(date, default=lambda: date.today())
-    pengguna = Optional('Pengguna', lazy=True)
+    pengguna = Optional('Pengguna', cascade_delete=True, lazy=True)
 
 
 class Santri(Orang):
@@ -46,14 +46,14 @@ class Santri(Orang):
     jumlah_saudara = Optional(int, size=8)
     tinggal_bersama = Optional(str, 60)
     penanggung_biaya = Required(str, default='ayah')
-    domisili = Set('Penghuni_Kamar')
-    orang_tua = Set('Relasi')
-    hobi = Set('Hobi_Santri')
+    domisili = Set('Penghuni_Kamar', cascade_delete=True)
+    orang_tua = Set('Relasi', cascade_delete=True)
+    hobi = Set('Hobi_Santri', cascade_delete=True)
 
 
 class Ortu(Orang):
     pendapatan = Optional(int)
-    anak = Set('Relasi')
+    anak = Set('Relasi', cascade_delete=True)
 
 
 class Alumni(Santri):
@@ -123,7 +123,7 @@ class Jenis_Alamat(db.Entity):
 class Hobi(db.Entity):
     id = PrimaryKey(int, size=8, auto=True)
     nama = Optional(str, 50, unique=True)
-    hobi_santri = Set('Hobi_Santri')
+    hobi_santri = Set('Hobi_Santri', cascade_delete=True)
     kategori = Required('Kategori_Hobi')
 
 
@@ -212,8 +212,8 @@ class Pengguna(db.Entity):
     password = Required(str)
     salt = Required(str)
     suspended = Required(bool, default=False)
-    kewenangan = Set('Kewenangan')
-    koneksi = Set('Online')
+    kewenangan = Set('Kewenangan', cascade_delete=True)
+    koneksi = Set('Online', cascade_delete=True)
     # alter table pengguna add `picture` varchar(500) NULL after email;
     # alter table pengguna add `salt` varchar(255) NOT NULL after password;
 
