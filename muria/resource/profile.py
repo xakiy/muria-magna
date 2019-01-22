@@ -128,11 +128,15 @@ class Picture(Resource):
             if profile_image is not None:
                 name = self.file_store.save(profile_image, self.pict_dir)
                 if name is not None:
+                    if user_profile.picture is not None:
+                        self.file_store.delete(user_profile.picture)
                     resp.status = falcon.HTTP_201
                     resp.location = req.uri
                     user_profile.picture = name
                     flush()
-                    content = {'success': "file uploaded as {0}".format(user_profile.picture)}
+                    content = {
+                        'success':
+                        "{0} file uploaded".format(os.path.basename(name))}
                 else:
                     resp.status = falcon.HTTP_404
                     resp.location = None

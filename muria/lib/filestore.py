@@ -100,6 +100,11 @@ class FileStore(object):
         logger.info('New File Path: {0}'.format(new_file_path))
         return new_file_path
 
+    def delete(self, filename):
+        if os.path.exists(filename) and os.path.isfile(filename):
+            os.unlink(filename)
+        return not os.path.exists(filename)
+
 
 class ImageStore(object):
 
