@@ -11,12 +11,12 @@ from pony.orm import db_session
 from muria.init import config
 from muria.lib.misc import dumpAsJSON
 from tests._pickles import _pickling, _unpickling
+from tests._lib import random_string
 
 
 class Auth(object):
     """Authentication Test."""
 
-    @pytest.mark.order1
     def simple_auth_get(self, _client):
         """
         Testing Authentication via GET.
@@ -30,8 +30,59 @@ class Auth(object):
             assert resp.json == {'WWW-Authenticate': 'Bearer'}
             assert resp.headers.get('www-authenticate') == 'Bearer'
 
+    def post_invalid_credentials(self, _client):
+        """
+        Testing Authentication via POST
+        with invalid credentials.
+        """
 
-    @pytest.mark.order2
+        proto = 'http'  # 'https'
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience')
+        }
+        credentials = {
+            "username": self.creds['username'],
+            "password": self.digest_pass + random_string(5)
+        }
+
+        resp = _client.simulate_post(
+            '/auth',
+            body=dumpAsJSON(credentials),
+            headers=headers, protocol=proto
+        )
+
+        assert resp.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+        assert resp.json.get('description') == "{'password': ['Length must be between 64 and 64.']}"
+
+        credentials = {
+            "username": self.creds['username'],
+            "password": self.digest_pass[:-5] + random_string(5)
+        }
+
+        resp = _client.simulate_post(
+            '/auth',
+            body=dumpAsJSON(credentials),
+            headers=headers, protocol=proto
+        )
+        assert resp.status == falcon.HTTP_UNAUTHORIZED
+        assert resp.json.get('code') == 401
+
+        credentials = {
+            "username": self.creds['username'][:-2] + random_string(2),
+            "password": self.digest_pass[:-5] + random_string(5)
+        }
+
+        resp = _client.simulate_post(
+            '/auth',
+            body=dumpAsJSON(credentials),
+            headers=headers, protocol=proto
+        )
+        assert resp.status == falcon.HTTP_UNAUTHORIZED
+        assert resp.json.get('code') == 401
+
     def post_login_and_get_tokens(self, _client):
         """Testing Authentication via POST."""
 
@@ -78,8 +129,6 @@ class Auth(object):
         assert payload['pid'] == str(self.user.orang.id)
         assert payload['roles'] == [ x for x in self.user.kewenangan.wewenang.nama ]
 
-
-    @pytest.mark.order3
     def auth_post_refresh_token(self, _client):
 
         old_access_token = _unpickling('access_token')
@@ -155,8 +204,6 @@ class Auth(object):
         assert old_ref_token_payload['iat'] < new_ref_token_payload['iat']
         assert old_ref_token_payload['exp'] < new_ref_token_payload['exp']
 
-
-    @pytest.mark.order4
     def auth_post_verify_token(self, _client):
         ## Veriy token whether it is valid or not
 

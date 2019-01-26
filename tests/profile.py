@@ -16,7 +16,6 @@ from tests._data_generator import DataGenerator
 class Profile(object):
 
     @db_session
-    @pytest.mark.order1
     def get_profile(self, _client, cache):
 
         resource_path = '/profile'
@@ -48,9 +47,7 @@ class Profile(object):
         assert self.content.get('profile')['id'] == someone['id']
         assert self.content.get('profile')['nama'] == someone['nama']
 
-
     @db_session
-    @pytest.mark.order2
     def put_profile_picture(self, _client, cache):
         from PIL import Image
         from io import BytesIO, BufferedReader
@@ -94,7 +91,6 @@ class Profile(object):
         # assert resp.json.get('success') == 'foo'
 
     @db_session
-    @pytest.mark.order3
     def get_profile_picture(self, _client, cache):
         resource_path = '/profile/picture'
 
@@ -118,7 +114,6 @@ class Profile(object):
         assert resp.status == falcon.HTTP_OK
 
     @db_session
-    @pytest.mark.order4
     def edit_profile(self, _client, cache):
         cached_content = cache.get('muria/account_content', None)
 
@@ -174,7 +169,6 @@ class Profile(object):
             assert response['username'] != old_cached['username']
 
     @db_session
-    @pytest.mark.order5
     def change_account_password(self, _client):
 
         resource_path = '/profile/security'

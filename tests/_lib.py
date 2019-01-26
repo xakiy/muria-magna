@@ -2,7 +2,7 @@ import random
 import string
 from io import BytesIO
 
-def random_string(self, size=8, chars=string.ascii_uppercase + string.digits):
+def random_string(size=8, chars=string.ascii_lowercase + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
 def create_multipart(data, fieldname, filename, content_type):

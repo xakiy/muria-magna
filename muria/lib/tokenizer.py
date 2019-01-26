@@ -109,58 +109,56 @@ class Tokenizer(object):
             return None
 
     def verifyAccessToken(self, access_token):
-        if self.isToken(access_token):
-            try:
-                jwt.decode(
-                    access_token,
-                    key=self.public_key,
-                    algorithms=self.algorithm,
-                    issuer=self.token_issuer,
-                    audience=self.token_audience,
-                )
-                return access_token
-            except jwt.InvalidTokenError as err:
-                # token is received but unable to process due to
-                # invalid content or invalid signature
-                return (422, err)
-        else:
+        if not self.isToken(access_token):
             return (400, 'Bad Token')
 
+        try:
+            jwt.decode(
+                access_token,
+                key=self.public_key,
+                algorithms=self.algorithm,
+                issuer=self.token_issuer,
+                audience=self.token_audience,
+            )
+            return access_token
+        except jwt.InvalidTokenError as err:
+            # token is received but unable to process due to
+            # invalid content or invalid signature
+            return (422, err)
 
     def refreshAccessToken(self, access_token, refresh_token):
         # on success this will return pair of refreshed
         # access token and refresh token, otherwise it
         # will return tuple of error code
 
-        if self.isToken(access_token) and self.isToken(refresh_token):
-            acc_token_sig = access_token.split('.')[2]
-
-            try:
-                token_payload = jwt.decode(
-                    access_token,
-                    key=self.public_key,
-                    algorithms=self.algorithm,
-                    issuer=self.token_issuer,
-                    audience=self.token_audience,
-                    options={'verify_exp': False}
-                )
-            except jwt.InvalidTokenError as err:
-                return (422, err)
-            else:
-                try:
-                    refresh_payload = jwt.decode(
-                        refresh_token,
-                        key=self.public_key,
-                        algorithms=self.algorithm,
-                        issuer=self.token_issuer,
-                        audience=self.token_audience
-                    )
-                except jwt.ExpiredSignatureError as err:
-                    return (432, err)
-                else:
-                    if acc_token_sig == refresh_payload['tsig']:
-                        return self.createAccessToken(token_payload)
-                    else:
-                        return (400, 'Token Pair Mismatch')
-        else:
+        if not self.isToken(access_token) or not self.isToken(refresh_token):
             return (400, 'Bad Tokens Pair')
+
+        acc_token_sig = access_token.split('.')[2]
+        try:
+            token_payload = jwt.decode(
+                access_token,
+                key=self.public_key,
+                algorithms=self.algorithm,
+                issuer=self.token_issuer,
+                audience=self.token_audience,
+                options={'verify_exp': False}
+            )
+        except jwt.InvalidTokenError as err:
+            return (422, err)
+
+        try:
+            refresh_payload = jwt.decode(
+                refresh_token,
+                key=self.public_key,
+                algorithms=self.algorithm,
+                issuer=self.token_issuer,
+                audience=self.token_audience
+            )
+        except jwt.ExpiredSignatureError as err:
+            return (432, err)
+
+        if acc_token_sig == refresh_payload['tsig']:
+            return self.createAccessToken(token_payload)
+        else:
+            return (400, 'Token Pair Mismatch')
