@@ -5,37 +5,37 @@ stages:
 testing on python3.6:
     image: python:3.6
     stage: test
-    script:
+    before_script:
     - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
     - ls -l
     - ls -l tests
     - pip install -r requirement-devel.txt
-    - pytest tests -vv
+    script:
+    - coverage run --source=muria,tests -m pytest tests -vv
+    - coverage report -m
+    # - pytest tests -vv
+    after_script:
+    - rm -fr .*
 
 testing on python3.5:
     image: python:3.5
     stage: test
-    script:
+    before_script:
     - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
     - ls -l
     - ls -l tests
     - pip install -r requirement-devel.txt
-    - pytest tests -vv
-
-# testing on python3.4:
-#     image: python:3.4
-#     stage: test
-#     script:
-#     - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev
-#     - ls -l
-#     - ls -l tests
-#     - pip install -r requirement-devel.txt
-#     - py.test ./tests/
+    script:
+    - coverage run --source=muria,tests -m pytest tests -vv
+    - coverage report -m
+    # - pytest tests -vv
+    after_script:
+    - rm -fr .*
 
 uploading:
     image: alpine:latest
     stage: deploy
-    script:
+    before_script:
     - apk update && apk add openssh sshpass
     - ls -l
     # since the hosting server use passenger phusion server
@@ -43,9 +43,12 @@ uploading:
     - chmod 755 */; chmod 755 */*/
     - rm -fr .gitlab-ci.yml .git
     - ls -l
+    script:
     - export SSHPASS=$REMOTE_SCP_PASSWORD
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME rm -fr $REMOTE_SCP_TARGET_PATH/muria $REMOTE_SCP_TARGET_PATH/tests
     - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r ./ $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME touch $REMOTE_SCP_TARGET_PATH/tmp/restart.txt
+    after_script:
+    - rm -fr .*
