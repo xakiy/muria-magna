@@ -82,7 +82,9 @@ if config.getboolean('security', 'secure'):
             '/auth',
             '/auth/verify',
             '/auth/refresh',
-            '/upload'
+            '/upload',
+            '/stats/santri',
+            '/stats/santri/{jinshi}'
         ],
         exempt_methods=[
             # excluded HTTP methods

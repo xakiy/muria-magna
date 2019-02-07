@@ -43,7 +43,7 @@ class GiriJwtChecker(JwtChecker):
 
         """
 
-        if req.path in self.exempt_routes or req.method in self.exempt_methods:
+        if req.uri_template in self.exempt_routes or req.method in self.exempt_methods:
             return
 
         token = req.headers.get('AUTHORIZATION', '').partition('Bearer ')[2]

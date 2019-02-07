@@ -179,11 +179,11 @@ Policy_Config = {
         },
         '/stats/santri': {
             'OPTIONS': ['@passthrough'],
-            'GET': ['reader']
+            'GET': ['@passthrough']
         },
         '/stats/santri/{jinshi}': {
             'OPTIONS': ['@passthrough'],
-            'GET': ['reader']
+            'GET': ['@passthrough']
         },
         '/upload': {
             'OPTIONS': ['@passthrough'],
