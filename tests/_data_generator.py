@@ -150,8 +150,8 @@ class DataGenerator(object):
 
 
     def makePengguna(self, orang, jsonify=False):
-        digest_pass = hashlib.sha256(bytes(self.randomChar(10), 'utf8')).hexdigest()
-        salt, hashed = tokenizer.createSaltedPassword(digest_pass)
+        password_string = self.randomChar(10)
+        salt, hashed = tokenizer.createSaltedPassword(password_string)
 
         pengguna = {
             "orang": str(orang.id),
@@ -165,7 +165,7 @@ class DataGenerator(object):
         if jsonify:
             pengguna = dumpAsJSON(pengguna)
 
-        return (pengguna, digest_pass)
+        return (pengguna, password_string)
 
 
     def makeKewenangan(self, pengguna, wewenang=4, jsonify=False):

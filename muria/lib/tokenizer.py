@@ -34,23 +34,18 @@ class Tokenizer(object):
         self.access_token_exp = config.getint('security', 'access_token_exp')
         self.refresh_token_exp = config.getint('security', 'refresh_token_exp')
 
-    def createSaltedPassword(self, digest):
+    def createSaltedPassword(self, password_string):
         """Create new password based on supplied digest.
         Args:
-            digest (hex hashed string): sha256 hashed string in hex mode.
+            password_string: plain string.
         Return tuple of hex version of the salt and new password.
         """
 
         salt_bin = urandom(20)
-        hashed_bin = hashlib.sha256(bytes(digest, 'utf8')).digest()
+        digest = hashlib.sha256(bytes(password_string, 'utf8')).digest()
+        hashed_bin = hashlib.sha256(digest).digest()
         hashed_bin_key = hashlib.pbkdf2_hmac('sha256', hashed_bin, salt_bin, 1000)
         return (salt_bin.hex(), hashed_bin_key.hex())
-
-    def getSaltedPassword(self, salt, digest):
-        salt_bin = binascii.unhexlify(salt)
-        hashed_bin = hashlib.sha256(bytes(digest, 'utf8')).digest()
-        hashed_bin_key = hashlib.pbkdf2_hmac('sha256', hashed_bin, salt_bin, 1000)
-        return hashed_bin_key.hex()
 
     def isToken(self, token):
         return isinstance(token, str) and token.count('.') == 2

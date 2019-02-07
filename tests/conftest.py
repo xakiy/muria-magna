@@ -34,7 +34,7 @@ def _generateUser(request):
         # populate him
         person = Orang(**someone)
         # generate a user based on previous person
-        creds, digest_pass = data_generator.makePengguna(person)
+        creds, password_string = data_generator.makePengguna(person)
         # populate him
         user = Pengguna(**creds)
         # generate a wewenang
@@ -47,6 +47,6 @@ def _generateUser(request):
         request.cls.person = person
         request.cls.someone = someone
         request.cls.creds = creds
-        request.cls.digest_pass = digest_pass
+        request.cls.password_string = password_string
         request.cls.user = user
         request.cls.wewenang = wewenang

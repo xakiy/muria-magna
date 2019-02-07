@@ -43,9 +43,10 @@ class Auth(object):
             "Host": config.get('security', 'issuer'),
             "Origin": config.get('security', 'audience')
         }
+        # test with short password, less than 8 characters
         credentials = {
             "username": self.creds['username'],
-            "password": self.digest_pass + random_string(5)
+            "password": self.password_string[:7]
         }
 
         resp = _client.simulate_post(
@@ -55,11 +56,12 @@ class Auth(object):
         )
 
         assert resp.status == falcon.HTTP_UNPROCESSABLE_ENTITY
-        assert resp.json.get('description') == "{'password': ['Length must be between 64 and 64.']}"
+        assert resp.json.get('description') == "{'password': ['Length must be between 8 and 40.']}"
 
+        # test with invalid password with the same length
         credentials = {
             "username": self.creds['username'],
-            "password": self.digest_pass[:-5] + random_string(5)
+            "password": self.password_string[:-2] + random_string(2)
         }
 
         resp = _client.simulate_post(
@@ -70,9 +72,10 @@ class Auth(object):
         assert resp.status == falcon.HTTP_UNAUTHORIZED
         assert resp.json.get('code') == 401
 
+        # test with both scrambled username and password
         credentials = {
             "username": self.creds['username'][:-2] + random_string(2),
-            "password": self.digest_pass[:-5] + random_string(5)
+            "password": self.password_string[:-5] + random_string(5)
         }
 
         resp = _client.simulate_post(
@@ -95,7 +98,7 @@ class Auth(object):
         }
         credentials = {
             "username": self.creds['username'],
-            "password": self.digest_pass
+            "password": self.password_string
         }
 
         resp = _client.simulate_post(
@@ -122,7 +125,7 @@ class Auth(object):
         _pickling(refresh_token, 'refresh_token')
         _pickling(self.creds, 'creds')
         _pickling(self.someone, 'someone')
-        _pickling(self.digest_pass, 'digest_pass')
+        _pickling(self.password_string, 'password_string')
 
         # self.user is from pytest fixture within the conftest.py
         assert payload['name'] == self.user.orang.nama

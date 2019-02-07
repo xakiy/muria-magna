@@ -175,12 +175,12 @@ class Profile(object):
 
         access_token = _unpickling('access_token')
         creds = _unpickling('creds')
-        digest_pass = _unpickling('digest_pass')
+        password_string = _unpickling('password_string')
 
-        new_pass = hashlib.sha256(bytes(DataGenerator().randomChar(10), 'utf8')).hexdigest()
+        new_pass = DataGenerator().randomChar(10)
 
         data = {
-            "old_password": digest_pass,
+            "old_password": password_string,
             "new_password": new_pass
         }
 

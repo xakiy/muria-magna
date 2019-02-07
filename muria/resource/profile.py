@@ -191,10 +191,10 @@ class Security(Resource):
 
             # calculate if new pass is 64 bit lengths
             # reject if empty
-            if len(new_pass) < 64 or len(old_pass) < 64:
+            if not (8 <= len(new_pass) <= 40) or not (8 <= len(old_pass) <= 40):
                 raise falcon.HTTPUnprocessableEntity(
                     title="Password Change",
-                    description="Invalid password length, should be 64 digits",
+                    description="Invalid password length, at least 8 and not more than 40 characters",
                     code=422)
             try:
                 user = Pengguna.get(orang=pid)

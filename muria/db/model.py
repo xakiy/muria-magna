@@ -217,9 +217,10 @@ class Pengguna(db.Entity):
     # alter table pengguna add `picture` varchar(500) NULL after email;
     # alter table pengguna add `salt` varchar(255) NOT NULL after password;
 
-    def checkPassword(self, password_digest):
+    def checkPassword(self, password_string):
         salt_bin = binascii.unhexlify(self.salt)
-        hashed_bin = hashlib.sha256(bytes(password_digest, 'utf8')).digest()
+        password_digest = hashlib.sha256(bytes(password_string, 'utf8')).digest()
+        hashed_bin = hashlib.sha256(password_digest).digest()
         hashed_bin_key = hashlib.pbkdf2_hmac('sha256', hashed_bin, salt_bin, 1000)
         return hashed_bin_key.hex() == self.password
 

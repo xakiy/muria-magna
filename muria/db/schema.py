@@ -264,7 +264,7 @@ class Pengguna_Schema(Skema):
 
 class Login_Schema(Skema):
     username = fields.String(required=True, validate=Regexp(r'^[a-z]+(?:[_.]?[a-zA-Z0-9]){7,28}$', re.U & re.I))
-    password = fields.String(required=True, validate=Length(min=64, max=64))
+    password = fields.String(required=True, validate=Length(min=8, max=40))
 
 
 class Grup_Schema(Skema):
