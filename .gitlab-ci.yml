@@ -16,7 +16,8 @@ testing on python3.6:
     - coverage report -m
     # - pytest tests -vv
     after_script:
-    - rm -fr ../muria-magna/
+    - cd ..
+    - rm -fr muria-magna/
 
 testing on python3.5:
     image: python:3.5
@@ -32,7 +33,8 @@ testing on python3.5:
     - coverage report -m
     # - pytest tests -vv
     after_script:
-    - rm -fr ../muria-magna/
+    - cd ..
+    - rm -fr muria-magna/
 
 uploading:
     image: alpine:latest
@@ -53,4 +55,5 @@ uploading:
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME touch $REMOTE_SCP_TARGET_PATH/tmp/restart.txt
     after_script:
-    - rm -fr ../muria-magna/
+    - cd ..
+    - rm -fr muria-magna/
