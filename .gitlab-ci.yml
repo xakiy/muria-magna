@@ -46,5 +46,7 @@ uploading:
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME rm -fr $REMOTE_SCP_TARGET_PATH/muria $REMOTE_SCP_TARGET_PATH/tests
     - sshpass -e scp -v -o stricthostkeychecking=no -P 64000 -r ./ $REMOTE_SCP_USERNAME:$REMOTE_SCP_TARGET_PATH
+    - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME "source $REMOTE_SCP_VIRTUALENV/bin/activate; pip install -r 
+$REMOTE_SCP_TARGET_PATH/requirement-devel.txt"
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME ls -l $REMOTE_SCP_TARGET_PATH
     - sshpass -e ssh -p 64000 -o stricthostkeychecking=no $REMOTE_SCP_USERNAME touch $REMOTE_SCP_TARGET_PATH/tmp/restart.txt
