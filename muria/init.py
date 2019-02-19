@@ -24,6 +24,7 @@ from muria.db.manager import DBManager
 
 from falcon_cors import CORS
 from falcon_multipart.middleware import MultipartMiddleware
+from falcon_require_https import RequireHTTPS
 from muria.middleware.jwt_checker import GiriJwtChecker
 from muria.middleware.rbac import RBAC
 from muria.lib.tokenizer import Tokenizer
@@ -95,6 +96,7 @@ if config.getboolean('security', 'secure'):
     middleware_list.append(cors.middleware)
     middleware_list.append(jwt_checker)
     middleware_list.append(RBAC(Policy_Config, check_jwt=True))
+    middleware_list.append(RequireHTTPS())
 
 middleware_list.append(MultipartMiddleware())
 
