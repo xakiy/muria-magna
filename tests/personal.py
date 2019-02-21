@@ -19,7 +19,6 @@ class Personal(object):
 
         access_token = _unpickling('access_token')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -30,7 +29,7 @@ class Personal(object):
 
         resp = _client.simulate_get(
             '/persons',
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         content = resp.json.get('persons')
@@ -51,7 +50,6 @@ class Personal(object):
 
         access_token = _unpickling('access_token')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -63,7 +61,7 @@ class Personal(object):
         resp = _client.simulate_post(
             '/persons/' + someone['id'],
             body=dumpAsJSON(someone),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_201
@@ -78,7 +76,6 @@ class Personal(object):
 
         access_token = _unpickling('access_token')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -90,7 +87,7 @@ class Personal(object):
         resp = _client.simulate_get(
             path='/persons',
             params={'search': someone.get('nama')},
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_200

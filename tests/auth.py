@@ -24,7 +24,7 @@ class Auth(object):
         Return simple JSON template
         that used as auth POST payload
         """
-        resp = _client.simulate_get('/auth')
+        resp = _client.simulate_get('/auth', protocol=self.protocol)
         assert resp.status == falcon.HTTP_OK
         if config.getboolean('app', 'debug'):
             assert resp.json == {'WWW-Authenticate': 'Bearer'}
@@ -36,7 +36,6 @@ class Auth(object):
         with invalid credentials.
         """
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -52,7 +51,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth',
             body=dumpAsJSON(credentials),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_UNPROCESSABLE_ENTITY
@@ -67,7 +66,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth',
             body=dumpAsJSON(credentials),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
         assert resp.status == falcon.HTTP_UNAUTHORIZED
         assert resp.json.get('code') == 401
@@ -81,7 +80,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth',
             body=dumpAsJSON(credentials),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
         assert resp.status == falcon.HTTP_UNAUTHORIZED
         assert resp.json.get('code') == 401
@@ -89,7 +88,6 @@ class Auth(object):
     def post_login_and_get_tokens(self, _client):
         """Testing Authentication via POST."""
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -104,7 +102,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth',
             body=dumpAsJSON(credentials),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_OK
@@ -140,7 +138,6 @@ class Auth(object):
         # make sure that old tokens are few seconds earlier
         time.sleep(1)
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -155,7 +152,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth/refresh',
             body=dumpAsJSON(payload),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         new_access_token = resp.json.get('access_token')
@@ -212,7 +209,6 @@ class Auth(object):
 
         access_token = _unpickling('access_token')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -226,7 +222,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth/verify',
             body=dumpAsJSON(payload),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_OK
@@ -242,7 +238,7 @@ class Auth(object):
         resp = _client.simulate_post(
             '/auth/verify',
             body=dumpAsJSON(payload),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_400

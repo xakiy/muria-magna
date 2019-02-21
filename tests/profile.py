@@ -24,7 +24,6 @@ class Profile(object):
         creds = _unpickling('creds')
         someone = _unpickling('someone')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -35,7 +34,7 @@ class Profile(object):
 
         resp = _client.simulate_get(
             resource_path,
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         self.content = resp.json.get('account')
@@ -72,7 +71,6 @@ class Profile(object):
             filename='pict_test.png',
             content_type='image/png')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers.update({
             "Host": config.get('security', 'issuer'),
@@ -83,7 +81,7 @@ class Profile(object):
         resp = _client.simulate_put(
             resource_path,
             body=data,
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_CREATED
@@ -98,7 +96,6 @@ class Profile(object):
         creds = _unpickling('creds')
         someone = _unpickling('someone')
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Host": config.get('security', 'issuer'),
@@ -108,7 +105,7 @@ class Profile(object):
 
         resp = _client.simulate_get(
             resource_path,
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_OK
@@ -145,7 +142,6 @@ class Profile(object):
 
             access_token = _unpickling('access_token')
 
-            proto = 'http'  # 'https'
             # headers updated based on header requirements
             headers = {
                 "Content-Type": "application/json",
@@ -157,7 +153,7 @@ class Profile(object):
             resp = _client.simulate_patch(
                 resource_path,
                 body=dumpAsJSON(cached_content),
-                headers=headers, protocol=proto
+                headers=headers, protocol=self.protocol
             )
 
             assert resp.status == falcon.HTTP_OK
@@ -184,7 +180,6 @@ class Profile(object):
             "new_password": new_pass
         }
 
-        proto = 'http'  # 'https'
         # headers updated based on header requirements
         headers = {
             "Content-Type": "application/json",
@@ -196,7 +191,7 @@ class Profile(object):
         resp = _client.simulate_patch(
             resource_path,
             body=dumpAsJSON(data),
-            headers=headers, protocol=proto
+            headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_CREATED

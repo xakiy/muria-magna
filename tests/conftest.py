@@ -15,6 +15,7 @@ if config_file is None or config_file is '':
     )
 
 from muria.wsgi import app
+from muria.init import config
 from muria.db.model import Orang, Pengguna, Kewenangan
 from tests._data_generator import DataGenerator
 from tests._pickles import _pickling, _unpickling
@@ -44,6 +45,9 @@ def _generateUser(request):
 
         user.kewenangan.wewenang.nama
 
+        # secure switching in muria.init is still buggy
+        # so let just stict to 'https' literally now
+        request.cls.protocol = 'https'  # if config.getboolean('security', 'secure') else 'http'
         request.cls.person = person
         request.cls.someone = someone
         request.cls.creds = creds
