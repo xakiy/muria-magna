@@ -1,14 +1,14 @@
 asn1crypto==0.24.0
 attrs==17.4.0
 certifi==2018.8.24
-cffi==1.11.4
+cffi==1.11.5
 chardet==3.0.4
 coverage==4.5.1
 cryptography==2.1.4
+Cython==0.29.6
 decorator==4.3.0
 ecdsa==0.13
 enum-compat==0.0.2
-eventlet==0.21.0
 falcon==1.4.1
 falcon-auth==1.1.0
 falcon-cors==1.1.7
@@ -18,7 +18,7 @@ falcon-policy==0.1.0
 falcon-require-https==0.1.0
 future==0.16.0
 gevent==1.2.2
-greenlet==0.4.12
+greenlet==0.4.13
 gunicorn==19.7.1
 idna==2.6
 jwcrypto==0.4.2
@@ -39,7 +39,7 @@ pytest-relaxed==1.1.4
 python-jose==2.0.2
 python-magic==0.4.15
 python-mimeparse==1.6.0
-python-rapidjson==0.2.5
+python-rapidjson==0.7.0
 simplejson==3.13.2
 six==1.11.0
 StringGenerator==0.3.1

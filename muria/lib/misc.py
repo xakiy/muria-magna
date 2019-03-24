@@ -22,22 +22,28 @@ from muria.init import config, DEBUG
 
 try:
     import rapidjson as json
-except ModuleNotFoundError:
+except ImportError:
     import json
-    class DatetimeEncoder(json.JSONEncoder):
-        """Encoder pengubah datetime sebagai string biasa."""
-
+    class ConvertionEncoder(json.JSONEncoder):
         def default(self, obj):
+            """Mengubah datetime sebagai string biasa."""
             if isinstance(obj, datetime.datetime) or \
                isinstance(obj, datetime.date):
                 return obj.isoformat()[:10]
-            return json.JSONEncoder.default(self, obj)
 
-    class ExceptionErrorEncoder(json.JSONEncoder):
-        def default(self, obj):
+            """Mengubah bytes menjadi string biasa."""
+            if isinstance(obj, bytes):
+                return obj.decode()
+
+            if isinstance(obj, type):
+                return obj.__str__()
+
             if isinstance(obj, dict):
                 return
-            return str(obj)
+            try:
+                return json.JSONEncoder.default(self, obj)
+            except TypeError:
+                return str(obj)
 
 
 def datetimeToISO(obj):
@@ -85,7 +91,7 @@ def getEtag(content):
         return tag + '"' + hashed + '"'
 
 
-def dumpAsJSON(data_in):
+def dumpAsJSON(source):
     """Mengubah dict JSON.
 
     NOTE: All date type is dumped in ISO8601 format
@@ -96,27 +102,25 @@ def dumpAsJSON(data_in):
         # UM_HEX = 1<<1 // canonical OR 32 hex chars in a row
         if DEBUG:
             # pretty output, debug only
-            data_out = json.dumps(data_in, default=datetimeToISO, uuid_mode=json.UM_CANONICAL, indent=4)
+            output = json.dumps(source, default=datetimeToISO, uuid_mode=json.UM_CANONICAL, indent=4)
         else:
             # pure JSON
-            data_out = json.dumps(data_in, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_CANONICAL) # speed 1.8xx
-    elif json.__name__ == 'ujson':
-            data_out = ujson.dumps(content)
+            output = json.dumps(source, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_CANONICAL) # speed 1.8xx
     else:
         if DEBUG:
             # pretty output, debug only
-            # data_out = ujson.dumps(content)
-            data_out = json.dumps(content, cls=DatetimeEncoder, sort_keys=True, indent=4 * ' ')
-            # data_out = json.dumps(content, ensure_ascii=False)
+            # output = ujson.dumps(source)
+            output = json.dumps(source, cls=ConvertionEncoder, sort_keys=True, indent=4 * ' ')
+            # output = json.dumps(source, ensure_ascii=False)
         else:
             # pure JSON
-            # data_out = rjson.dumps(content, default=datetimeToISO) # speed 1.6xx
-            # data_out = ujson.dumps(content)
-            data_out = json.dumps(content, cls=DatetimeEncoder) # speed 1.8xx
-            # data_out = sjson.dumps(sjson.loads(content), use_decimal=False)
-            # data_out = json.dumps(content) #not work for datetime.date field
+            # output = rjson.dumps(source, default=datetimeToISO) # speed 1.6xx
+            # output = ujson.dumps(source)
+            output = json.dumps(source, cls=ConvertionEncoder) # speed 1.8xx
+            # output = sjson.dumps(sjson.loads(source), use_decimal=False)
+            # output = json.dumps(source) #not work for datetime.date field
 
-    return data_out
+    return output
 
 
 def isJinshi(x):

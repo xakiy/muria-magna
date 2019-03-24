@@ -15,7 +15,6 @@
 """ muria asrama class. """
 
 import falcon
-import rapidjson as rjson
 import datetime
 import uuid
 from muria.lib.misc import dumpAsJSON, getEtag

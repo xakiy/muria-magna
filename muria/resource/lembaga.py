@@ -15,7 +15,6 @@
 """ muria lembaga class. """
 
 import falcon
-import rapidjson as rjson
 import datetime
 import uuid
 from muria.resource.base import Resource
