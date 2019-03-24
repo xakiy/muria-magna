@@ -35,11 +35,10 @@ except ImportError:
             if isinstance(obj, bytes):
                 return obj.decode()
 
-            if isinstance(obj, type):
-                return obj.__str__()
-
+            """Abaikan bila sebuah dict."""
             if isinstance(obj, dict):
                 return
+
             try:
                 return json.JSONEncoder.default(self, obj)
             except TypeError:
