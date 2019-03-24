@@ -28,7 +28,7 @@ class Personal(object):
         }
 
         resp = _client.simulate_get(
-            '/persons',
+            '/v1/orang',
             headers=headers, protocol=self.protocol
         )
 
@@ -59,7 +59,7 @@ class Personal(object):
         }
 
         resp = _client.simulate_post(
-            '/persons/' + someone['id'],
+            '/v1/orang/' + someone['id'],
             body=dumpAsJSON(someone),
             headers=headers, protocol=self.protocol
         )
@@ -85,7 +85,7 @@ class Personal(object):
         }
 
         resp = _client.simulate_get(
-            path='/persons',
+            path='/v1/orang',
             params={'search': someone.get('nama')},
             headers=headers, protocol=self.protocol
         )

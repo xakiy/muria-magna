@@ -9,7 +9,7 @@ Cython==0.29.6
 decorator==4.3.0
 ecdsa==0.13
 enum-compat==0.0.2
-falcon==1.4.1
+falcon==2.0.0
 falcon-auth==1.1.0
 falcon-cors==1.1.7
 falcon-jwt-checker==0.1.3

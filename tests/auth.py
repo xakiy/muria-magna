@@ -24,7 +24,13 @@ class Auth(object):
         Return simple JSON template
         that used as auth POST payload
         """
-        resp = _client.simulate_get('/auth', protocol=self.protocol)
+        # headers updated based on header requirements
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get('security', 'issuer'),
+            "Origin": config.get('security', 'audience')
+        }
+        resp = _client.simulate_get('/v1/auth', headers=headers, protocol=self.protocol)
         assert resp.status == falcon.HTTP_OK
         if config.getboolean('app', 'debug'):
             assert resp.json == {'WWW-Authenticate': 'Bearer'}
@@ -49,7 +55,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth',
+            '/v1/auth',
             body=dumpAsJSON(credentials),
             headers=headers, protocol=self.protocol
         )
@@ -64,7 +70,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth',
+            '/v1/auth',
             body=dumpAsJSON(credentials),
             headers=headers, protocol=self.protocol
         )
@@ -78,7 +84,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth',
+            '/v1/auth',
             body=dumpAsJSON(credentials),
             headers=headers, protocol=self.protocol
         )
@@ -100,7 +106,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth',
+            '/v1/auth',
             body=dumpAsJSON(credentials),
             headers=headers, protocol=self.protocol
         )
@@ -150,7 +156,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth/refresh',
+            '/v1/auth/refresh',
             body=dumpAsJSON(payload),
             headers=headers, protocol=self.protocol
         )
@@ -220,7 +226,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth/verify',
+            '/v1/auth/verify',
             body=dumpAsJSON(payload),
             headers=headers, protocol=self.protocol
         )
@@ -236,7 +242,7 @@ class Auth(object):
         }
 
         resp = _client.simulate_post(
-            '/auth/verify',
+            '/v1/auth/verify',
             body=dumpAsJSON(payload),
             headers=headers, protocol=self.protocol
         )

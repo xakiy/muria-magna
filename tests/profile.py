@@ -18,7 +18,7 @@ class Profile(object):
     @db_session
     def get_profile(self, _client, cache):
 
-        resource_path = '/profile'
+        resource_path = '/v1/profile'
 
         access_token = _unpickling('access_token')
         creds = _unpickling('creds')
@@ -52,7 +52,7 @@ class Profile(object):
         from io import BytesIO, BufferedReader
         from tests._lib import create_multipart
 
-        resource_path = '/profile/picture'
+        resource_path = '/v1/profile/picture'
 
         access_token = _unpickling('access_token')
         creds = _unpickling('creds')
@@ -90,7 +90,7 @@ class Profile(object):
 
     @db_session
     def get_profile_picture(self, _client, cache):
-        resource_path = '/profile/picture'
+        resource_path = '/v1/profile/picture'
 
         access_token = _unpickling('access_token')
         creds = _unpickling('creds')
@@ -138,7 +138,7 @@ class Profile(object):
 
             cached_content['username'] = new_username
 
-            resource_path = '/profile'
+            resource_path = '/v1/profile'
 
             access_token = _unpickling('access_token')
 
@@ -167,7 +167,7 @@ class Profile(object):
     @db_session
     def change_account_password(self, _client):
 
-        resource_path = '/profile/security'
+        resource_path = '/v1/profile/security'
 
         access_token = _unpickling('access_token')
         creds = _unpickling('creds')

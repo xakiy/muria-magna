@@ -24,6 +24,7 @@ from muria.resource import uploader
 from muria.resource import image
 # from muria.resource import devel
 
+base_path = '/v1'
 static_route = []
 resource_route = []
 
@@ -46,9 +47,9 @@ resource_route.append(('/accounts', account.Accounts()))
 # resource_route.append(('/accounts/{id:uuid}', res_account))
 
 # semua personal/warga, termasuk para santri, bahkan wali santri di rumah
-resource_route.append(('/persons', personal.ResOrangs()))
+resource_route.append(('/orang', personal.ResOrangs()))
 # person by uuid
-resource_route.append(('/persons/{id:uuid}', personal.ResDataOrang()))
+resource_route.append(('/orang/{id:uuid}', personal.ResDataOrang()))
 
 # listing data semua santri, dengan paginasi
 resource_route.append(('/santri', personal.ResSantri()))

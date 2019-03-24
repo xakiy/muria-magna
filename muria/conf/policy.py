@@ -38,13 +38,13 @@ Policy_Config = {
         'deleter': ['root', 'admin']
     },
     'routes': {
-        '/auth': {
+        '/v1/auth': {
             'GET': ['@passthrough'],
             'HEAD': ['@passthrough'],
             'OPTIONS': ['@passthrough'],
             'POST': ['@passthrough']
         },
-        '/auth/verify': {
+        '/v1/auth/verify': {
             'OPTIONS': ['@passthrough'],
             # 'GET': ['@passthrough'], # phusion server would hangup if this invoked
             # TODO:
@@ -54,93 +54,93 @@ Policy_Config = {
             # akan bekerja terlebih dahulu sebelum custom verifikasi token terjadi.
             'POST': ['@passthrough']
         },
-        '/auth/refresh': {
+        '/v1/auth/refresh': {
             'OPTIONS': ['@passthrough'],
             # TODO:
             # Idem dengan di atas.
             'POST': ['@passthrough']
         },
-        '/accounts': {
+        '/v1/accounts': {
             'OPTIONS': ['@passthrough'],
             'GET': ['editor'],
             'POST': ['editor'],
             'PATCH': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/accounts/{id:uuid}': {
+        '/v1/accounts/{id:uuid}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['editor'],
             'POST': ['editor'],
             'PATCH': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/profile': {
+        '/v1/profile': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['reader'],
             'PATCH': ['reader']
         },
-        '/profile/security': {
+        '/v1/profile/security': {
             'OPTIONS': ['@passthrough'],
             'POST': ['reader'],
             'PATCH': ['reader']
         },
-        '/profile/picture': {
+        '/v1/profile/picture': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'PUT': ['reader']
         },
-        '/persons': {
+        '/v1/orang': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
-        '/persons/{id:uuid}': {
+        '/v1/orang/{id:uuid}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/santri': {
+        '/v1/santri': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
-        '/santri/{id:uuid}': {
+        '/v1/santri/{id:uuid}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/lembaga': {
+        '/v1/lembaga': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/lembaga/{lid}': {
+        '/v1/lembaga/{lid}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/lembaga/{lid}/jabatan': {
+        '/v1/lembaga/{lid}/jabatan': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/lembaga/{lid}/jabatan/{id}': {
+        '/v1/lembaga/{lid}/jabatan/{id}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/rayon': {
+        '/v1/rayon': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
@@ -148,52 +148,52 @@ Policy_Config = {
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/rayon/kepala': {
+        '/v1/rayon/kepala': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/rayon/{wid:int}': {
+        '/v1/rayon/{wid:int}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/rayon/{wid:int}/blok': {
+        '/v1/rayon/{wid:int}/blok': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader'],
             'POST': ['creator'],
             'PUT': ['editor'],
             'DELETE': ['deleter'],
         },
-        '/stats/orang': {
+        '/v1/stats/orang': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
-        '/stats/wali': {
+        '/v1/stats/wali': {
             'OPTIONS': ['@passthrough'],
             'GET': ['reader']
         },
-        '/stats/santri': {
+        '/v1/stats/santri': {
             'OPTIONS': ['@passthrough'],
             'GET': ['@passthrough']
         },
-        '/stats/santri/{jinshi}': {
+        '/v1/stats/santri/{jinshi}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['@passthrough']
         },
-        '/upload': {
+        '/v1/upload': {
             'OPTIONS': ['@passthrough'],
             'POST': ['@passthrough']
         },
-        '/images': {
+        '/v1/images': {
             'OPTIONS': ['@passthrough'],
             'GET': ['@passthrough']
         },
-        '/images/{name}': {
+        '/v1/images/{name}': {
             'OPTIONS': ['@passthrough'],
             'GET': ['@passthrough'],
             'POST': ['@passthrough']

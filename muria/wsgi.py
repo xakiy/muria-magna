@@ -23,10 +23,10 @@ app = application = falcon.API(middleware=middleware_list)
 
 app.req_options.auto_parse_form_urlencoded = True
 
-from muria.route import static_route, resource_route
+from muria.route import base_path, static_route, resource_route
 
 for (path, url) in static_route:
     app.add_static_route(path, url)
 
 for (path, resource) in resource_route:
-    app.add_route(path, resource)
+    app.add_route(base_path + path, resource)

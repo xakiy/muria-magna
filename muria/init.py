@@ -22,9 +22,9 @@ from muria.db.manager import DBManager
 # from falcon_auth import FalconAuthMiddleware, BasicAuthBackend
 # from falcon_jwt_checker import JwtChecker
 
-from falcon_cors import CORS
+from muria.middleware.cors import CORS
 from falcon_multipart.middleware import MultipartMiddleware
-from falcon_require_https import RequireHTTPS
+from muria.middleware.require_https import RequireHTTPS
 from muria.middleware.jwt_checker import GiriJwtChecker
 from muria.middleware.rbac import RBAC
 from muria.lib.tokenizer import Tokenizer
@@ -80,12 +80,12 @@ if config.getboolean('security', 'secure'):
         leeway=60,
         exempt_routes=[
             # excluded routes
-            '/auth',
-            '/auth/verify',
-            '/auth/refresh',
-            '/upload',
-            '/stats/santri',
-            '/stats/santri/{jinshi}'
+            '/v1/auth',
+            '/v1/auth/verify',
+            '/v1/auth/refresh',
+            '/v1/upload',
+            '/v1/stats/santri',
+            '/v1/stats/santri/{jinshi}'
         ],
         exempt_methods=[
             # excluded HTTP methods
