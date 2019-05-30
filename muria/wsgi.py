@@ -13,17 +13,17 @@
 # limitations under the License.
 """muria main app, wsgi."""
 
-import falcon
-
-from muria.init import middleware_list
-# from muria import tokenizer
-
-
-app = application = falcon.API(middleware=middleware_list)
-
-app.req_options.auto_parse_form_urlencoded = True
-
+from falcon import API
+from muria.init import extra_handlers, middleware_list
 from muria.route import base_path, static_route, resource_route
+
+app = application = API(middleware=middleware_list)
+
+app.req_options.media_handlers.update(extra_handlers)
+app.resp_options.media_handlers.update(extra_handlers)
+
+app.req_options.auto_parse_form_urlencoded = False
+# Set to False to make sure falcon will not convert form entries as params
 
 for (path, url) in static_route:
     app.add_static_route(path, url)

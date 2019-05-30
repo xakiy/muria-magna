@@ -197,6 +197,11 @@ Policy_Config = {
             'OPTIONS': ['@passthrough'],
             'GET': ['@passthrough'],
             'POST': ['@passthrough']
+        },
+        '/v1/oauth2': {
+            'OPTIONS': ['@passthrough'],
+            'GET': ['@passthrough'],
+            'POST': ['@passthrough']
         }
     },
 }

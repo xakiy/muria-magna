@@ -22,6 +22,7 @@ from muria.resource import asrama
 from muria.resource import stats
 from muria.resource import uploader
 from muria.resource import image
+from muria.resource import oauth2
 # from muria.resource import devel
 
 base_path = '/v1'
@@ -29,7 +30,7 @@ static_route = []
 resource_route = []
 
 # Fitur baru di falcon 1.4.0
-static_route.append(('/web', '/home/zakiy/public_html/giriDashboard/'))
+#static_route.append(('/web', '/home/zakiy/public_html/giriDashboard/'))
 # static_route.append('/pub', os.path.dirname(os.path.abspath(__file__)) +
 #                     '/' + config.path('storage_path'))
 static_route.append(('/ref', '/home/zakiy/public_html/sufee/'))
@@ -92,3 +93,5 @@ resource_route.append(('/stats/santri/{jinshi}', stats.ResStatsSantriByJinshi())
 resource_route.append(('/upload', uploader.Upload()))
 resource_route.append(('/images/', image.Collection()))
 resource_route.append(('/images/{name}', image.Item()))
+
+resource_route.append(('/oauth2', oauth2.Oauth2()))

@@ -29,7 +29,7 @@ from muria.middleware.jwt_checker import GiriJwtChecker
 from muria.middleware.rbac import RBAC
 from muria.lib.tokenizer import Tokenizer
 from muria.lib.logger import Logger
-
+from muria.lib.form import FormHandler
 
 # MURIA_SETUP merupakan env yang menunjuk ke berkas
 # konfigurasi produksi atau pengembangan.
@@ -52,6 +52,10 @@ if DEBUG:
     logger.debug('---------------------------------')
 
 tokenizer = Tokenizer(config)
+
+extra_handlers = {
+    'application/x-www-form-urlencoded': FormHandler()
+}
 
 middleware_list = []
 
@@ -85,7 +89,8 @@ if config.getboolean('security', 'secure'):
             '/v1/auth/refresh',
             '/v1/upload',
             '/v1/stats/santri',
-            '/v1/stats/santri/{jinshi}'
+            '/v1/stats/santri/{jinshi}',
+            '/v1/oauth2'
         ],
         exempt_methods=[
             # excluded HTTP methods
