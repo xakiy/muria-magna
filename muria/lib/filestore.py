@@ -35,7 +35,7 @@ class FileStore(object):
     """
 
     def __init__(self):
-        self.temp_dir = config.get('path', 'temp_dir')
+        self.temp_dir = config.get("path", "temp_dir")
         self.ensure_dir(self.temp_dir)
 
     # make sure destination dir is exist
@@ -47,38 +47,39 @@ class FileStore(object):
         self.ensure_dir(dest_dir)
         # We should sanitize dest_dir as if someone will
         # use in arbitrary way
-        logger.info('Saving uploaded file...')
+        logger.info("Saving uploaded file...")
 
         tick = time.time()
-        random_name = str(tick).replace('.', '') + uuid.uuid4().hex
+        random_name = str(tick).replace(".", "") + uuid.uuid4().hex
 
         # Read file as binary
         raw = input_handler.file
 
         # Retrieve filetype
         source_type = input_handler.type
-        logger.info('Source Type: {0}'.format(source_type))
+        logger.info("Source Type: {0}".format(source_type))
 
         # Retrieve file extension
-        source_ext = '.' + input_handler.filename.rsplit('.')[1]
+        source_ext = "." + input_handler.filename.rsplit(".")[1]
         # BUG: doesn't yet support multi extension ie. .tar.gz
-        logger.info('Source Ext: {0}'.format(source_ext))
+        logger.info("Source Ext: {0}".format(source_ext))
 
         # To prevent incomplete files from being used we write it
         # first as temporary one.
-        temp_file_path = os.path.join(self.temp_dir, random_name) + '~'
-        logger.info('Temporary File Path: {0}'.format(temp_file_path))
+        temp_file_path = os.path.join(self.temp_dir, random_name) + "~"
+        logger.info("Temporary File Path: {0}".format(temp_file_path))
 
         try:
             # Then write the stream data to that temporary file
-            output_file = open(temp_file_path, 'x+b')
+            output_file = open(temp_file_path, "x+b")
 
             shutil.copyfileobj(raw, output_file)
 
             # If done writing, grab the extension
             output_file.seek(0)
             extensions = mimetypes.guess_all_extensions(
-                magic.from_buffer(output_file.read(128), mime=True))
+                magic.from_buffer(output_file.read(128), mime=True)
+            )
             output_file.close()
 
             ext = source_ext if source_ext in extensions else extensions[0]
@@ -86,18 +87,14 @@ class FileStore(object):
             # Now that we know the file has been fully saved to disk
             # and we can rename/move it.
             new_file_path = shutil.move(
-                temp_file_path,
-                os.path.join(dest_dir, new_filename)
+                temp_file_path, os.path.join(dest_dir, new_filename)
             )
 
         except FileNotFoundError as nof:
-            logger.debug('Error: {0} of "{1}"'.format(
-                nof.strerror,
-                new_filename)
-            )
+            logger.debug('Error: {0} of "{1}"'.format(nof.strerror, new_filename))
             new_file_path = None
 
-        logger.info('New File Path: {0}'.format(new_file_path))
+        logger.info("New File Path: {0}".format(new_file_path))
         return new_file_path
 
     def delete(self, filename):
@@ -110,20 +107,20 @@ class ImageStore(object):
 
     _CHUNK_SIZE_BYTES = 4096
     _IMAGE_NAME_PATTERN = re.compile(
-        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$'
+        "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$"
     )
 
     def __init__(self, uuidgen=uuid.uuid4, fopen=io.open):
-        self._storage_path = config.get('path', 'image_pub_dir')
+        self._storage_path = config.get("path", "image_pub_dir")
         self._uuidgen = uuidgen
         self._fopen = fopen
 
     def save(self, image_stream, image_content_type):
         ext = mimetypes.guess_extension(image_content_type)
-        name = '{uuid}{ext}'.format(uuid=self._uuidgen(), ext=ext)
+        name = "{uuid}{ext}".format(uuid=self._uuidgen(), ext=ext)
         image_path = os.path.join(self._storage_path, name)
 
-        with self._fopen(image_path, 'wb') as image_file:
+        with self._fopen(image_path, "wb") as image_file:
             while True:
                 chunk = image_stream.read(self._CHUNK_SIZE_BYTES)
                 if not chunk:
@@ -136,10 +133,10 @@ class ImageStore(object):
     def open(self, name):
         # Always validate untrusted input!
         if not self._IMAGE_NAME_PATTERN.match(name):
-            raise IOError('File not found')
+            raise IOError("File not found")
 
         image_path = os.path.join(self._storage_path, name)
-        stream = self._fopen(image_path, 'rb')
+        stream = self._fopen(image_path, "rb")
         stream_len = os.path.getsize(image_path)
 
         return stream, stream_len

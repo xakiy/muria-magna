@@ -18,21 +18,23 @@ from uuid import UUID
 from pony.orm import db_session, flush
 from muria.db.model import Jinshi, Figur, Wewenang
 
+
 def makeJinshi():
     data = list()
-    data.append({'id': 'l', 'nama': 'Laki-laki', 'kecil': 'Putra', 'formal': 'Pria'})
-    data.append({'id': 'p', 'nama': 'Perempuan', 'kecil': 'Putri', 'formal': 'Wanita'})
+    data.append({"id": "l", "nama": "Laki-laki", "kecil": "Putra", "formal": "Pria"})
+    data.append({"id": "p", "nama": "Perempuan", "kecil": "Putri", "formal": "Wanita"})
     with db_session:
         for j in data:
             if not Jinshi.exists(**j):
                 Jinshi(**j)
         flush()
 
+
 def makeFigur():
     data = list()
-    data.append({'nama_atas': 'Ayah', 'nama_bawah': 'Anak'})
-    data.append({'nama_atas': 'Ibu', 'nama_bawah': 'Anak'})
-    data.append({'nama_atas': 'Wali', 'nama_bawah': 'Anak Asuh'})
+    data.append({"nama_atas": "Ayah", "nama_bawah": "Anak"})
+    data.append({"nama_atas": "Ibu", "nama_bawah": "Anak"})
+    data.append({"nama_atas": "Wali", "nama_bawah": "Anak Asuh"})
 
     with db_session:
         for f in data:
@@ -40,8 +42,8 @@ def makeFigur():
                 Figur(**f)
         flush()
 
-# CORS Policy
-# def makeGrup():
+    # CORS Policy
+    # def makeGrup():
     """
     +----+------------+------------+
     | id | nama       | keterangan |
@@ -59,11 +61,11 @@ def makeFigur():
     +----+------------+------------+
     """
 
-# CORS Policy combined with Wewenang
-# def makeGrupWewenang():
+    # CORS Policy combined with Wewenang
+    # def makeGrupWewenang():
     # pass
 
-# def makeJenisAlamat():
+    # def makeJenisAlamat():
     """
     +----+--------+
     | id | nama   |
@@ -74,7 +76,7 @@ def makeFigur():
     +----+--------+
     """
 
-# def makeJenisAsrama():
+    # def makeJenisAsrama():
     """
     +----+---------------------+
     | id | nama                |
@@ -91,10 +93,10 @@ def makeFigur():
     +----+---------------------+
     """
 
-# def makeJenisTelepon():
+    # def makeJenisTelepon():
     # pass
 
-# def makeTingkatPendidikan():
+    # def makeTingkatPendidikan():
     """
     +----+--------------------------+-----------+
     | id | nama                     | singkatan |
@@ -109,22 +111,24 @@ def makeFigur():
     +----+--------------------------+-----------+
     """
 
+
 def makeWewenang():
     data = list()
-    data.append({'id': 1, 'nama': 'root'})
-    data.append({'id': 2, 'nama': 'admin'})
-    data.append({'id': 3, 'nama': 'editor'})
-    data.append({'id': 4, 'nama': 'kontributor'})
-    data.append({'id': 5, 'nama': 'santriwan'})
-    data.append({'id': 6, 'nama': 'santriwati'})
-    data.append({'id': 7, 'nama': 'wali'})
-    data.append({'id': 8, 'nama': 'umum'})
+    data.append({"id": 1, "nama": "root"})
+    data.append({"id": 2, "nama": "admin"})
+    data.append({"id": 3, "nama": "editor"})
+    data.append({"id": 4, "nama": "kontributor"})
+    data.append({"id": 5, "nama": "santriwan"})
+    data.append({"id": 6, "nama": "santriwati"})
+    data.append({"id": 7, "nama": "wali"})
+    data.append({"id": 8, "nama": "umum"})
 
     with db_session:
         for w in data:
             if not Wewenang.exists(**w):
                 Wewenang(**w)
         flush()
+
 
 def setPremise():
     makeJinshi()

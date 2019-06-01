@@ -31,89 +31,89 @@ import os
 
 
 class Profile(Resource):
-
     @db_session
     def on_get(self, req, resp, **params):
-        if params.get('jwt_claims') and params['jwt_claims'].get('pid'):
+        if params.get("jwt_claims") and params["jwt_claims"].get("pid"):
             try:
-                pid = params['jwt_claims']['pid']
+                pid = params["jwt_claims"]["pid"]
                 profile = Pengguna[pid]
             except ObjectNotFound:
                 raise falcon.HTTPUnauthorized(code=401)
 
             if isinstance(profile, Pengguna):
-                content = {'account': Pengguna_Schema().dump(profile)[0]}
+                content = {"account": Pengguna_Schema().dump(profile)[0]}
                 resp.status = falcon.HTTP_OK
                 resp.body = dumpAsJSON(content)
                 return
 
-        raise falcon.HTTPNotFound(
-            description='Profile is empty',
-            code=404)
+        raise falcon.HTTPNotFound(description="Profile is empty", code=404)
 
     @db_session
     def on_patch(self, req, resp, **params):
-        if req.media.get('id') == params['jwt_claims'].get('pid'):
+        if req.media.get("id") == params["jwt_claims"].get("pid"):
             try:
-                user = Pengguna[params['jwt_claims'].get('pid')]
+                user = Pengguna[params["jwt_claims"].get("pid")]
             except ObjectNotFound:
                 raise falcon.HTTPUnauthorized(code=401)
             ps = Pengguna_Schema()
             update, error = ps.load(req.media)
             if error:
                 raise falcon.HTTPUnprocessableEntity(
-                    title='Profile Update Error',
-                    description={'data': req.media, 'errors': error},
-                    code=422)
+                    title="Profile Update Error",
+                    description={"data": req.media, "errors": error},
+                    code=422,
+                )
             try:
                 user.set(**update)
                 flush()
-                content = {'account': ps.dump(user)[0]}
+                content = {"account": ps.dump(user)[0]}
                 resp.status = falcon.HTTP_OK
                 resp.body = dumpAsJSON(content)
             except (TypeError, ValueError, IntegrityError) as err:
                 raise falcon.HTTPUnprocessableEntity(
-                    title='Profile Update Error',
-                    description=str(err), code=422)
+                    title="Profile Update Error", description=str(err), code=422
+                )
         else:
             raise falcon.HTTPUnprocessableEntity(
-                title='Profile Update Error',
-                description='Incomplete data supplied',
-                code=422)
+                title="Profile Update Error",
+                description="Incomplete data supplied",
+                code=422,
+            )
 
 
 class Picture(Resource):
 
-    pict_dir = config.get('path', 'profile_pict_dir')
+    pict_dir = config.get("path", "profile_pict_dir")
     file_store = FileStore()
 
     @db_session
     def on_get(self, req, resp, **params):
-        if params.get('jwt_claims') and params['jwt_claims'].get('pid'):
+        if params.get("jwt_claims") and params["jwt_claims"].get("pid"):
             try:
-                pid = params['jwt_claims']['pid']
+                pid = params["jwt_claims"]["pid"]
                 user_profile = Pengguna[pid]
             except ObjectNotFound:
                 raise falcon.HTTPUnauthorized(code=401)
 
             if user_profile.picture:
                 resp.status = falcon.HTTP_OK
-                (resp.stream,
-                 resp.stream_len,
-                 resp.content_type) = self._open_file(user_profile.picture)
+                (resp.stream, resp.stream_len, resp.content_type) = self._open_file(
+                    user_profile.picture
+                )
 
         else:
             raise falcon.HTTPUnprocessableEntity(
-                title='Profile Update Error',
-                description='Incomplete data supplied',
-                code=422)
+                title="Profile Update Error",
+                description="Incomplete data supplied",
+                code=422,
+            )
 
     @db_session
     def on_put(self, req, resp, **params):
 
-        if params.get('jwt_claims') and params['jwt_claims'].get('pid'):
+        if params.get("jwt_claims") and params["jwt_claims"].get("pid"):
             try:
-                pid = params['jwt_claims']['pid']
+                pid = params["jwt_claims"]["pid"]
                 user_profile = Pengguna[pid]
             except ObjectNotFound:
                 raise falcon.HTTPUnauthorized(code=401)
@@ -123,7 +123,7 @@ class Picture(Resource):
             # id checking, like generated uuid that will be
             # compared to previous post
             # uid = req.get_param('profile_image_id')
-            profile_image = req.get_param('profile_image')
+            profile_image = req.get_param("profile_image")
 
             if profile_image is not None:
                 name = self.file_store.save(profile_image, self.pict_dir)
@@ -135,45 +135,45 @@ class Picture(Resource):
                     user_profile.picture = name
                     flush()
                     content = {
-                        'success':
-                        "{0} file uploaded".format(os.path.basename(name))}
+                        "success": "{0} file uploaded".format(os.path.basename(name))
+                    }
                 else:
                     resp.status = falcon.HTTP_404
                     resp.location = None
-                    content = {'error': "file failed to upload"}
+                    content = {"error": "file failed to upload"}
             else:
                 resp.status = falcon.HTTP_404
                 resp.location = None
-                content = {'error': "upload failed"}
+                content = {"error": "upload failed"}
 
             resp.body = dumpAsJSON(content)
         else:
             raise falcon.HTTPUnprocessableEntity(
-                title='Profile Update Error',
-                description='Incomplete data supplied',
-                code=422)
+                title="Profile Update Error",
+                description="Incomplete data supplied",
+                code=422,
+            )
 
     def _open_file(self, picture):
         print(picture)
         if os.path.exists(picture) and os.path.isfile(picture):
             try:
-                stream_data = open(picture, 'rb')
+                stream_data = open(picture, "rb")
                 stream_len = os.path.getsize(picture)
                 stream_type = mimetypes.guess_type(picture)[0]
-                print('got it')
+                print("got it")
                 return (stream_data, stream_len, stream_type)
             except FileNotFoundError as err:
                 # Should return default Blank/Not found picture
-                print('nee')
+                print("nee")
                 pass
-        print('naa')
+        print("naa")
         return (None, None, None)
-
 
     def _getEtag(self, fileHandler):
         md5 = hashlib.md5()
         while True:
-            data = fileHandler.read(2**20)
+            data = fileHandler.read(2 ** 20)
             if not data:
                 break
             md5.update(data)
@@ -181,13 +181,12 @@ class Picture(Resource):
 
 
 class Security(Resource):
-
     @db_session
     def on_patch(self, req, resp, **params):
-        if req.media.get('new_password') and req.media.get('old_password'):
-            pid = params['jwt_claims'].get('pid')
-            old_pass = req.media.get('old_password')
-            new_pass = req.media.get('new_password')
+        if req.media.get("new_password") and req.media.get("old_password"):
+            pid = params["jwt_claims"].get("pid")
+            old_pass = req.media.get("old_password")
+            new_pass = req.media.get("new_password")
 
             # calculate if new pass is 64 bit lengths
             # reject if empty
@@ -195,7 +194,8 @@ class Security(Resource):
                 raise falcon.HTTPUnprocessableEntity(
                     title="Password Change",
                     description="Invalid password length, at least 8 and not more than 40 characters",
-                    code=422)
+                    code=422,
+                )
             try:
                 user = Pengguna.get(orang=pid)
             except ObjectNotFound:
@@ -210,4 +210,5 @@ class Security(Resource):
                 raise falcon.HTTPUnprocessableEntity(
                     title="Password Change",
                     description="Wrong password supplied.",
-                    code=422)
+                    code=422,
+                )

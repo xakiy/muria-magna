@@ -35,32 +35,32 @@ class ResOrangs(Resource):
     def on_get(self, req, resp, **params):
 
         req_params = req.params
-        if req_params.get('search') is not None:
+        if req_params.get("search") is not None:
             content = dict()
             ps = Orang_Schema()
-            query = Orang.select(lambda o: req_params.get('search') in o.nama)
+            query = Orang.select(lambda o: req_params.get("search") in o.nama)
             if query.count() > 0:
                 content = {
-                    'count': query.count(),
-                    'persons':
-                    [ps.dump(p.to_dict())[0] for p in query]}
+                    "count": query.count(),
+                    "persons": [ps.dump(p.to_dict())[0] for p in query],
+                }
                 resp.status = falcon.HTTP_200
             else:
                 resp.status = falcon.HTTP_404
-                content = {'error': 'No data found!'}
+                content = {"error": "No data found!"}
         else:
             content = dict()
-            persons = Orang.select()[:self.config.getint('app', 'page_limit')]
+            persons = Orang.select()[: self.config.getint("app", "page_limit")]
             ps = Orang_Schema()
             if len(persons) > 0:
                 content = {
-                    'count': len(persons),
-                    'persons':
-                    [ps.dump(p.to_dict())[0] for p in persons]}
+                    "count": len(persons),
+                    "persons": [ps.dump(p.to_dict())[0] for p in persons],
+                }
                 resp.status = falcon.HTTP_200
             else:
                 resp.status = falcon.HTTP_404
-                content = {'error': 'No data found!'}
+                content = {"error": "No data found!"}
 
         resp.body = dumpAsJSON(content)
 
@@ -81,7 +81,7 @@ class ResDataOrang(Resource):
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = ('Non-existant id request of #{0}'.format(id))
+            content = "Non-existant id request of #{0}".format(id)
 
         resp.body = dumpAsJSON(content)
 
@@ -93,29 +93,39 @@ class ResDataOrang(Resource):
             person, error = ps.load(req.media)
 
             if error:
-                raise falcon.HTTPError(falcon.HTTP_400,
-                                       title='Invalid Parameters',
-                                       code=error)
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, title="Invalid Parameters", code=error
+                )
 
-            if not Orang.exists(nik=person['nik']):
+            if not Orang.exists(nik=person["nik"]):
                 try:
                     pe = Orang(**person)
                     if isinstance(pe, Orang):
-                        content = {'message': 'Successfully inserted',
-                                   'url': '/persons/{0}'.format(pe.id)}
+                        content = {
+                            "message": "Successfully inserted",
+                            "url": "/persons/{0}".format(pe.id),
+                        }
                         resp.status = falcon.HTTP_201
                     else:
-                        content = {'message': 'Data gagal dimasukkan karena sebab yang tidak jelas :('}
+                        content = {
+                            "message": "Data gagal dimasukkan karena sebab yang tidak jelas :("
+                        }
                         resp.status = falcon.HTTP_400
 
                 except OrmError:
-                    content = {'message': 'Data gagal dimasukkan'}
+                    content = {"message": "Data gagal dimasukkan"}
                     resp.status = falcon.HTTP_400
             else:
-                content = {'message': 'Data orang yang bersangkutan telah ada di database'}
+                content = {
+                    "message": "Data orang yang bersangkutan telah ada di database"
+                }
                 resp.status = falcon.HTTP_400
         else:
-            raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
+            raise falcon.HTTPError(
+                falcon.HTTP_400,
+                "Invalid JSON",
+                "Could not decode the request body. The JSON was incorrect.",
+            )
 
         resp.body = dumpAsJSON(content)
 
@@ -134,20 +144,18 @@ class ResSantri(Resource):
 
         content = dict()
         # santri_list = Santri.select()[:config.get('app', 'page_limit')]
-        santri_list = Santri.select()[:self.config.getint('app', 'page_limit')]
+        santri_list = Santri.select()[: self.config.getint("app", "page_limit")]
         # paging akan disesuaikan menurut request
         sc = Santri_Schema()
 
         if len(santri_list) != 0:
-            content = {'santri': [ sc.dump( s.to_dict() )[0] for s in santri_list]}
+            content = {"santri": [sc.dump(s.to_dict())[0] for s in santri_list]}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = {'error': 'empty result'}
+            content = {"error": "empty result"}
 
         resp.body = dumpAsJSON(content)
-
-
 
     @db_session
     def on_post(self, req, resp, **params):
@@ -157,29 +165,39 @@ class ResSantri(Resource):
             fulan, error = ss.load(req.media)
 
             if error:
-                raise falcon.HTTPError(falcon.HTTP_400,
-                                       title='Invalid Parameters',
-                                       code=error)
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, title="Invalid Parameters", code=error
+                )
 
-            if not Santri.exists(nis=fulan['nis']):
+            if not Santri.exists(nis=fulan["nis"]):
                 try:
                     santri = Santri(**fulan)
                     if isinstance(santri, Santri):
-                        content = {'message': 'Successfully inserted',
-                                   'url': '/santri/{0}'.format(santri.id)}
+                        content = {
+                            "message": "Successfully inserted",
+                            "url": "/santri/{0}".format(santri.id),
+                        }
                         resp.status = falcon.HTTP_201
                     else:
-                        raise falcon.HTTPError(falcon.HTTP_500,
-                                               title=falcon.HTTP_500,
-                                               description="Unable to insert data")
+                        raise falcon.HTTPError(
+                            falcon.HTTP_500,
+                            title=falcon.HTTP_500,
+                            description="Unable to insert data",
+                        )
                 except err:
-                    content = {'message': 'Data gagal dimasukkan'}
+                    content = {"message": "Data gagal dimasukkan"}
                     resp.status = falcon.HTTP_400
             else:
-                content= {'message': 'Data orang yang bersangkutan telah ada di database'}
+                content = {
+                    "message": "Data orang yang bersangkutan telah ada di database"
+                }
                 resp.status = falcon.HTTP_400
         else:
-            raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
+            raise falcon.HTTPError(
+                falcon.HTTP_400,
+                "Invalid JSON",
+                "Could not decode the request body. The JSON was incorrect.",
+            )
 
         resp.body = dumpAsJSON(content)
 
@@ -199,6 +217,6 @@ class ResDataSantri(Resource):
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = ('Invalid id #{0}'.format(id))
+            content = "Invalid id #{0}".format(id)
 
         resp.body = dumpAsJSON(content)

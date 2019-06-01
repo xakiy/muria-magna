@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""OAuth2 Resource File."""
+"""OAuth2 Resource."""
 
 import falcon
 import base64
@@ -22,26 +22,23 @@ from muria.resource.base import Resource
 from muria.db.schema import Login_Schema
 from muria.db.model import Pengguna
 from muria.lib.misc import dumpAsJSON
-from muria.lib.form import data_packs
 
 
-
-
-def get_basic_auth(request, content_type='application/x-www-form-urlencoded'):
+def get_basic_auth(request, content_type="application/x-www-form-urlencoded"):
     """Extract Auth Basic from user request."""
     req = request
-    if req.content_type == content_type and req.headers.get('AUTHORIZATION'):
-        basic = req.headers.get('AUTHORIZATION', '').partition('Basic ')[2]
-        return bytes(basic, 'utf-8')
+    if req.content_type == content_type and req.headers.get("AUTHORIZATION"):
+        basic = req.headers.get("AUTHORIZATION", "").partition("Basic ")[2]
+        return bytes(basic, "utf-8")
 
 
 def decode_basic_auth(string):
     """Decode string with base64."""
     if not isinstance(string, bytes):
-        string = bytes(string, 'utf-8')
+        string = bytes(string, "utf-8")
 
-    basic = base64.decodebytes(string).decode('utf-8')
-    username, sep, password = basic.partition(':')
+    basic = base64.decodebytes(string).decode("utf-8")
+    username, sep, password = basic.partition(":")
     return username, password
 
 
@@ -53,29 +50,29 @@ class Oauth2(Resource):
         data = req.media
         print(data)
         resp.status = falcon.HTTP_OK
-        resp.set_header('WWW-Authenticate', 'Bearer')
-        content = {'WWW-Authenticate': 'Bearer'}
+        resp.set_header("WWW-Authenticate", "Bearer")
+        content = {"WWW-Authenticate": "Bearer"}
         resp.body = dumpAsJSON(content)
 
     @db_session
     def on_post(self, req, resp, **params):
 
-        if not config.getboolean('security', 'secure'):
+        if not config.getboolean("security", "secure"):
             raise falcon.HTTPBadRequest(
-                title='HTTPS Required',
+                title="HTTPS Required",
                 description=(
-                    'All requests must be performed via the HTTPS protocol. '
-                    'Please switch to HTTPS and try again.'
-                )
+                    "All requests must be performed via the HTTPS protocol. "
+                    "Please switch to HTTPS and try again."
+                ),
             )
         # TODO: Need to implement client_id and client_secret instead of
         #       using username and password credentials directly as of
         #       swagger-editor send Auth Basic in client_id
         #       and client_secret pair
-        auth_basic = get_basic_auth(req, 'application/x-www-form-urlencoded')
+        auth_basic = get_basic_auth(req, "application/x-www-form-urlencoded")
         if auth_basic is not None:
             user, password = decode_basic_auth(auth_basic)
-            credentials = {'username': user, 'password': password}
+            credentials = {"username": user, "password": password}
         else:
             credentials = req.media
 
@@ -85,21 +82,23 @@ class Oauth2(Resource):
         if errors:
             # entity is received but unable to process, may due to:
             # blank entity, or invalid one.
-            raise falcon.HTTPUnprocessableEntity(description=str(errors), code=422)
+            raise falcon.HTTPUnprocessableEntity(
+                description=str(errors), code=422
+            )
 
-        if not Pengguna.exists(username=data['username']):
+        if not Pengguna.exists(username=data["username"]):
             raise falcon.HTTPUnauthorized(code=401)
 
-        auth_user = Pengguna.get(username=data['username'])
+        auth_user = Pengguna.get(username=data["username"])
 
-        if auth_user.checkPassword(data['password']):
+        if auth_user.checkPassword(data["password"]):
 
             token_payload = {
-                'name': auth_user.orang.nama,
-                'pid': str(auth_user.orang.id),
-                'roles': [x for x in auth_user.kewenangan.wewenang.nama]
+                "name": auth_user.orang.nama,
+                "pid": str(auth_user.orang.id),
+                "roles": [x for x in auth_user.kewenangan.wewenang.nama],
             }
-            print(token_payload, data['password'])
+            print(token_payload, data["password"])
 
             tokens = tokenizer.createAccessToken(token_payload)
 
@@ -110,10 +109,12 @@ class Oauth2(Resource):
             content = {
                 # some clients do not recognize the token type if
                 # not properly titled case as in RFC6750 section-2.1
-                'token_type': 'Bearer',
-                'expires_in': self.config.getint('security', 'access_token_exp'),
-                'refresh_token': tokens['refresh_token'],
-                'access_token': tokens['access_token']
+                "token_type": "Bearer",
+                "expires_in": self.config.getint(
+                    "security", "access_token_exp"
+                ),
+                "refresh_token": tokens["refresh_token"],
+                "access_token": tokens["access_token"],
             }
             resp.status = falcon.HTTP_OK
             resp.body = dumpAsJSON(content)

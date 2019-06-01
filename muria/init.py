@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Init env dan konfigurasi lainnya."""
+
+"""Init Env and Other Configurations."""
 
 from muria.lib.config import Parser
 from muria.conf.policy import Policy_Config
 from muria.db.manager import DBManager
-
 
 # Middlewares
 # from falcon_auth import FalconAuthMiddleware, BasicAuthBackend
@@ -34,9 +34,9 @@ from muria.lib.form import FormHandler
 # MURIA_SETUP merupakan env yang menunjuk ke berkas
 # konfigurasi produksi atau pengembangan.
 # seperti: export MURIA_SETUP=~/config/devel.ini
-config = Parser(setup='MURIA_SETUP')
+config = Parser(setup="MURIA_SETUP")
 
-DEBUG = config.getboolean('app', 'debug')
+DEBUG = config.getboolean("app", "debug")
 
 logger = Logger(config).getLogger()
 
@@ -47,55 +47,65 @@ from muria.conf import premise
 premise.setPremise()
 
 if DEBUG:
-    logger.debug('---------------------------------')
-    logger.debug('# WARNING: DEBUG MODE IS ACTIVE #')
-    logger.debug('---------------------------------')
+    logger.debug("---------------------------------")
+    logger.debug("# WARNING: DEBUG MODE IS ACTIVE #")
+    logger.debug("---------------------------------")
 
 tokenizer = Tokenizer(config)
 
-extra_handlers = {
-    'application/x-www-form-urlencoded': FormHandler()
-}
+extra_handlers = {"application/x-www-form-urlencoded": FormHandler()}
 
 middleware_list = []
 
-if config.getboolean('security', 'secure'):
+if config.getboolean("security", "secure"):
 
     cors = CORS(
-        log_level=config.getint('cors', 'log_level'),
-        allow_all_origins=config.getboolean('cors', 'allow_all_origins'),  # false means disallow any random host to connect
-        allow_origins_list=config.getlist('cors', 'allow_origins_list'),
-        allow_all_methods=config.getboolean('cors', 'allow_all_methods'),  # allow all methods incl. custom ones are allowed via CORS requests
-        allow_methods_list=config.getlist('cors', 'allow_methods_list'),
+        log_level=config.getint("cors", "log_level"),
+        allow_all_origins=config.getboolean(
+            "cors", "allow_all_origins"
+        ),  # false means disallow any random host to connect
+        allow_origins_list=config.getlist("cors", "allow_origins_list"),
+        allow_all_methods=config.getboolean(
+            "cors", "allow_all_methods"
+        ),  # allow all methods incl. custom ones are allowed via CORS requests
+        allow_methods_list=config.getlist("cors", "allow_methods_list"),
         # exposed value sent as response to the Access-Control-Expose-Headers request
-        expose_headers_list=config.getlist('cors', 'expose_headers_list'),
-        allow_all_headers=config.getboolean('cors', 'allow_all_headers'),  # for preflight response
-        allow_headers_list=config.getlist('cors', 'allow_headers_list'),
-        allow_credentials_all_origins=config.getboolean('cors', 'allow_credentials_all_origins'),
-        allow_credentials_origins_list=config.getlist('cors', 'allow_credentials_origins_list'),
-        max_age=config.getint('cors', 'max_age')
+        expose_headers_list=config.getlist("cors", "expose_headers_list"),
+        allow_all_headers=config.getboolean(
+            "cors", "allow_all_headers"
+        ),  # for preflight response
+        allow_headers_list=config.getlist("cors", "allow_headers_list"),
+        allow_credentials_all_origins=config.getboolean(
+            "cors", "allow_credentials_all_origins"
+        ),
+        allow_credentials_origins_list=config.getlist(
+            "cors", "allow_credentials_origins_list"
+        ),
+        max_age=config.getint("cors", "max_age"),
     )
 
     jwt_checker = GiriJwtChecker(
-        secret=config.getbinary('security', 'public_key'),  # May be a public key
-        algorithm=config.get('security', 'algorithm'),
-        issuer=config.get('security', 'issuer'),
-        audience=config.get('security', 'audience'),
+        secret=config.getbinary(
+            "security", "public_key"
+        ),  # May be a public key
+        algorithm=config.get("security", "algorithm"),
+        issuer=config.get("security", "issuer"),
+        audience=config.get("security", "audience"),
         leeway=60,
         exempt_routes=[
             # excluded routes
-            '/v1/auth',
-            '/v1/auth/verify',
-            '/v1/auth/refresh',
-            '/v1/upload',
-            '/v1/stats/santri',
-            '/v1/stats/santri/{jinshi}',
-            '/v1/oauth2'
+            "/v1/auth",
+            "/v1/auth/verify",
+            "/v1/auth/refresh",
+            "/v1/upload",
+            "/v1/stats/santri",
+            "/v1/stats/santri/{jinshi}",
+            "/v1/oauth2",
         ],
         exempt_methods=[
             # excluded HTTP methods
-            'OPTIONS'
-        ]
+            "OPTIONS"
+        ],
     )
 
     middleware_list.append(cors.middleware)
@@ -105,4 +115,4 @@ if config.getboolean('security', 'secure'):
 
 middleware_list.append(MultipartMiddleware())
 
-logger.debug('Initto...!')
+logger.debug("Initto...!")

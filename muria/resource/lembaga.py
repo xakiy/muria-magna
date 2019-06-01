@@ -20,7 +20,11 @@ import uuid
 from muria.resource.base import Resource
 from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
-from muria.db.schema import Lembaga_Schema, Jabatan_Lembaga_Schema, Pegawai_Lembaga_Schema
+from muria.db.schema import (
+    Lembaga_Schema,
+    Jabatan_Lembaga_Schema,
+    Pegawai_Lembaga_Schema,
+)
 from pony.orm.core import TransactionIntegrityError, CacheIndexError
 
 
@@ -34,18 +38,17 @@ class ResLembaga(Resource):
     def on_get(self, req, resp, **params):
 
         content = dict()
-        lembaga_list = Lembaga.select()[:self.config.getint('app', 'page_limit')]
+        lembaga_list = Lembaga.select()[: self.config.getint("app", "page_limit")]
         ls = Lembaga_Schema()
 
         if len(lembaga_list) != 0:
-            content = {'lembaga': [ ls.dump( l.to_dict() )[0] for l in lembaga_list]}
+            content = {"lembaga": [ls.dump(l.to_dict())[0] for l in lembaga_list]}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = {'error': 'No lembaga found!'}
+            content = {"error": "No lembaga found!"}
 
         resp.body = dumpAsJSON(content)
-
 
     @db_session()
     def on_post(self, req, resp, **params):
@@ -55,31 +58,43 @@ class ResLembaga(Resource):
             instansi, error = ls.load(req.media)
 
             if error:
-                raise falcon.HTTPError(falcon.HTTP_400,
-                                       title='Invalid Parameters',
-                                       code=error)
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, title="Invalid Parameters", code=error
+                )
 
-            if not Lembaga.exists(lambda l: l.slug==instansi['slug'] or l.nama==instansi['nama'] or l.id==instansi['id']):
+            if not Lembaga.exists(
+                lambda l: l.slug == instansi["slug"]
+                or l.nama == instansi["nama"]
+                or l.id == instansi["id"]
+            ):
                 try:
                     lembaga = Lembaga(**instansi)
 
                     if isinstance(lembaga, Lembaga):
-                        content = {'message': 'Successfully inserted',
-                                   'url': '/lembaga/{0}'.format(lembaga.id)}
+                        content = {
+                            "message": "Successfully inserted",
+                            "url": "/lembaga/{0}".format(lembaga.id),
+                        }
                         resp.status = falcon.HTTP_201
                     else:
-                        raise falcon.HTTPError(falcon.HTTP_500,
-                                       title=falcon.HTTP_500,
-                                       description="Unable to insert data")
+                        raise falcon.HTTPError(
+                            falcon.HTTP_500,
+                            title=falcon.HTTP_500,
+                            description="Unable to insert data",
+                        )
 
                 except (TransactionIntegrityError, CacheIndexError):
-                    content = {'message': 'Data gagal dimasukkan'}
+                    content = {"message": "Data gagal dimasukkan"}
                     resp.status = falcon.HTTP_400
             else:
-                content= {'message': 'Data tersebut telah ada di database'}
+                content = {"message": "Data tersebut telah ada di database"}
                 resp.status = falcon.HTTP_400
         else:
-            raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
+            raise falcon.HTTPError(
+                falcon.HTTP_400,
+                "Invalid JSON",
+                "Could not decode the request body. The JSON was incorrect.",
+            )
 
         resp.body = dumpAsJSON(content)
 
@@ -97,7 +112,7 @@ class ResDataLembaga(Resource):
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = {'error': 'Resouce not found, eg. #{0}'.format(lid)}
+            content = {"error": "Resouce not found, eg. #{0}".format(lid)}
 
         resp.body = dumpAsJSON(content)
 
@@ -109,32 +124,48 @@ class ResDataLembaga(Resource):
             instansi, error = ls.load(req.media)
 
             if error:
-                raise falcon.HTTPError(falcon.HTTP_400,
-                                       title='Invalid Parameters',
-                                       code=error)
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, title="Invalid Parameters", code=error
+                )
 
-            if Lembaga.exists(lambda l: l.slug==instansi['slug'] or l.nama==instansi['nama'] or l.id==instansi['id']):
+            if Lembaga.exists(
+                lambda l: l.slug == instansi["slug"]
+                or l.nama == instansi["nama"]
+                or l.id == instansi["id"]
+            ):
                 try:
-                    lembaga = Lembaga.get(lambda l: l.slug==instansi['slug'] or l.nama==instansi['nama'] or l.id==instansi['id'])
+                    lembaga = Lembaga.get(
+                        lambda l: l.slug == instansi["slug"]
+                        or l.nama == instansi["nama"]
+                        or l.id == instansi["id"]
+                    )
                     lembaga.set(**instansi)
 
                     if isinstance(lembaga, Lembaga):
-                        content = {'message': 'Successfully updated',
-                                   'url': '/lembaga/{0}'.format(lembaga.id)}
+                        content = {
+                            "message": "Successfully updated",
+                            "url": "/lembaga/{0}".format(lembaga.id),
+                        }
                         resp.status = falcon.HTTP_201
                     else:
-                        raise falcon.HTTPError(falcon.HTTP_500,
-                                       title=falcon.HTTP_500,
-                                       description="Unable to insert data")
+                        raise falcon.HTTPError(
+                            falcon.HTTP_500,
+                            title=falcon.HTTP_500,
+                            description="Unable to insert data",
+                        )
 
                 except (TransactionIntegrityError, CacheIndexError):
-                    content = {'message': 'Data gagal diperbarui'}
+                    content = {"message": "Data gagal diperbarui"}
                     resp.status = falcon.HTTP_400
             else:
-                content= {'message': 'Data tersebut tidak ada di database'}
+                content = {"message": "Data tersebut tidak ada di database"}
                 resp.status = falcon.HTTP_400
         else:
-            raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
+            raise falcon.HTTPError(
+                falcon.HTTP_400,
+                "Invalid JSON",
+                "Could not decode the request body. The JSON was incorrect.",
+            )
 
         resp.body = dumpAsJSON(content)
 
@@ -150,18 +181,21 @@ class ResJabatanLembaga(Resource):
 
         if Lembaga.exists(id=lid):
             content = dict()
-            jabatan_lembaga_list = Jabatan_Lembaga.select(lambda j: j.lembaga.id == lid)[:self.config.getint('app', 'page_limit')]
+            jabatan_lembaga_list = Jabatan_Lembaga.select(
+                lambda j: j.lembaga.id == lid
+            )[: self.config.getint("app", "page_limit")]
             jls = Jabatan_Lembaga_Schema()
 
-            content = {'jabatan': [ jls.dump( jl.to_dict() )[0] for jl in jabatan_lembaga_list]}
+            content = {
+                "jabatan": [jls.dump(jl.to_dict())[0] for jl in jabatan_lembaga_list]
+            }
             resp.status = falcon.HTTP_200
-            resp.set_header('Access-Control-Allow-Origin','*')
+            resp.set_header("Access-Control-Allow-Origin", "*")
         else:
             resp.status = falcon.HTTP_404
-            content = {'error': 'No lembaga found!'}
+            content = {"error": "No lembaga found!"}
 
         resp.body = dumpAsJSON(content)
-
 
     @db_session
     def on_post(self, req, resp, lid, **params):
@@ -171,32 +205,47 @@ class ResJabatanLembaga(Resource):
             tugas, error = jls.load(req.media)
 
             if error:
-                raise falcon.HTTPError(falcon.HTTP_400,
-                                       title='Invalid Parameters',
-                                       code=error)
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, title="Invalid Parameters", code=error
+                )
 
-            if int(lid) != int(tugas['lembaga']):
-                raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Cross id submitted. The JSON was incorrect.')
+            if int(lid) != int(tugas["lembaga"]):
+                raise falcon.HTTPError(
+                    falcon.HTTP_400,
+                    "Invalid JSON",
+                    "Cross id submitted. The JSON was incorrect.",
+                )
 
-            if ( Lembaga.exists(id=lid) == True ) & ( Jabatan_Lembaga.exists(lembaga=tugas['lembaga'], jabatan=tugas['jabatan']) == False ):
+            if (Lembaga.exists(id=lid) == True) & (
+                Jabatan_Lembaga.exists(
+                    lembaga=tugas["lembaga"], jabatan=tugas["jabatan"]
+                )
+                == False
+            ):
                 try:
                     jabatan = Jabatan_Lembaga(**tugas)
                     if isinstance(jabatan, Jabatan_Lembaga):
-                        content = {'message': 'Data berhasil dimasukkan'}
+                        content = {"message": "Data berhasil dimasukkan"}
                         resp.status = falcon.HTTP_201
                     else:
-                        raise falcon.HTTPError(falcon.HTTP_500,
-                                       title=falcon.HTTP_500,
-                                       description="Error instansiasi entitas!")
+                        raise falcon.HTTPError(
+                            falcon.HTTP_500,
+                            title=falcon.HTTP_500,
+                            description="Error instansiasi entitas!",
+                        )
 
                 except:
-                    content = {'message': 'Data gagal dimasukkan'}
+                    content = {"message": "Data gagal dimasukkan"}
                     resp.status = falcon.HTTP_400
             else:
-                content= {'message': 'Data tersebut telah ada di database'}
+                content = {"message": "Data tersebut telah ada di database"}
                 resp.status = falcon.HTTP_400
         else:
-            raise falcon.HTTPError(falcon.HTTP_400,'Invalid JSON','Could not decode the request body. The JSON was incorrect.')
+            raise falcon.HTTPError(
+                falcon.HTTP_400,
+                "Invalid JSON",
+                "Could not decode the request body. The JSON was incorrect.",
+            )
 
         resp.body = dumpAsJSON(content)
 
@@ -215,15 +264,17 @@ class ResJabatanLembagaDetail(Resource):
             instansi = Lembaga.get(id=lid)
             jabatan = Jabatan_Lembaga.get(id=id, lembaga=instansi.id)
 
-            if jabatan :
-                content = {'jabatan': jabatan.to_dict() }
+            if jabatan:
+                content = {"jabatan": jabatan.to_dict()}
                 resp.status = falcon.HTTP_200
-                resp.set_header('Access-Control-Allow-Origin','*')
+                resp.set_header("Access-Control-Allow-Origin", "*")
             else:
                 resp.status = falcon.HTTP_404
-                content = {'error': 'No jabatan found!'}
+                content = {"error": "No jabatan found!"}
         else:
-            raise falcon.HTTPError(falcon.HTTP_400,'Invalid request','Data not found!')
+            raise falcon.HTTPError(
+                falcon.HTTP_400, "Invalid request", "Data not found!"
+            )
 
         resp.body = dumpAsJSON(content)
 

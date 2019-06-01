@@ -24,11 +24,11 @@ try:
     import rapidjson as json
 except ImportError:
     import json
+
     class ConvertionEncoder(json.JSONEncoder):
         def default(self, obj):
             """Mengubah datetime sebagai string biasa."""
-            if isinstance(obj, datetime.datetime) or \
-               isinstance(obj, datetime.date):
+            if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
                 return obj.isoformat()[:10]
 
             """Mengubah bytes menjadi string biasa."""
@@ -66,8 +66,11 @@ def dict_merge(dct, merge_dct):
     :return: None
     """
     for k, v in merge_dct.iteritems():
-        if (k in dct and isinstance(dct[k], dict) and
-                isinstance(merge_dct[k], collections.Mapping)):
+        if (
+            k in dct
+            and isinstance(dct[k], dict)
+            and isinstance(merge_dct[k], collections.Mapping)
+        ):
             dict_merge(dct[k], merge_dct[k])
         else:
             dct[k] = merge_dct[k]
@@ -82,11 +85,11 @@ def merge_two_dicts(x, y):
 
 def getEtag(content):
     """Hitung entity tag."""
-    tag = 'W/'  # Weak eTag
+    tag = "W/"  # Weak eTag
     if len(content) == 0:
         return tag + '"d41d8cd98f00b204e9800998ecf8427e"'
     else:
-        hashed = hashlib.md5(bytes(content, 'utf8')).hexdigest()
+        hashed = hashlib.md5(bytes(content, "utf8")).hexdigest()
         return tag + '"' + hashed + '"'
 
 
@@ -95,27 +98,33 @@ def dumpAsJSON(source):
 
     NOTE: All date type is dumped in ISO8601 format
     """
-    if json.__name__ == 'rapidjson':
+    if json.__name__ == "rapidjson":
         # UM_NONE = 0,
         # UM_CANONICAL = 1<<0, // 4-dashed 32 hex chars: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
         # UM_HEX = 1<<1 // canonical OR 32 hex chars in a row
         if DEBUG:
             # pretty output, debug only
-            output = json.dumps(source, default=datetimeToISO, uuid_mode=json.UM_CANONICAL, indent=4)
+            output = json.dumps(
+                source, default=datetimeToISO, uuid_mode=json.UM_CANONICAL, indent=4
+            )
         else:
             # pure JSON
-            output = json.dumps(source, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_CANONICAL) # speed 1.8xx
+            output = json.dumps(
+                source, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_CANONICAL
+            )  # speed 1.8xx
     else:
         if DEBUG:
             # pretty output, debug only
             # output = ujson.dumps(source)
-            output = json.dumps(source, cls=ConvertionEncoder, sort_keys=True, indent=4 * ' ')
+            output = json.dumps(
+                source, cls=ConvertionEncoder, sort_keys=True, indent=4 * " "
+            )
             # output = json.dumps(source, ensure_ascii=False)
         else:
             # pure JSON
             # output = rjson.dumps(source, default=datetimeToISO) # speed 1.6xx
             # output = ujson.dumps(source)
-            output = json.dumps(source, cls=ConvertionEncoder) # speed 1.8xx
+            output = json.dumps(source, cls=ConvertionEncoder)  # speed 1.8xx
             # output = sjson.dumps(sjson.loads(source), use_decimal=False)
             # output = json.dumps(source) #not work for datetime.date field
 
@@ -123,4 +132,4 @@ def dumpAsJSON(source):
 
 
 def isJinshi(x):
-    return ('l', 'p').count(x)
+    return ("l", "p").count(x)

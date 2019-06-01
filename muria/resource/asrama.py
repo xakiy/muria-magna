@@ -34,24 +34,24 @@ class ResRayon(Resource):
     @db_session
     def on_get(self, req, resp, **params):
 
-        print('#DEBUG @asrama')
+        print("#DEBUG @asrama")
         # DEBUG
-        print('headers: ', req.headers)
-        print('acc_route: ', req.access_route)
-        print('params: ', req.params)
-        #print('media: ', req.media)
+        print("headers: ", req.headers)
+        print("acc_route: ", req.access_route)
+        print("params: ", req.params)
+        # print('media: ', req.media)
 
         content = dict()
-        rayon_list = Asrama_Rayon.select()[:self.config.getint('app', 'page_limit')]
+        rayon_list = Asrama_Rayon.select()[: self.config.getint("app", "page_limit")]
 
         ars = Asrama_Rayon_Schema()
 
         if len(rayon_list) != 0:
-            content = {'rayon': [  r.getDict() for r in rayon_list]}
+            content = {"rayon": [r.getDict() for r in rayon_list]}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = {'error': 'empty result'}
+            content = {"error": "empty result"}
 
         resp.body = dumpAsJSON(content)
         resp.etag = getEtag(resp.body)
@@ -60,12 +60,12 @@ class ResRayon(Resource):
             resp.status = falcon.HTTP_304
 
     def on_options(self, req, resp, **params):
-        print('#DEBUG @asrama/options')
+        print("#DEBUG @asrama/options")
         # DEBUG
-        print('headers: ', req.headers)
-        print('acc_route: ', req.access_route)
-        print('params: ', req.params)
-        #print('media: ', req.media)
+        print("headers: ", req.headers)
+        print("acc_route: ", req.access_route)
+        print("params: ", req.params)
+        # print('media: ', req.media)
         resp.status = falcon.HTTP_OK
 
 
@@ -84,7 +84,7 @@ class ResDataRayon(Resource):
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = ('Non-existant id request of #{0}'.format(id))
+            content = "Non-existant id request of #{0}".format(id)
 
         resp.body = dumpAsJSON(content)
 
@@ -98,22 +98,26 @@ class ResKepalaRayon(Resource):
     def on_get(self, req, resp, **params):
 
         content = dict()
-        rayon_list = Asrama_Rayon.select()[:self.config.getint('app', 'page_limit')]
+        rayon_list = Asrama_Rayon.select()[: self.config.getint("app", "page_limit")]
 
         if len(rayon_list) != 0:
 
-            content = {'kepala_rayon': [{
-                'id_rayon': w.id,
-                'kepala_rayon': w.kepala_rayon.nama,
-                'kepala_rayon_id': w.kepala_rayon.id,
-                'nama_rayon': w.nama_rayon,
-                'area_rayon': w.area_rayon
-            } for w in rayon_list
-            ]}
+            content = {
+                "kepala_rayon": [
+                    {
+                        "id_rayon": w.id,
+                        "kepala_rayon": w.kepala_rayon.nama,
+                        "kepala_rayon_id": w.kepala_rayon.id,
+                        "nama_rayon": w.nama_rayon,
+                        "area_rayon": w.area_rayon,
+                    }
+                    for w in rayon_list
+                ]
+            }
 
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = {'error': 'empty result'}
+            content = {"error": "empty result"}
 
         resp.body = dumpAsJSON(content)

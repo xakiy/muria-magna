@@ -14,66 +14,380 @@ from muria.init import tokenizer
 from muria.db.model import Jinshi
 from muria.lib.misc import dumpAsJSON
 
-class DataGenerator(object):
 
+class DataGenerator(object):
     def __init__(self):
         self.today = datetime.date.today().isoformat()
         self.now = datetime.datetime.now().isoformat()
         self.next6years = str(int(self.today[:4]) + 6) + self.today[4:]
-        self.femaleNames = ['Dina', 'Saufa', 'Irmawati', 'Ulfa', 'Minarni', 'Afni', 'Asfia', 'Hairiyah', 'Fitri', 'Maria', 'Munawaroh', 'Nikmah', 'Artiyah', 'Sarilah', 'Nadin', 'Ika', 'Emi', 'Erni', 'Hilda', 'Ira', 'Izzah', 'Ana', 'Nita', 'Salsabila', 'Risa', 'Saraswati', 'Titin', 'Yuliana', 'Wahyuni', 'Hafsah', 'Tiara', 'Ghea', 'Indah', 'Hayyin', 'Fathimah', "Lu'luk", 'Nufus', 'Windri', 'Erin', 'Iliana', 'Fifi', 'Vivian', 'Juli', 'Yuli', 'Sandra', 'Sofia', 'Rubi', 'Rabiah', 'Husniah', 'Halimah', 'Rusmini', 'Mirna', 'Muslimah', 'Hartati', 'Lia', 'Lutfia', 'Mia', 'Maya', 'Lily', 'Diana', 'Silfie', 'Retno', 'Susi', 'Yohana', 'Suparni', 'Zahro', 'Ramadhani', 'Munisah', 'Zuhriyah', 'Vina', 'Rahma', 'Rahmi', 'Ayu', 'Anik', 'Hani', 'Hana', 'Latifah', 'Aishah', 'Zulaikha', 'Ririn', 'Anisa', 'Dewi', 'Putri', 'Suciati', 'Puji', 'Astuti', 'Jamila', 'Laksmi', 'Bunga', 'Yuanita', 'Bilqis', 'Safitri', 'Yuliana', 'Fatmawati', 'Nova', 'Rosa', 'Sri', 'Indri', 'Sofiah', 'Sari', 'Suharti', 'Rukmini', 'Binti', 'Sulistiawati', 'Gina', 'Revina', 'Alviana', 'Widuri', 'Windi', 'Wulandari', 'Ismah', 'Rafiah', 'Sulastri', 'Hilwa', 'Ida', 'Keisha', 'Meisya', 'Maisyaroh']
-        self.maleNames = ['Ahmad', 'Zairi', 'Zainur', 'Salim', 'Yanto', 'Qasim', 'Mundzir', 'Hasan', 'Husnan', 'Fanani', 'Benny', 'Afandi', 'Mukhlis', 'Ahmadi', 'Arianto', 'Suheri', 'Suparman', 'Suhaimi', 'Irwanto', 'Hamdan', 'Teguh', 'Wawan', 'Iwan', 'Herman', 'Hendra', 'Rijal', 'Fahmi', 'Rendy', 'Nurman', 'Reza', 'Anton', 'David', 'Zakaria', 'Andi', 'Yahya', 'Sukarman', 'Fatih', 'Agus', 'Heri', 'Arya', 'Hilman', 'Yosep', 'Zainul', 'Zein', 'Rahmat', 'Sutikno', 'Helmi', 'Rozik', 'Maftuh', 'Sulaiman', 'Rony', 'Indra', 'Hermawan', 'Hasyim', 'Rojabi', 'Wahyudi', 'Idham', 'Ryan', 'Fathoni', 'Sholeh', 'Purniadi', 'Husni', "Ma'arif", 'Huda', 'Burhan', 'Busyro', 'Jaka', 'Bagas', 'Arif', 'Hidayat', 'Reza', 'Muammar', 'Fery', 'Yani', 'Hendri', 'Sutrisno', 'Sukarno', 'Cecep', 'Kosasih', 'Entong', 'Ilham', 'Ishak', 'Habib', 'Surya', 'Mughni', 'Farhan', 'Hartono', 'Taufan', 'Tantowi', 'Sulhan', 'Abduh', 'Hariri', 'Fauzan', 'Lukman', 'Shiddiq', 'Enda', 'Priadi', 'Tukul', 'Saiful', 'Bima', 'Krisna', 'Bisma', 'Arya', 'Dwiki', 'Setiawan', 'Yulianto', 'Irwanto', 'Irwansyah', 'Ary', 'Aryadi', 'Hardi', 'Duta', 'Dino', 'Fadhil', 'Sutikno', 'Halim', 'Husain', 'Rifky', 'Sahid', 'Sadzhili', 'Ridwan', 'Mansyur', 'Ghozali', 'Zubair', 'Lubis', 'Muhsin', 'Tiyo', 'Edi', 'Sadewa', 'Rudy', 'Rizky', 'Hakim', 'Sukadi', 'Agung', 'Tohari', 'Arbain', 'Haekal', 'Syarif', 'Hidayat', 'Jamil', 'Fino']
-        self.address = ['Semarang', 'Surabaya', 'Malang', 'Jember', 'Bali', 'Banten', 'Probolinggo', 'Purbalingga', 'Wonosobo', 'Sragen', 'Jombang', 'Mojokerto', 'Pontianak', 'Padang', 'Medan', 'Aceh', 'Palembang', 'Lampung', 'Riau', 'Bangka', 'Maluku', 'Samarinda', 'Banjarmasin', 'Makassar', 'Manado', 'NTB', 'NTT', 'Flores', 'Papua', 'Manowari', 'Salatiga', 'Solo', 'Madiun', 'Magetan', 'Trenggalek', 'Klaten', 'Nganjuk', 'Tuban', 'Bojonegoro', 'Kudus', 'Gresik', 'Lamongan', 'Pasuruan', 'Bangil', 'Banyuwangi', 'Lumajang', 'Blitar', 'Kediri', 'Situbondo', 'Bandung', 'Bogor', 'Batam', 'Halmahera']
-        self.domain = ['yahoo.com', 'gmail.com', 'mail.com', 'live.com', 'mail.ru']
+        self.femaleNames = [
+            "Dina",
+            "Saufa",
+            "Irmawati",
+            "Ulfa",
+            "Minarni",
+            "Afni",
+            "Asfia",
+            "Hairiyah",
+            "Fitri",
+            "Maria",
+            "Munawaroh",
+            "Nikmah",
+            "Artiyah",
+            "Sarilah",
+            "Nadin",
+            "Ika",
+            "Emi",
+            "Erni",
+            "Hilda",
+            "Ira",
+            "Izzah",
+            "Ana",
+            "Nita",
+            "Salsabila",
+            "Risa",
+            "Saraswati",
+            "Titin",
+            "Yuliana",
+            "Wahyuni",
+            "Hafsah",
+            "Tiara",
+            "Ghea",
+            "Indah",
+            "Hayyin",
+            "Fathimah",
+            "Lu'luk",
+            "Nufus",
+            "Windri",
+            "Erin",
+            "Iliana",
+            "Fifi",
+            "Vivian",
+            "Juli",
+            "Yuli",
+            "Sandra",
+            "Sofia",
+            "Rubi",
+            "Rabiah",
+            "Husniah",
+            "Halimah",
+            "Rusmini",
+            "Mirna",
+            "Muslimah",
+            "Hartati",
+            "Lia",
+            "Lutfia",
+            "Mia",
+            "Maya",
+            "Lily",
+            "Diana",
+            "Silfie",
+            "Retno",
+            "Susi",
+            "Yohana",
+            "Suparni",
+            "Zahro",
+            "Ramadhani",
+            "Munisah",
+            "Zuhriyah",
+            "Vina",
+            "Rahma",
+            "Rahmi",
+            "Ayu",
+            "Anik",
+            "Hani",
+            "Hana",
+            "Latifah",
+            "Aishah",
+            "Zulaikha",
+            "Ririn",
+            "Anisa",
+            "Dewi",
+            "Putri",
+            "Suciati",
+            "Puji",
+            "Astuti",
+            "Jamila",
+            "Laksmi",
+            "Bunga",
+            "Yuanita",
+            "Bilqis",
+            "Safitri",
+            "Yuliana",
+            "Fatmawati",
+            "Nova",
+            "Rosa",
+            "Sri",
+            "Indri",
+            "Sofiah",
+            "Sari",
+            "Suharti",
+            "Rukmini",
+            "Binti",
+            "Sulistiawati",
+            "Gina",
+            "Revina",
+            "Alviana",
+            "Widuri",
+            "Windi",
+            "Wulandari",
+            "Ismah",
+            "Rafiah",
+            "Sulastri",
+            "Hilwa",
+            "Ida",
+            "Keisha",
+            "Meisya",
+            "Maisyaroh",
+        ]
+        self.maleNames = [
+            "Ahmad",
+            "Zairi",
+            "Zainur",
+            "Salim",
+            "Yanto",
+            "Qasim",
+            "Mundzir",
+            "Hasan",
+            "Husnan",
+            "Fanani",
+            "Benny",
+            "Afandi",
+            "Mukhlis",
+            "Ahmadi",
+            "Arianto",
+            "Suheri",
+            "Suparman",
+            "Suhaimi",
+            "Irwanto",
+            "Hamdan",
+            "Teguh",
+            "Wawan",
+            "Iwan",
+            "Herman",
+            "Hendra",
+            "Rijal",
+            "Fahmi",
+            "Rendy",
+            "Nurman",
+            "Reza",
+            "Anton",
+            "David",
+            "Zakaria",
+            "Andi",
+            "Yahya",
+            "Sukarman",
+            "Fatih",
+            "Agus",
+            "Heri",
+            "Arya",
+            "Hilman",
+            "Yosep",
+            "Zainul",
+            "Zein",
+            "Rahmat",
+            "Sutikno",
+            "Helmi",
+            "Rozik",
+            "Maftuh",
+            "Sulaiman",
+            "Rony",
+            "Indra",
+            "Hermawan",
+            "Hasyim",
+            "Rojabi",
+            "Wahyudi",
+            "Idham",
+            "Ryan",
+            "Fathoni",
+            "Sholeh",
+            "Purniadi",
+            "Husni",
+            "Ma'arif",
+            "Huda",
+            "Burhan",
+            "Busyro",
+            "Jaka",
+            "Bagas",
+            "Arif",
+            "Hidayat",
+            "Reza",
+            "Muammar",
+            "Fery",
+            "Yani",
+            "Hendri",
+            "Sutrisno",
+            "Sukarno",
+            "Cecep",
+            "Kosasih",
+            "Entong",
+            "Ilham",
+            "Ishak",
+            "Habib",
+            "Surya",
+            "Mughni",
+            "Farhan",
+            "Hartono",
+            "Taufan",
+            "Tantowi",
+            "Sulhan",
+            "Abduh",
+            "Hariri",
+            "Fauzan",
+            "Lukman",
+            "Shiddiq",
+            "Enda",
+            "Priadi",
+            "Tukul",
+            "Saiful",
+            "Bima",
+            "Krisna",
+            "Bisma",
+            "Arya",
+            "Dwiki",
+            "Setiawan",
+            "Yulianto",
+            "Irwanto",
+            "Irwansyah",
+            "Ary",
+            "Aryadi",
+            "Hardi",
+            "Duta",
+            "Dino",
+            "Fadhil",
+            "Sutikno",
+            "Halim",
+            "Husain",
+            "Rifky",
+            "Sahid",
+            "Sadzhili",
+            "Ridwan",
+            "Mansyur",
+            "Ghozali",
+            "Zubair",
+            "Lubis",
+            "Muhsin",
+            "Tiyo",
+            "Edi",
+            "Sadewa",
+            "Rudy",
+            "Rizky",
+            "Hakim",
+            "Sukadi",
+            "Agung",
+            "Tohari",
+            "Arbain",
+            "Haekal",
+            "Syarif",
+            "Hidayat",
+            "Jamil",
+            "Fino",
+        ]
+        self.address = [
+            "Semarang",
+            "Surabaya",
+            "Malang",
+            "Jember",
+            "Bali",
+            "Banten",
+            "Probolinggo",
+            "Purbalingga",
+            "Wonosobo",
+            "Sragen",
+            "Jombang",
+            "Mojokerto",
+            "Pontianak",
+            "Padang",
+            "Medan",
+            "Aceh",
+            "Palembang",
+            "Lampung",
+            "Riau",
+            "Bangka",
+            "Maluku",
+            "Samarinda",
+            "Banjarmasin",
+            "Makassar",
+            "Manado",
+            "NTB",
+            "NTT",
+            "Flores",
+            "Papua",
+            "Manowari",
+            "Salatiga",
+            "Solo",
+            "Madiun",
+            "Magetan",
+            "Trenggalek",
+            "Klaten",
+            "Nganjuk",
+            "Tuban",
+            "Bojonegoro",
+            "Kudus",
+            "Gresik",
+            "Lamongan",
+            "Pasuruan",
+            "Bangil",
+            "Banyuwangi",
+            "Lumajang",
+            "Blitar",
+            "Kediri",
+            "Situbondo",
+            "Bandung",
+            "Bogor",
+            "Batam",
+            "Halmahera",
+        ]
+        self.domain = ["yahoo.com", "gmail.com", "mail.com", "live.com", "mail.ru"]
 
     def randomAddress(self):
         return self.address[random.randint(0, len(self.address) - 1)]
 
-
     """ create random date """
+
     def randomDate(self):
         try:
-            date = datetime.date(random.randint(1980, 2009), random.randint(1, 12), random.randint(1, 31)).isoformat()
+            date = datetime.date(
+                random.randint(1980, 2009), random.randint(1, 12), random.randint(1, 31)
+            ).isoformat()
         except ValueError:
             date = self.randomDate()
         return date
 
-
-    def randomName(self, sex = 'male'):
+    def randomName(self, sex="male"):
         start = 0
-        if sex == 'female' or sex == 'p' or sex == 'w':
+        if sex == "female" or sex == "p" or sex == "w":
             names = self.femaleNames
         else:
             names = self.maleNames
 
         stop = len(names) - 1
-        return str(names[random.randint(start, stop)] + ' ' + names[random.randint(start, stop)])
-
+        return str(
+            names[random.randint(start, stop)]
+            + " "
+            + names[random.randint(start, stop)]
+        )
 
     def randomNIK(self):
         return random.randint(eval("1" * 16), eval("9" * 16))
 
-
-    def jinshi(self, sex = 'male'):
-        if sex == 'female' or sex == 'p' or sex == 'w':
-            return Jinshi.get(id='p')
+    def jinshi(self, sex="male"):
+        if sex == "female" or sex == "p" or sex == "w":
+            return Jinshi.get(id="p")
         else:
-            return Jinshi.get(id='l')
-
+            return Jinshi.get(id="l")
 
     def randomKinship(self):
         pass
-
 
     def randomDomain(self):
         stop = len(self.domain) - 1
         return str(self.domain[random.randint(0, stop)])
 
-
     def randomChar(self, size=8, chars=string.ascii_uppercase + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size))
+        return "".join(random.choice(chars) for _ in range(size))
 
-
-    def makeOrang(self, sex='male', jsonify=False):
+    def makeOrang(self, sex="male", jsonify=False):
 
         person = {
             "id": str(uuid.uuid4()),
@@ -104,8 +418,7 @@ class DataGenerator(object):
 
         return person
 
-
-    def makeSantri(self, sex='male', jsonify=False):
+    def makeSantri(self, sex="male", jsonify=False):
         """Populate random data as Santri
         """
 
@@ -140,7 +453,7 @@ class DataGenerator(object):
             # #"kepala_wilayah": ,
             # #"kepala_blok": ,
             # #"ketua_kamar": ,
-            "menghuni_kamar": None
+            "menghuni_kamar": None,
         }
 
         if jsonify:
@@ -148,25 +461,23 @@ class DataGenerator(object):
 
         return santri
 
-
     def makePengguna(self, orang, jsonify=False):
         password_string = self.randomChar(10)
         salt, hashed = tokenizer.createSaltedPassword(password_string)
 
         pengguna = {
             "orang": str(orang.id),
-            "username": orang.nama.replace(' ', '.').lower(),
-            "email": orang.nama.replace(' ', '.').lower() + '@' + self.randomDomain(),
+            "username": orang.nama.replace(" ", ".").lower(),
+            "email": orang.nama.replace(" ", ".").lower() + "@" + self.randomDomain(),
             "password": hashed,
             "salt": salt,
-            "suspended": 0
+            "suspended": 0,
         }
 
         if jsonify:
             pengguna = dumpAsJSON(pengguna)
 
         return (pengguna, password_string)
-
 
     def makeKewenangan(self, pengguna, wewenang=4, jsonify=False):
         """
@@ -176,7 +487,9 @@ class DataGenerator(object):
         """
         kewenangan = {
             "pengguna": str(pengguna.orang.id),
-            "wewenang": wewenang if ( 0 < wewenang < 5 ) else ( 5 if orang.jinshi.id == 'l' else 6 )
+            "wewenang": wewenang
+            if (0 < wewenang < 5)
+            else (5 if orang.jinshi.id == "l" else 6)
             # 1 = root
             # 2 = admin
             # 3 = editor

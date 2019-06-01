@@ -11,31 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Form Handler for x-www-form-urlencoded."""
+
+"""Form Handler for X-WWW-FORM-URLENCODED."""
 
 from falcon import media, uri, errors
 from urllib import parse
 
 
 def stringify(item):
-        if not isinstance(item, str) or not isinstance(item, bytes):
-            return str(item)
-        return item
+    """Stringify bytes object."""
+    if not isinstance(item, str) or not isinstance(item, bytes):
+        return str(item)
+    return item
 
 
-def data_unpacks(string):
+def data_unpack(string):
     """An alias for parse_query_string."""
     return uri.parse_query_string(string)
 
 
-def data_packs(data):
+def data_pack(data):
     """Pack a dict into concatenated string."""
     t = list()
     for i in data:
-        t.append('='.join([i, parse.quote_plus(stringify(data[i]))]))
-    result = '&'.join(t)
+        t.append("=".join([i, parse.quote_plus(stringify(data[i]))]))
+    result = "&".join(t)
     if not isinstance(result, bytes):
-        return result.encode('utf-8')
+        return result.encode("utf-8")
     return result
 
 
@@ -45,14 +47,14 @@ class FormHandler(media.BaseHandler):
     def deserialize(self, stream, content_type, content_length):
         """Deserialize stream."""
         try:
-            return data_unpacks(stream.read().decode('utf-8'))
+            return data_unpack(stream.read().decode("utf-8"))
         except ValueError as err:
             raise errors.HTTPBadRequest(
-                'Invalid Form field',
-                'Could not parse field content - {0}'.format(err)
+                "Invalid Form field",
+                "Could not parse field content - {0}".format(err),
             )
 
     def serialize(self, media, content_type):
         """Serialize data."""
-        result = data_packs(media)
+        result = data_pack(media)
         return result

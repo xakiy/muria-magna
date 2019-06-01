@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""muria auth class file."""
+"""Auth Resource."""
 
 import falcon
 from muria.init import DEBUG, tokenizer
@@ -35,9 +35,9 @@ class Authentication(Resource):
     def on_get(self, req, resp):
 
         resp.status = falcon.HTTP_OK
-        resp.set_header('WWW-Authenticate', 'Bearer')
+        resp.set_header("WWW-Authenticate", "Bearer")
         if DEBUG:
-            content = {'WWW-Authenticate': 'Bearer'}
+            content = {"WWW-Authenticate": "Bearer"}
             resp.body = dumpAsJSON(content)
 
     @db_session
@@ -48,17 +48,17 @@ class Authentication(Resource):
             # blank entity, or invalid one.
             raise falcon.HTTPUnprocessableEntity(description=str(errors), code=422)
 
-        if not Pengguna.exists(username=data['username']):
+        if not Pengguna.exists(username=data["username"]):
             raise falcon.HTTPUnauthorized(code=401)
 
-        auth_user = Pengguna.get(username=data['username'])
+        auth_user = Pengguna.get(username=data["username"])
 
-        if auth_user.checkPassword(data['password']):
+        if auth_user.checkPassword(data["password"]):
 
             token_payload = {
-                'name': auth_user.orang.nama,
-                'pid': str(auth_user.orang.id),
-                'roles': [x for x in auth_user.kewenangan.wewenang.nama]
+                "name": auth_user.orang.nama,
+                "pid": str(auth_user.orang.id),
+                "roles": [x for x in auth_user.kewenangan.wewenang.nama],
             }
 
             tokens = tokenizer.createAccessToken(token_payload)
@@ -70,10 +70,10 @@ class Authentication(Resource):
             content = {
                 # some clients do not recognize the token type if
                 # not properly titled case as in RFC6750 section-2.1
-                'token_type': 'Bearer',
-                'expires_in': self.config.getint('security', 'access_token_exp'),
-                'refresh_token': tokens['refresh_token'],
-                'access_token': tokens['access_token']
+                "token_type": "Bearer",
+                "expires_in": self.config.getint("security", "access_token_exp"),
+                "refresh_token": tokens["refresh_token"],
+                "access_token": tokens["access_token"],
             }
             resp.status = falcon.HTTP_OK
             resp.body = dumpAsJSON(content)
@@ -92,7 +92,7 @@ class Verification(Resource):
 
     def on_post(self, req, resp, **params):
 
-        access_token = req.media.get('access_token')
+        access_token = req.media.get("access_token")
 
         # TODO:
         # implement some cache validations on the user
@@ -105,20 +105,19 @@ class Verification(Resource):
 
         elif token[0] == 422:
             raise falcon.HTTPUnprocessableEntity(
-                title='Token Verification',
-                description=str(token[1]), code=422)
+                title="Token Verification", description=str(token[1]), code=422
+            )
         else:
             raise falcon.HTTPBadRequest(
-                title='Token Verification',
-                description=str(token[1]), code=400)
+                title="Token Verification", description=str(token[1]), code=400
+            )
 
 
 class Refresh(Resource):
-
     def on_post(self, req, resp, **params):
 
-        access_token = req.media.get('access_token')
-        refresh_token = req.media.get('refresh_token')
+        access_token = req.media.get("access_token")
+        refresh_token = req.media.get("refresh_token")
 
         # on success it will be dict of tokens, otherwise it will
         # tuple of error
@@ -126,23 +125,25 @@ class Refresh(Resource):
 
         if isinstance(content, dict):
             payload = {
-                'token_type': 'Bearer',
-                'expires_in': self.config.getint('security', 'access_token_exp'),
-                'refresh_token': content['refresh_token'],
-                'access_token': content['access_token']
+                "token_type": "Bearer",
+                "expires_in": self.config.getint("security", "access_token_exp"),
+                "refresh_token": content["refresh_token"],
+                "access_token": content["access_token"],
             }
             resp.status = falcon.HTTP_OK
             resp.body = dumpAsJSON(payload)
         # tuple of error
         elif content[0] == 422:
             raise falcon.HTTPUnprocessableEntity(
-                title='Renew Access Token',
-                description=str(content[1]), code=422)
+                title="Renew Access Token", description=str(content[1]), code=422
+            )
         elif content[0] == 432:
             raise falcon.HTTPUnprocessableEntity(
-                title='Renew Refresh Token Expired',
-                description=str(content[1]), code=432)
+                title="Renew Refresh Token Expired",
+                description=str(content[1]),
+                code=432,
+            )
         else:
             raise falcon.HTTPBadRequest(
-                title='Renew Tokens Pair',
-                description=str(token[1]), code=400)
+                title="Renew Tokens Pair", description=str(token[1]), code=400
+            )

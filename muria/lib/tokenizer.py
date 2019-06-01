@@ -23,16 +23,15 @@ from calendar import timegm
 
 
 class Tokenizer(object):
-
     def __init__(self, config, ecdsa=True, rsa=False):
 
-        self.private_key = config.getbinary('security', 'private_key')
-        self.public_key = config.getbinary('security', 'public_key')
-        self.algorithm = config.get('security', 'algorithm')
-        self.token_issuer = config.get('security', 'issuer')
-        self.token_audience = config.get('security', 'audience')
-        self.access_token_exp = config.getint('security', 'access_token_exp')
-        self.refresh_token_exp = config.getint('security', 'refresh_token_exp')
+        self.private_key = config.getbinary("security", "private_key")
+        self.public_key = config.getbinary("security", "public_key")
+        self.algorithm = config.get("security", "algorithm")
+        self.token_issuer = config.get("security", "issuer")
+        self.token_audience = config.get("security", "audience")
+        self.access_token_exp = config.getint("security", "access_token_exp")
+        self.refresh_token_exp = config.getint("security", "refresh_token_exp")
 
     def createSaltedPassword(self, password_string):
         """Create new password based on supplied digest.
@@ -42,17 +41,17 @@ class Tokenizer(object):
         """
 
         salt_bin = urandom(20)
-        digest = hashlib.sha256(bytes(password_string, 'utf8')).digest()
+        digest = hashlib.sha256(bytes(password_string, "utf8")).digest()
         hashed_bin = hashlib.sha256(digest).digest()
-        hashed_bin_key = hashlib.pbkdf2_hmac('sha256', hashed_bin, salt_bin, 1000)
+        hashed_bin_key = hashlib.pbkdf2_hmac("sha256", hashed_bin, salt_bin, 1000)
         return (salt_bin.hex(), hashed_bin_key.hex())
 
     def isToken(self, token):
-        return isinstance(token, str) and token.count('.') == 2
+        return isinstance(token, str) and token.count(".") == 2
 
     def createAccessToken(self, payload):
 
-        '''
+        """
         JWT Reserved Claims
         Claims    name          Format         Usage
         -------   ----------    ------         ---------
@@ -63,41 +62,37 @@ class Tokenizer(object):
         ‘iat’     Issued At     int            The time at which the JWT was issued.
 
         The time values will be converted automatically into int if it populated with datetime object.
-        '''
+        """
 
         if isinstance(payload, dict):
             tokens = dict()
             now = datetime.utcnow()
             access_token_default_claims = {
-                'iss': self.token_issuer,
-                'aud': self.token_audience,
-                'iat': now,
-                'exp': now + timedelta(seconds=self.access_token_exp),
+                "iss": self.token_issuer,
+                "aud": self.token_audience,
+                "iat": now,
+                "exp": now + timedelta(seconds=self.access_token_exp),
             }
             access_token_payload = payload.copy()
             access_token_payload.update(access_token_default_claims)
 
-            tokens['access_token'] = jwt.encode(
-                access_token_payload,
-                self.private_key,
-                algorithm=self.algorithm
+            tokens["access_token"] = jwt.encode(
+                access_token_payload, self.private_key, algorithm=self.algorithm
             )
 
-            acc_token_sig = bytes(tokens['access_token']).decode('utf8').split('.')[2]
+            acc_token_sig = bytes(tokens["access_token"]).decode("utf8").split(".")[2]
 
             refresh_token_payload = {
-                'tsig': acc_token_sig,
+                "tsig": acc_token_sig,
                 # decode this unixtimestamp using datetime.utcfromtimestamp()
-                'tiat': timegm(now.utctimetuple()),
-                'iss': self.token_issuer,
-                'aud': self.token_audience,
-                'iat': now,
-                'exp': now + timedelta(seconds=self.refresh_token_exp)
+                "tiat": timegm(now.utctimetuple()),
+                "iss": self.token_issuer,
+                "aud": self.token_audience,
+                "iat": now,
+                "exp": now + timedelta(seconds=self.refresh_token_exp),
             }
-            tokens['refresh_token'] = jwt.encode(
-                refresh_token_payload,
-                self.private_key,
-                algorithm=self.algorithm
+            tokens["refresh_token"] = jwt.encode(
+                refresh_token_payload, self.private_key, algorithm=self.algorithm
             )
             return tokens
         else:
@@ -105,7 +100,7 @@ class Tokenizer(object):
 
     def verifyAccessToken(self, access_token):
         if not self.isToken(access_token):
-            return (400, 'Bad Token')
+            return (400, "Bad Token")
 
         try:
             jwt.decode(
@@ -127,9 +122,9 @@ class Tokenizer(object):
         # will return tuple of error code
 
         if not self.isToken(access_token) or not self.isToken(refresh_token):
-            return (400, 'Bad Tokens Pair')
+            return (400, "Bad Tokens Pair")
 
-        acc_token_sig = access_token.split('.')[2]
+        acc_token_sig = access_token.split(".")[2]
         try:
             token_payload = jwt.decode(
                 access_token,
@@ -137,7 +132,7 @@ class Tokenizer(object):
                 algorithms=self.algorithm,
                 issuer=self.token_issuer,
                 audience=self.token_audience,
-                options={'verify_exp': False}
+                options={"verify_exp": False},
             )
         except jwt.InvalidTokenError as err:
             return (422, err)
@@ -148,12 +143,12 @@ class Tokenizer(object):
                 key=self.public_key,
                 algorithms=self.algorithm,
                 issuer=self.token_issuer,
-                audience=self.token_audience
+                audience=self.token_audience,
             )
         except jwt.ExpiredSignatureError as err:
             return (432, err)
 
-        if acc_token_sig == refresh_payload['tsig']:
+        if acc_token_sig == refresh_payload["tsig"]:
             return self.createAccessToken(token_payload)
         else:
-            return (400, 'Token Pair Mismatch')
+            return (400, "Token Pair Mismatch")

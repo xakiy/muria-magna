@@ -2,7 +2,7 @@ import re
 
 import falcon
 
-_FORWARDED_PROTO_RE = re.compile('proto=([A-Za-z]+)')
+_FORWARDED_PROTO_RE = re.compile("proto=([A-Za-z]+)")
 
 
 class RequireHTTPS(object):
@@ -27,27 +27,27 @@ class RequireHTTPS(object):
     def process_request(self, req, resp):
         # NOTE: replaced deprecated req.protocol
         #       with req.scheme since it removed in Falcon v2.0.
-        if req.scheme.lower() == 'https':
+        if req.scheme.lower() == "https":
             return
 
-        xfp = req.get_header('X-FORWARDED-PROTO')
-        if xfp and xfp.lower() == 'https':
+        xfp = req.get_header("X-FORWARDED-PROTO")
+        if xfp and xfp.lower() == "https":
             return
 
-        forwarded = req.get_header('FORWARDED')
+        forwarded = req.get_header("FORWARDED")
         if forwarded:
             # NOTE(kgriffs): The first hop must indicate HTTPS,
             #   otherwise the chain is already insecure.
-            first, __, __ = forwarded.partition(',')
+            first, __, __ = forwarded.partition(",")
 
             match = _FORWARDED_PROTO_RE.search(first)
-            if match and match.group(1).lower() == 'https':
+            if match and match.group(1).lower() == "https":
                 return
 
         raise falcon.HTTPBadRequest(
-            title='HTTPS Required',
+            title="HTTPS Required",
             description=(
-                'All requests must be performed via the HTTPS protocol. '
-                'Please switch to HTTPS and try again.'
-            )
+                "All requests must be performed via the HTTPS protocol. "
+                "Please switch to HTTPS and try again."
+            ),
         )

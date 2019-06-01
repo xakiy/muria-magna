@@ -35,11 +35,11 @@ class ResStatsOrang(Resource):
 
         if orang_total != 0:
 
-            content = {'statistiks_orang': orang_total}
+            content = {"statistiks_orang": orang_total}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = ('Stats error!')
+            content = "Stats error!"
 
         resp.body = dumpAsJSON(content)
         resp.etag = getEtag(resp.body)
@@ -60,11 +60,11 @@ class ResStatsWali(Resource):
 
         if ortu_total != 0:
 
-            content = {'statistiks_wali': ortu_total}
+            content = {"statistiks_wali": ortu_total}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = ('Stats error!')
+            content = "Stats error!"
 
         resp.body = dumpAsJSON(content)
         resp.etag = getEtag(resp.body)
@@ -85,11 +85,11 @@ class ResStatsSantri(Resource):
 
         if santri_total != 0:
 
-            content = {'statistiks_santri': santri_total}
+            content = {"statistiks_santri": santri_total}
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_404
-            content = ('Stats error!')
+            content = "Stats error!"
 
         resp.body = dumpAsJSON(content)
         resp.etag = getEtag(resp.body)
@@ -104,21 +104,21 @@ class ResStatsSantriByJinshi(Resource):
     """
 
     @db_session
-    def on_get(self, req, resp, jinshi='', **params):
+    def on_get(self, req, resp, jinshi="", **params):
 
         try:
-            if jinshi == 'putra':
-                total = count(s for s in Santri if s.jinshi.id == 'l')
-                key = 'statistiks_santri_putra'
-            elif jinshi == 'putri':
-                total = count(s for s in Santri if s.jinshi.id == 'p')
-                key = 'statistiks_santri_putri'
+            if jinshi == "putra":
+                total = count(s for s in Santri if s.jinshi.id == "l")
+                key = "statistiks_santri_putra"
+            elif jinshi == "putri":
+                total = count(s for s in Santri if s.jinshi.id == "p")
+                key = "statistiks_santri_putri"
 
             content = {key: total}
             resp.status = falcon.HTTP_200
         except:
             resp.status = falcon.HTTP_404
-            content = ('Invalid Resource Request: #{0}'.format(jinshi))
+            content = "Invalid Resource Request: #{0}".format(jinshi)
 
         resp.body = dumpAsJSON(content)
         resp.etag = getEtag(resp.body)

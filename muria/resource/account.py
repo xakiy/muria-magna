@@ -24,21 +24,18 @@ from pony.orm.dbapiprovider import IntegrityError
 
 
 class Accounts(Resource):
-
     @db_session
     def on_get(self, req, resp, **params):
-        if params.get('jwt_claims') and params['jwt_claims'].get('roles'):
-            pid = params['jwt_claims']['pid']
-            users = Pengguna.select()[:self.config.getint('app', 'page_limit')]
+        if params.get("jwt_claims") and params["jwt_claims"].get("roles"):
+            pid = params["jwt_claims"]["pid"]
+            users = Pengguna.select()[: self.config.getint("app", "page_limit")]
             ps = Pengguna_Schema()
             if len(users) > 0:
                 content = {
-                    'count': len(users),
-                    'accounts':
-                    [ps.dump(u)[0] for u in users]}
+                    "count": len(users),
+                    "accounts": [ps.dump(u)[0] for u in users],
+                }
                 resp.status = falcon.HTTP_200
                 resp.body = dumpAsJSON(content)
             else:
-                raise falcon.HTTPNotFound(
-                    description='Profile is empty',
-                    code=404)
+                raise falcon.HTTPNotFound(description="Profile is empty", code=404)

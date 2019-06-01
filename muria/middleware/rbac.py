@@ -21,13 +21,15 @@ class RBAC(RoleBasedPolicy):
     def process_resource(self, req, resp, resource, params):
         route = req.uri_template
         if self.check_jwt and isinstance(params, dict):
-            claims = params.get('jwt_claims')
-            roles_header = isinstance(claims, dict) and claims.get('roles') or '@unknown'
+            claims = params.get("jwt_claims")
+            roles_header = (
+                isinstance(claims, dict) and claims.get("roles") or "@unknown"
+            )
         else:
-            roles_header = req.get_header('X-Roles', default='@unknown')
+            roles_header = req.get_header("X-Roles", default="@unknown")
 
         if isinstance(roles_header, str):
-            provided_roles = [role.strip() for role in roles_header.split(',')]
+            provided_roles = [role.strip() for role in roles_header.split(",")]
         else:
             provided_roles = roles_header
 
@@ -38,5 +40,5 @@ class RBAC(RoleBasedPolicy):
 
         if not has_role:
             raise falcon.HTTPForbidden(
-                description='Access to this resource has been restricted'
+                description="Access to this resource has been restricted"
             )
