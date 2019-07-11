@@ -43,6 +43,7 @@ def data_pack(data):
 
 class FormHandler(media.BaseHandler):
     """Custom Handler for 'application/x-www-form-urlencoded'."""
+    # NOTE: currently only work on Falcon v.2.0
 
     def deserialize(self, stream, content_type, content_length):
         """Deserialize stream."""
