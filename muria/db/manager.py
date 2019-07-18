@@ -88,5 +88,5 @@ class DBManager(object):
     def generate(self):
         sql_debug(self.config.getboolean("database", "verbose"))
         self.link.generate_mapping(
-            create_tables=self.config.get("database", "create_table")
+            create_tables=self.config.getboolean("database", "create_table")
         )
