@@ -14,7 +14,7 @@
 
 """muria base resource class."""
 
-from muria.init import config, CORS, connection
+from muria.init import config, CORS
 from muria.lib.misc import dumpAsJSON, getEtag
 from falcon import HTTP_OK
 
@@ -26,9 +26,8 @@ class Resource(object):
     Super class untuk class resource dalam muria-magna
     """
 
-    def __init__(self, config=config, connection=connection, **params):
+    def __init__(self, config=config, **params):
         self.config = config
-        self.connection = connection
         # self.cors = CORS
 
     def __resp__(self):

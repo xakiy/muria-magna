@@ -16,7 +16,7 @@
 
 from muria.lib.config import Parser
 from muria.conf.policy import Policy_Config
-from muria.db.manager import DBManager
+from muria.db.setup import setup_database
 
 # Middlewares
 # from falcon_auth import FalconAuthMiddleware, BasicAuthBackend
@@ -40,11 +40,7 @@ DEBUG = config.getboolean("app", "debug")
 
 logger = Logger(config).getLogger()
 
-connection = DBManager(config)  # database connection
-
-from muria.conf import premise
-
-premise.setPremise()
+setup_database(config)
 
 if DEBUG:
     logger.debug("---------------------------------")

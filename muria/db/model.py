@@ -18,8 +18,8 @@ import hashlib
 import binascii
 from os import urandom
 from datetime import datetime, date
-from muria.init import connection
 from pony.orm import (
+    Database,
     PrimaryKey,
     Required,
     Optional,
@@ -28,9 +28,10 @@ from pony.orm import (
     composite_key,
     commit,
 )
+from muria.db.preload import tables
 
-db = link = connection.getLink()
 
+db = connection = Database()
 
 class Orang(db.Entity):
     id = PrimaryKey(str, 36, default=uuid.uuid4)
@@ -328,5 +329,6 @@ class Kewenangan(db.Entity):
     wewenang = Required(Wewenang)
     PrimaryKey(pengguna, wewenang)
 
-
-connection.generate()
+def generate_tables():
+    db.generateTables()
+    db.populatPreload(tables)
