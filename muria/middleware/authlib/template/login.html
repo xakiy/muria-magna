@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Muria Magna Login Page</title>
+  <style>
+    * {font-family: monospace;}
+  </style>
+</head>
+<body>
+<h1>Muria Magna</h1>
+<h3>User Login</h3>
+
+<form action="http://api.krokod.net:8000/login" method="post">
+
+  <div>
+    <input type="hidden" name="client" value="Muria-Panel">
+    <label>Username:
+      <input type="text" name="username">
+    </label>
+    <br />
+    <label>Password:
+      <input type="text" name="password">
+    </label>
+    <br />
+    <label>
+      <span>Remeber Me</span>
+      <input type="checkbox" name="confirm">
+    </label>
+
+    <button>Login</button>
+  </div>
+
+</form>
+
+</body>
+</html>

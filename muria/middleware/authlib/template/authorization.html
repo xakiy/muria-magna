@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Muria Magna Login Page</title>
+  <style>
+    * {font-family: monospace;}
+    .radio-toolbar {
+      margin: 10px;
+    }
+
+    .radio-toolbar input[type="radio"] {
+        display:none;
+    }
+
+    .radio-toolbar label {
+        display:inline-block;
+        background-color:#ddd;
+        padding: 10px 20px;
+        font-family:Arial;
+        font-size:16px;
+        border: 2px solid #444;
+        border-radius: 4px;
+    }
+
+    .radio-toolbar label:hover {
+      background-color: #dfd;
+    }
+
+    .radio-toolbar input[type="radio"]:checked + label {
+        background-color:#bfb;
+        border-color: #4c4;
+    }
+  </style>
+</head>
+<body>
+<h1>Muria Magna</h1>
+<h3>Authorize Client</h3>
+
+<form action="http://api.krokod.net:8000/login" method="post">
+
+  <div>
+    <label>Client:
+      <input type="text" name="client" readonly="readonly" value="clientValue">
+    </label>
+    <br />
+    <label>User:
+      <input type="text" name="username" readonly="readonly" value="usernameValue">
+    </label>
+    <br />
+    <label>
+      <span>Grant Type</span>
+      <select name="granttype">
+        <option value="authorization_code">Authorization Code</option>
+        <option value="implicit">Implicit</option>
+      </select>
+    </label>
+    <div class="radio-toolbar">
+    <input type="radio" id="radioDeny" name="authorize" value="deny">
+    <label for="radioDeny">Deny</label>
+
+    <input type="radio" id="radioAuthorize" name="authorize" value="accept">
+    <label for="radioAuthorize">Authorize</label>
+    </div>
+    </div>
+    <button name="submit">Submit</button>
+
+</form>
+
+</body>
+</html>
