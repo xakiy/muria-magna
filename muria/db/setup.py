@@ -107,18 +107,23 @@ def setup_database(config):
         )
 
     if params["provider"] in ("mysql", "postgres"):
+        options = params.copy()
+        # if socket provided try to use it first
         if params.get("unix_socket") is not None:
-            # try to connect using socket
             try:
                 if params.get("port"):
                     params.pop("port")
                 connection.bind(**params)
-            # else using TCP port
+            # otherwise use TCP port
             except OperationalError as oe:
-                params.pop("unix_socket")
-                connection.bind(**params)
+                options.pop("unix_socket")
+                connection.bind(**options)
+                params = options
     else:
         connection.bind(**params)
+
+    # config.add_section('db')
+    # config.read_dict({'db': params})
 
     sql_debug(config.getboolean("database", "verbose"))
     connection.generate_mapping(
