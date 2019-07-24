@@ -18,14 +18,14 @@ from configparser import ConfigParser, ExtendedInterpolation
 
 
 class Parser(ConfigParser):
-    """Extending ConfigParser with some special getters."""
+    """Extending ConfigParser with additional getters."""
 
     def __init__(self, setup, interpolation=ExtendedInterpolation(), **kwargs):
         super(Parser, self).__init__(interpolation=interpolation, **kwargs)
         if os.path.isfile(str(os.environ.get(setup))):
             conf_file = str(os.environ.get(setup))
         else:
-            raise EnvironmentError("No setup environment defined!")
+            raise EnvironmentError("Env setup belum diatur!")
 
         if not bool(self.read(conf_file).count(conf_file)):
             raise FileNotFoundError("File konfigurasi %s tidak ditemukan" % setup)
