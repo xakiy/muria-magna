@@ -17,8 +17,7 @@ import datetime
 import collections
 import hashlib
 
-from muria.init import config, DEBUG
-
+from muria.init import DEBUG
 
 try:
     import rapidjson as json
@@ -28,7 +27,8 @@ except ImportError:
     class ConvertionEncoder(json.JSONEncoder):
         def default(self, obj):
             """Mengubah datetime sebagai string biasa."""
-            if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
+            if isinstance(obj, datetime.datetime) or \
+                    isinstance(obj, datetime.date):
                 return obj.isoformat()[:10]
 
             """Mengubah bytes menjadi string biasa."""
@@ -43,13 +43,6 @@ except ImportError:
                 return json.JSONEncoder.default(self, obj)
             except TypeError:
                 return str(obj)
-
-
-def datetimeToISO(obj):
-    """Dipakai oleh rapidjson."""
-    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
-        return obj.isoformat()[:10]
-    return str(obj)[:10]
 
 
 # code by angstwad
@@ -67,9 +60,9 @@ def dict_merge(dct, merge_dct):
     """
     for k, v in merge_dct.iteritems():
         if (
-            k in dct
-            and isinstance(dct[k], dict)
-            and isinstance(merge_dct[k], collections.Mapping)
+            k in dct and
+                isinstance(dct[k], dict) and
+                isinstance(merge_dct[k], collections.Mapping)
         ):
             dict_merge(dct[k], merge_dct[k])
         else:
@@ -93,6 +86,13 @@ def getEtag(content):
         return tag + '"' + hashed + '"'
 
 
+def datetimeToISO(obj):
+    """Dipakai oleh rapidjson."""
+    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
+        return obj.isoformat()[:10]
+    return str(obj)[:10]
+
+
 def dumpAsJSON(source):
     """Mengubah dict JSON.
 
@@ -112,7 +112,27 @@ def dumpAsJSON(source):
             output = json.dumps(
                 source, datetime_mode=json.DM_ISO8601, uuid_mode=json.UM_CANONICAL
             )  # speed 1.8xx
-    else:
+    elif json.__name__ == 'json':
+
+        class ConvertionEncoder(json.JSONEncoder):
+            def default(self, obj):
+                """Mengubah datetime sebagai string biasa."""
+                if isinstance(obj, datetime.datetime) or \
+                        isinstance(obj, datetime.date):
+                    return obj.isoformat()[:10]
+
+                """Mengubah bytes menjadi string biasa."""
+                if isinstance(obj, bytes):
+                    return obj.decode()
+
+                """Abaikan bila sebuah dict."""
+                if isinstance(obj, dict):
+                    return
+
+                try:
+                    return json.JSONEncoder.default(self, obj)
+                except TypeError:
+                    return str(obj)
         if DEBUG:
             # pretty output, debug only
             # output = ujson.dumps(source)
