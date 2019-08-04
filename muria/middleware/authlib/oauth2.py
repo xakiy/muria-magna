@@ -20,7 +20,7 @@ GRANT_TYPES_EXPIRES = {
 class OAuth2Server(OAuthorizationServer):
 
     def __init__(self, query_client=query_client, save_token=save_token, **config):
-        super(AuthorizationServer, self).__init__(
+        super(OAuth2Server, self).__init__(
             query_client, generate_token, save_token, **config)
         self.generate_token = generate_token
         if query_client is not None:

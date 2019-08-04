@@ -1,5 +1,6 @@
 
 from pony.orm import (
+    Database,
     PrimaryKey,
     Required,
     Optional,
@@ -15,6 +16,8 @@ from .ponies import (
     OIDCAuthorizationCodeMixin,
     OAuth2TokenMixin
 )
+
+db = connection = Database()
 
 class User(db.Entity):
     id = PrimaryKey(int, auto=True)
@@ -35,7 +38,7 @@ class User(db.Entity):
 
 class OAuth2Client(db.Entity, OAuth2ClientMixin):
     id = PrimaryKey(int, auto=True)
-    user_id = Required(User, cascade_delete=True)
+    user_id = Required(User)
 
 
 class OAuth2Token(db.Entity, OAuth2TokenMixin):
@@ -47,9 +50,6 @@ class OAuth2Token(db.Entity, OAuth2TokenMixin):
         return expires_at < time.time()
 
 
-class OAuth2AuthorizationCode(db.Entity, AuthorizationCodeMixin):
+class OAuth2AuthorizationCode(db.Entity, OAuth2AuthorizationCodeMixin):
     id = PrimaryKey(int, auto=True)
-    user_id = Required(User, cascade_delete=True)
-
-
-connection.generate_mapping(create_tables=True)
+    user_id = Required(User)

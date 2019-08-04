@@ -1,5 +1,9 @@
+<<<<<<< Updated upstream
+from authlib.oauth2.rfc6749 import grants
+=======
 from authlib.specs.rfc6749 import grants
-from .models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+>>>>>>> Stashed changes
+from .model import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):

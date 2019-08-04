@@ -2,11 +2,9 @@
 import falcon
 import rapidjson
 from muria.lib.form import FormHandler
-from pony.orm import (
-    Database
-)
 from muria.middleware.authlib import OAuth2Server
 from muria.middleware.authlib.model import (
+    connection,
     OAuth2Client,
     OAuth2Token
 )
@@ -16,6 +14,12 @@ from muria.middleware.authlib.ponies import (
     create_revocation_endpoint,
     create_bearer_token_validator,
 )
+from authlib.specs.rfc6749 import grants
+from muria.middleware.authlib.grants import (
+    AuthorizationCodeGrant,
+    PasswordGrant,
+    RefreshTokenGrant
+)
 
 dbconf = {
     'provider': 'sqlite',
@@ -24,7 +28,8 @@ dbconf = {
 }
 
 #: database connection
-db = connection = Database(**dbconf)
+connection.bind(**dbconf)
+connection.generate_mapping(create_tables=True)
 
 #: app initialization
 app = application = falcon.API()
@@ -54,7 +59,6 @@ authorization = OAuth2Server(
     save_token=save_token,
     **oauth2_conf
 )
-require_oauth = ResourceProtector()
 
 # support all grants
 authorization.register_grant(grants.ImplicitGrant)
@@ -64,12 +68,15 @@ authorization.register_grant(PasswordGrant)
 authorization.register_grant(RefreshTokenGrant)
 
 # support revocation
-revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
+revocation_cls = create_revocation_endpoint(OAuth2Token)
 authorization.register_endpoint(revocation_cls)
 
+
+
 # protect resource
-bearer_cls = create_bearer_token_validator(db.session, OAuth2Token)
-require_oauth.register_token_validator(bearer_cls())
+# require_oauth = ResourceProtector()
+# bearer_cls = create_bearer_token_validator(OAuth2Token)
+# require_oauth.register_token_validator(bearer_cls())
 
 
 

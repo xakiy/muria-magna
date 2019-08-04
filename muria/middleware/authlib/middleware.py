@@ -1,4 +1,7 @@
-from authlib.oauth2 import OAuth2Request
+from authlib.oauth2 import (
+    OAuth2Request,
+    ResourceProtector
+)
 
 from .helpers import (
     query_client,
