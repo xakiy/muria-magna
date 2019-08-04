@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 from authlib.oauth2.rfc6749 import grants
-=======
-from authlib.specs.rfc6749 import grants
->>>>>>> Stashed changes
 from .model import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
 

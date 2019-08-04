@@ -112,7 +112,9 @@ class Login(object):
                 "media": req.media,
                 "params": req.params
             }
-            resp.body = rapidjson.dumps(content)
+            resp.content_type = "application/x-www-form-urlencoded"
+            # resp.body = rapidjson.dumps(content)
+            resp.media = req.media
 
 
 print("================================")

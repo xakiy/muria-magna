@@ -14,48 +14,31 @@
 
 """Form Handler for X-WWW-FORM-URLENCODED."""
 
-from falcon import media, uri, errors
 from urllib import parse
-
-
-def stringify(item):
-    """Stringify bytes object."""
-    if not isinstance(item, str) or not isinstance(item, bytes):
-        return str(item)
-    return item
-
-
-def data_unpack(string):
-    """An alias for parse_query_string."""
-    return uri.parse_query_string(string)
-
-
-def data_pack(data):
-    """Pack a dict into concatenated string."""
-    t = list()
-    for i in data:
-        t.append("=".join([i, parse.quote_plus(stringify(data[i]))]))
-    result = "&".join(t)
-    if not isinstance(result, bytes):
-        return result.encode("utf-8")
-    return result
+from falcon import (
+    media,
+    uri,
+    errors
+)
 
 
 class FormHandler(media.BaseHandler):
     """Custom Handler for 'application/x-www-form-urlencoded'."""
-    # NOTE: currently only work on Falcon v.2.0
 
     def deserialize(self, stream, content_type, content_length):
         """Deserialize stream."""
-        try:
-            return data_unpack(stream.read().decode("utf-8"))
-        except ValueError as err:
-            raise errors.HTTPBadRequest(
-                "Invalid Form field",
-                "Could not parse field content - {0}".format(err),
-            )
+        if content_length > 0:
+            try:
+                return uri.parse_query_string(stream.read().decode("utf-8"))
+            except ValueError as err:
+                raise errors.HTTPBadRequest(
+                    "Invalid Form field",
+                    "Could not parse field content - {0}".format(err),
+                )
 
     def serialize(self, media, content_type):
         """Serialize data."""
-        result = data_pack(media)
+        result = parse.urlencode(media)
+        if not isinstance(result, bytes):
+            return result.encode("utf-8")
         return result
