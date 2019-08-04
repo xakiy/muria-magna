@@ -20,7 +20,6 @@ import mimetypes
 import hashlib
 from muria.init import config, tokenizer
 from muria.resource.base import Resource
-from muria.lib.misc import getEtag, dumpAsJSON
 from muria.db.model import Orang, Pengguna
 from muria.db.schema import Pengguna_Schema
 from muria.lib.filestore import FileStore
@@ -43,7 +42,7 @@ class Profile(Resource):
             if isinstance(profile, Pengguna):
                 content = {"account": Pengguna_Schema().dump(profile)[0]}
                 resp.status = falcon.HTTP_OK
-                resp.body = dumpAsJSON(content)
+                resp.media = content
                 return
 
         raise falcon.HTTPNotFound(description="Profile is empty", code=404)
@@ -68,7 +67,7 @@ class Profile(Resource):
                 flush()
                 content = {"account": ps.dump(user)[0]}
                 resp.status = falcon.HTTP_OK
-                resp.body = dumpAsJSON(content)
+                resp.media = content
             except (TypeError, ValueError, IntegrityError) as err:
                 raise falcon.HTTPUnprocessableEntity(
                     title="Profile Update Error", description=str(err), code=422
@@ -146,7 +145,7 @@ class Picture(Resource):
                 resp.location = None
                 content = {"error": "upload failed"}
 
-            resp.body = dumpAsJSON(content)
+            resp.media = content
         else:
             raise falcon.HTTPUnprocessableEntity(
                 title="Profile Update Error",

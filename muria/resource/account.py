@@ -16,7 +16,6 @@
 
 import falcon
 from muria.resource.base import Resource
-from muria.lib.misc import dumpAsJSON
 from muria.db.model import Orang, Pengguna
 from muria.db.schema import Pengguna_Schema
 from pony.orm import db_session, ObjectNotFound, flush
@@ -36,6 +35,6 @@ class Accounts(Resource):
                     "accounts": [ps.dump(u)[0] for u in users],
                 }
                 resp.status = falcon.HTTP_200
-                resp.body = dumpAsJSON(content)
+                resp.media = content
             else:
                 raise falcon.HTTPNotFound(description="Profile is empty", code=404)

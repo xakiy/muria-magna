@@ -17,7 +17,6 @@
 import falcon
 from muria.init import config
 from muria.resource.base import Resource
-from muria.lib.misc import dumpAsJSON
 from muria.lib.filestore import FileStore, ImageStore
 
 import mimetypes
@@ -80,4 +79,4 @@ class Upload(object):
             resp.location = None
             content = {"error": "upload failed"}
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content

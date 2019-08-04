@@ -19,7 +19,6 @@ from muria.init import DEBUG, tokenizer
 from muria.resource.base import Resource
 from muria.db.schema import Login_Schema, Pengguna_Schema
 from muria.db.model import Pengguna
-from muria.lib.misc import dumpAsJSON
 
 from pony.orm import db_session
 
@@ -38,7 +37,7 @@ class Authentication(Resource):
         resp.set_header("WWW-Authenticate", "Bearer")
         if DEBUG:
             content = {"WWW-Authenticate": "Bearer"}
-            resp.body = dumpAsJSON(content)
+            resp.media = content
 
     @db_session
     def on_post(self, req, resp):
@@ -76,7 +75,7 @@ class Authentication(Resource):
                 "access_token": tokens["access_token"],
             }
             resp.status = falcon.HTTP_OK
-            resp.body = dumpAsJSON(content)
+            resp.media = content
         else:
             # entity is received but not authorized by the server
             # due to invalid credentials.
@@ -101,7 +100,7 @@ class Verification(Resource):
         if tokenizer.isToken(token):
             content = {"access_token": token}
             resp.status = falcon.HTTP_200
-            resp.body = dumpAsJSON(content)
+            resp.media = content
 
         elif token[0] == 422:
             raise falcon.HTTPUnprocessableEntity(
@@ -131,7 +130,7 @@ class Refresh(Resource):
                 "access_token": content["access_token"],
             }
             resp.status = falcon.HTTP_OK
-            resp.body = dumpAsJSON(payload)
+            resp.media = payload
         # tuple of error
         elif content[0] == 422:
             raise falcon.HTTPUnprocessableEntity(

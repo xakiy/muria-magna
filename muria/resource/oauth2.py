@@ -21,7 +21,6 @@ from muria.init import config, tokenizer
 from muria.resource.base import Resource
 from muria.db.schema import Login_Schema
 from muria.db.model import Pengguna
-from muria.lib.misc import dumpAsJSON
 
 
 def get_basic_auth(request, content_type="application/x-www-form-urlencoded"):
@@ -52,7 +51,7 @@ class Oauth2(Resource):
         resp.status = falcon.HTTP_OK
         resp.set_header("WWW-Authenticate", "Bearer")
         content = {"WWW-Authenticate": "Bearer"}
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
     @db_session
     def on_post(self, req, resp, **params):
@@ -117,7 +116,7 @@ class Oauth2(Resource):
                 "access_token": tokens["access_token"],
             }
             resp.status = falcon.HTTP_OK
-            resp.body = dumpAsJSON(content)
+            resp.media = content
         else:
             # entity is received but not authorized by the server
             # due to invalid credentials.

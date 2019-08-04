@@ -18,7 +18,6 @@ import falcon
 import datetime
 import uuid
 from muria.resource.base import Resource
-from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Orang, Santri
 from muria.db.schema import Orang_Schema, Santri_Schema
 from pony.orm import db_session, OrmError
@@ -62,7 +61,7 @@ class ResOrangs(Resource):
                 resp.status = falcon.HTTP_404
                 content = {"error": "No data found!"}
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResDataOrang(Resource):
@@ -83,7 +82,7 @@ class ResDataOrang(Resource):
             resp.status = falcon.HTTP_404
             content = "Non-existant id request of #{0}".format(id)
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
     @db_session
     def on_post(self, req, resp, **params):
@@ -127,7 +126,7 @@ class ResDataOrang(Resource):
                 "Could not decode the request body. The JSON was incorrect.",
             )
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResSantri(Resource):
@@ -155,7 +154,7 @@ class ResSantri(Resource):
             resp.status = falcon.HTTP_404
             content = {"error": "empty result"}
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
     @db_session
     def on_post(self, req, resp, **params):
@@ -199,7 +198,7 @@ class ResSantri(Resource):
                 "Could not decode the request body. The JSON was incorrect.",
             )
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResDataSantri(Resource):
@@ -219,4 +218,4 @@ class ResDataSantri(Resource):
             resp.status = falcon.HTTP_404
             content = "Invalid id #{0}".format(id)
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content

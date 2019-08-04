@@ -18,7 +18,6 @@ import falcon
 import datetime
 import uuid
 from muria.resource.base import Resource
-from muria.lib.misc import dumpAsJSON, getEtag
 from muria.db.model import Lembaga, Jabatan_Lembaga, Pegawai_Lembaga
 from muria.db.schema import (
     Lembaga_Schema,
@@ -48,7 +47,7 @@ class ResLembaga(Resource):
             resp.status = falcon.HTTP_404
             content = {"error": "No lembaga found!"}
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
     @db_session()
     def on_post(self, req, resp, **params):
@@ -96,7 +95,7 @@ class ResLembaga(Resource):
                 "Could not decode the request body. The JSON was incorrect.",
             )
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResDataLembaga(Resource):
@@ -114,7 +113,7 @@ class ResDataLembaga(Resource):
             resp.status = falcon.HTTP_404
             content = {"error": "Resouce not found, eg. #{0}".format(lid)}
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
     @db_session()
     def on_put(self, req, resp, **params):
@@ -167,7 +166,7 @@ class ResDataLembaga(Resource):
                 "Could not decode the request body. The JSON was incorrect.",
             )
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResJabatanLembaga(Resource):
@@ -195,7 +194,7 @@ class ResJabatanLembaga(Resource):
             resp.status = falcon.HTTP_404
             content = {"error": "No lembaga found!"}
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
     @db_session
     def on_post(self, req, resp, lid, **params):
@@ -247,7 +246,7 @@ class ResJabatanLembaga(Resource):
                 "Could not decode the request body. The JSON was incorrect.",
             )
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResJabatanLembagaDetail(Resource):
@@ -276,7 +275,7 @@ class ResJabatanLembagaDetail(Resource):
                 falcon.HTTP_400, "Invalid request", "Data not found!"
             )
 
-        resp.body = dumpAsJSON(content)
+        resp.media = content
 
 
 class ResKaryawanLembaga(Resource):

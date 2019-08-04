@@ -15,7 +15,6 @@
 """muria base resource class."""
 
 from muria.init import config, CORS
-from muria.lib.misc import dumpAsJSON, getEtag
 from falcon import HTTP_OK
 
 
@@ -28,8 +27,3 @@ class Resource(object):
 
     def __init__(self, config=config, **params):
         self.config = config
-        # self.cors = CORS
-
-    def __resp__(self):
-        self.resp.body = dumpAsJSON(self.content)
-        self.resp.etag = getEtag(self.resp.body)

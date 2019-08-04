@@ -30,6 +30,7 @@ from muria.middleware.rbac import RBAC
 from muria.lib.tokenizer import Tokenizer
 from muria.lib.logger import Logger
 from muria.lib.form import FormHandler
+from muria.lib.json import JSONHandler
 
 # MURIA_SETUP merupakan env yang menunjuk ke berkas
 # konfigurasi produksi atau pengembangan.
@@ -49,7 +50,11 @@ if DEBUG:
 
 tokenizer = Tokenizer(config)
 
-extra_handlers = {"application/x-www-form-urlencoded": FormHandler()}
+extra_handlers = {
+    "application/json": JSONHandler,
+    "application/json; charset=UTF-8": JSONHandler,
+    "application/x-www-form-urlencoded": FormHandler()
+}
 
 middleware_list = []
 
