@@ -14,10 +14,9 @@ from tests._pickles import _unpickling
 
 class Personal(object):
     @db_session
-    @pytest.mark.order5
-    def get_persons(self, _client):
+    def get_persons(self, client, request):
 
-        access_token = _unpickling("access_token")
+        access_token = request.config.cache.get("access_token", None)
 
         # headers updated based on header requirements
         headers = {
@@ -27,7 +26,7 @@ class Personal(object):
             "Authorization": "Bearer " + access_token,
         }
 
-        resp = _client.simulate_get(
+        resp = client.simulate_get(
             "/v1/orang", headers=headers, protocol=self.protocol
         )
 
@@ -37,7 +36,7 @@ class Personal(object):
         assert len(content) > 0
 
     @db_session
-    def post_person(self, _client, cache):
+    def post_person(self, client, request):
         from muria.db.model import Orang, Pengguna, Kewenangan
         from tests._data_generator import DataGenerator
 
@@ -45,9 +44,9 @@ class Personal(object):
 
         # generate random person
         someone = data_generator.makeOrang(sex="male")
-        cache.set("posted_person", dumpAsJSON(someone))
+        request.config.cache.set("posted_person", dumpAsJSON(someone))
 
-        access_token = _unpickling("access_token")
+        access_token = request.config.cache.get("access_token", None)
 
         # headers updated based on header requirements
         headers = {
@@ -57,7 +56,7 @@ class Personal(object):
             "Authorization": "Bearer " + access_token,
         }
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/orang/" + someone["id"],
             body=dumpAsJSON(someone),
             headers=headers,
@@ -67,14 +66,14 @@ class Personal(object):
         assert resp.status == falcon.HTTP_201
 
     @db_session
-    def search_person(self, _client, cache):
+    def search_person(self, client, request):
 
         import json
         from urllib.parse import urlencode
 
-        someone = json.loads(cache.get("posted_person", "{}"))
+        someone = json.loads(request.config.cache.get("posted_person", "{}"))
 
-        access_token = _unpickling("access_token")
+        access_token = request.config.cache.get("access_token", None)
 
         # headers updated based on header requirements
         headers = {
@@ -84,7 +83,7 @@ class Personal(object):
             "Authorization": "Bearer " + access_token,
         }
 
-        resp = _client.simulate_get(
+        resp = client.simulate_get(
             path="/v1/orang",
             params={"search": someone.get("nama")},
             headers=headers,

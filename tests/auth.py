@@ -18,7 +18,7 @@ from tests._lib import random_string
 class Auth(object):
     """Authentication Test."""
 
-    def simple_auth_get(self, _client):
+    def simple_auth_get(self, client):
         """
         Testing Authentication via GET.
 
@@ -31,13 +31,13 @@ class Auth(object):
             "Host": config.get("security", "issuer"),
             "Origin": config.get("security", "audience"),
         }
-        resp = _client.simulate_get("/v1/auth", headers=headers, protocol=self.protocol)
+        resp = client.simulate_get("/v1/auth", headers=headers, protocol=self.protocol)
         assert resp.status == falcon.HTTP_OK
         if config.getboolean("app", "debug"):
             assert resp.json == {"WWW-Authenticate": "Bearer"}
             assert resp.headers.get("www-authenticate") == "Bearer"
 
-    def post_invalid_credentials(self, _client):
+    def post_invalid_credentials(self, client):
         """
         Testing Authentication via POST
         with invalid credentials.
@@ -51,11 +51,11 @@ class Auth(object):
         }
         # test with short password, less than 8 characters
         credentials = {
-            "username": self.creds["username"],
+            "username": self.pengguna.username,
             "password": self.password_string[:7],
         }
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth",
             body=dumpAsJSON(credentials),
             headers=headers,
@@ -70,11 +70,11 @@ class Auth(object):
 
         # test with invalid password with the same length
         credentials = {
-            "username": self.creds["username"],
+            "username": self.pengguna.username,
             "password": self.password_string[:-2] + random_string(2),
         }
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth",
             body=dumpAsJSON(credentials),
             headers=headers,
@@ -85,11 +85,11 @@ class Auth(object):
 
         # test with both scrambled username and password
         credentials = {
-            "username": self.creds["username"][:-2] + random_string(2),
+            "username": self.pengguna.username[:-2] + random_string(2),
             "password": self.password_string[:-5] + random_string(5),
         }
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth",
             body=dumpAsJSON(credentials),
             headers=headers,
@@ -98,7 +98,7 @@ class Auth(object):
         assert resp.status == falcon.HTTP_UNAUTHORIZED
         assert resp.json.get("code") == 401
 
-    def post_login_and_get_tokens(self, _client):
+    def post_login_and_get_tokens(self, client, request):
         """Testing Authentication via POST."""
 
         # headers updated based on header requirements
@@ -108,11 +108,11 @@ class Auth(object):
             "Origin": config.get("security", "audience"),
         }
         credentials = {
-            "username": self.creds["username"],
+            "username": self.pengguna.username,
             "password": self.password_string,
         }
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth",
             body=dumpAsJSON(credentials),
             headers=headers,
@@ -133,21 +133,18 @@ class Auth(object):
             audience=config.get("security", "audience"),
         )
 
-        _pickling(access_token, "access_token")
-        _pickling(refresh_token, "refresh_token")
-        _pickling(self.creds, "creds")
-        _pickling(self.someone, "someone")
-        _pickling(self.password_string, "password_string")
+        request.config.cache.set("access_token", access_token)
+        request.config.cache.set("refresh_token", refresh_token)
 
         # self.user is from pytest fixture within the conftest.py
-        assert payload["name"] == self.user.orang.nama
-        assert payload["pid"] == str(self.user.orang.id)
-        assert payload["roles"] == [x for x in self.user.kewenangan.wewenang.nama]
+        assert payload["name"] == self.pengguna.orang.nama
+        assert payload["pid"] == str(self.pengguna.orang.id)
+        assert payload["roles"] == self.roles
 
-    def auth_post_refresh_token(self, _client):
+    def auth_post_refresh_token(self, client, request):
 
-        old_access_token = _unpickling("access_token")
-        old_refresh_token = _unpickling("refresh_token")
+        old_access_token = request.config.cache.get("access_token", None)
+        old_refresh_token = request.config.cache.get("refresh_token", None)
 
         # make sure that old tokens are few seconds earlier
         time.sleep(1)
@@ -160,7 +157,7 @@ class Auth(object):
         }
         payload = {"access_token": old_access_token, "refresh_token": old_refresh_token}
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth/refresh",
             body=dumpAsJSON(payload),
             headers=headers,
@@ -216,10 +213,10 @@ class Auth(object):
         assert old_ref_token_payload["iat"] < new_ref_token_payload["iat"]
         assert old_ref_token_payload["exp"] < new_ref_token_payload["exp"]
 
-    def auth_post_verify_token(self, _client):
+    def auth_post_verify_token(self, client, request):
         ## Veriy token whether it is valid or not
 
-        access_token = _unpickling("access_token")
+        access_token = request.config.cache.get("access_token", None)
 
         # headers updated based on header requirements
         headers = {
@@ -229,7 +226,7 @@ class Auth(object):
         }
         payload = {"access_token": access_token}
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth/verify",
             body=dumpAsJSON(payload),
             headers=headers,
@@ -244,7 +241,7 @@ class Auth(object):
 
         payload = {"access_token": broken_token}
 
-        resp = _client.simulate_post(
+        resp = client.simulate_post(
             "/v1/auth/verify",
             body=dumpAsJSON(payload),
             headers=headers,

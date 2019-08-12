@@ -16,13 +16,11 @@ from tests._data_generator import DataGenerator
 
 class Profile(object):
     @db_session
-    def get_profile(self, _client, cache):
+    def get_profile(self, client, request):
 
         resource_path = "/v1/profile"
 
-        access_token = _unpickling("access_token")
-        creds = _unpickling("creds")
-        someone = _unpickling("someone")
+        access_token = request.config.cache.get("access_token", None)
 
         # headers updated based on header requirements
         headers = {
@@ -32,30 +30,29 @@ class Profile(object):
             "Authorization": "Bearer " + access_token,
         }
 
-        resp = _client.simulate_get(
+        resp = client.simulate_get(
             resource_path, headers=headers, protocol=self.protocol
         )
 
         self.content = resp.json.get("account")
-        cache.set("muria/account_content", self.content)
+        request.config.cache.set("muria/account_content", self.content)
 
         assert resp.status == falcon.HTTP_OK
-        assert self.content.get("email") == creds.get("email")
-        assert self.content.get("username") == creds.get("username")
-        assert self.content.get("profile")["id"] == someone["id"]
-        assert self.content.get("profile")["nama"] == someone["nama"]
+        assert self.content.get("email") == self.pengguna.email
+        assert self.content.get("username") == self.pengguna.username
+        assert self.content.get("profile")["id"] == self.orang.id
+        assert self.content.get("profile")["nama"] == self.orang.nama
 
     @db_session
-    def put_profile_picture(self, _client, cache):
+    def put_profile_picture(self, client, request):
+
         from PIL import Image
         from io import BytesIO, BufferedReader
         from tests._lib import create_multipart
 
         resource_path = "/v1/profile/picture"
 
-        access_token = _unpickling("access_token")
-        creds = _unpickling("creds")
-        someone = _unpickling("someone")
+        access_token = request.config.cache.get("access_token", None)
 
         img = Image.new("RGB", (400, 300), color="green")
         # bytes_stream = BufferedReader()
@@ -80,7 +77,7 @@ class Profile(object):
             }
         )
 
-        resp = _client.simulate_put(
+        resp = client.simulate_put(
             resource_path, body=data, headers=headers, protocol=self.protocol
         )
 
@@ -89,57 +86,55 @@ class Profile(object):
         # assert resp.json.get('success') == 'foo'
 
     @db_session
-    def get_profile_picture(self, _client, cache):
+    def get_profile_picture(self, client, request):
         resource_path = "/v1/profile/picture"
 
-        access_token = _unpickling("access_token")
-        creds = _unpickling("creds")
-        someone = _unpickling("someone")
-
-        # headers updated based on header requirements
+        access_token = request.config.cache.get("access_token", None)
         headers = {
             "Host": config.get("security", "issuer"),
             "Origin": config.get("security", "audience"),
             "Authorization": "Bearer " + access_token,
         }
 
-        resp = _client.simulate_get(
+        resp = client.simulate_get(
             resource_path, headers=headers, protocol=self.protocol
         )
 
         assert resp.status == falcon.HTTP_OK
 
     @db_session
-    def edit_profile(self, _client, cache):
-        cached_content = cache.get("muria/account_content", None)
+    def edit_profile(self, client, request):
 
-        if cached_content is not None:
+        account_content = request.config.cache.get("muria/account_content", None)
+
+        if account_content is not None:
+            mod_content = account_content.copy()
             # putting id in parent data
-            cached_content["id"] = cached_content["profile"]["id"]
+            mod_content["id"] = mod_content["profile"]["id"]
 
             # reversing user in email
-            old_email = cached_content["email"].split("@")
-            ori_nama = cached_content["profile"]["nama"].split(" ")
+            old_email = mod_content["email"].split("@")
+            ori_nama = mod_content["profile"]["nama"].split(" ")
             ori_nama.reverse()
             nama = (".").join(ori_nama)
             new_email = nama + "@" + old_email[-1:].pop()
 
-            assert cached_content["email"] != new_email
+            assert mod_content["email"] != new_email
 
-            cached_content["email"] = new_email
+            mod_content["email"] = new_email
 
             # reversing username
-            new_username = cached_content["username"].split(".")
+            new_username = mod_content["username"].split(".")
             new_username.reverse()
             new_username = (".").join(new_username)
 
-            assert cached_content["username"] != new_username
+            assert mod_content["username"] != new_username
 
-            cached_content["username"] = new_username
+            mod_content["username"] = new_username
 
             resource_path = "/v1/profile"
 
-            access_token = _unpickling("access_token")
+            access_token = request.config.cache.get("access_token", None)
 
             # headers updated based on header requirements
             headers = {
@@ -149,33 +144,47 @@ class Profile(object):
                 "Authorization": "Bearer " + access_token,
             }
 
-            resp = _client.simulate_patch(
+            resp = client.simulate_patch(
                 resource_path,
-                body=dumpAsJSON(cached_content),
+                body=dumpAsJSON(mod_content),
                 headers=headers,
                 protocol=self.protocol,
             )
 
             assert resp.status == falcon.HTTP_OK
 
-            old_cached = cache.get("muria/account_content", None)
             response = resp.json.get("account")
 
-            assert response["email"] != old_cached["email"]
-            assert response["username"] != old_cached["username"]
+            assert response["email"] != account_content["email"]
+            assert response["username"] != account_content["username"]
+
+            # restore default user data
+            account_content["id"] = account_content["profile"]["id"]
+
+            resp = client.simulate_patch(
+                resource_path,
+                body=dumpAsJSON(account_content),
+                headers=headers,
+                protocol=self.protocol,
+            )
+
+            assert resp.status == falcon.HTTP_OK
+
+            response = resp.json.get("account")
+
+            assert response["email"] == account_content["email"]
+            assert response["username"] == account_content["username"]
 
     @db_session
-    def change_account_password(self, _client):
+    def change_account_password(self, client, request):
 
         resource_path = "/v1/profile/security"
 
-        access_token = _unpickling("access_token")
-        creds = _unpickling("creds")
-        password_string = _unpickling("password_string")
+        access_token = request.config.cache.get("access_token", None)
 
         new_pass = DataGenerator().randomChar(10)
 
-        data = {"old_password": password_string, "new_password": new_pass}
+        data = {"old_password": self.password_string, "new_password": new_pass}
 
         # headers updated based on header requirements
         headers = {
@@ -185,7 +194,27 @@ class Profile(object):
             "Authorization": "Bearer " + access_token,
         }
 
-        resp = _client.simulate_patch(
+        resp = client.simulate_patch(
+            resource_path,
+            body=dumpAsJSON(data),
+            headers=headers,
+            protocol=self.protocol,
+        )
+
+        assert resp.status == falcon.HTTP_CREATED
+
+        # restore original data
+
+        data = {"new_password": self.password_string, "old_password": new_pass}
+
+        headers = {
+            "Content-Type": "application/json",
+            "Host": config.get("security", "issuer"),
+            "Origin": config.get("security", "audience"),
+            "Authorization": "Bearer " + access_token,
+        }
+
+        resp = client.simulate_patch(
             resource_path,
             body=dumpAsJSON(data),
             headers=headers,

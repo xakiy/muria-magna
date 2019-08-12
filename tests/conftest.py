@@ -14,43 +14,57 @@ from muria.wsgi import app
 from muria.init import config
 from muria.db.model import Orang, Pengguna, Kewenangan
 from tests._data_generator import DataGenerator
-from tests._pickles import _pickling, _unpickling
-from pony.orm import db_session
+from pony.orm import db_session, commit
 
 
 @pytest.fixture
-def _client():
+def client():
     return testing.TestClient(app)
 
 
 @pytest.fixture(scope="class", autouse=True)
-def _generateUser(request):
-    with db_session:
-        data_generator = DataGenerator()
-        jinshi = "male" if randint(1, 100) % 2 == 0 else "female"
-        # generate random person
-        someone = data_generator.makeOrang(sex=jinshi)
-        # populate him
-        person = Orang(**someone)
-        # generate a user based on previous person
-        creds, password_string = data_generator.makePengguna(person)
-        # populate him
-        user = Pengguna(**creds)
-        # generate a wewenang
-        wewenang = data_generator.makeKewenangan(user)
-        # grant kewenangan
-        kewenangan = Kewenangan(**wewenang)
+@db_session
+def default_user(request):
 
-        user.kewenangan.wewenang.nama
+    orang = {
+        'id': '7b8bccaa-5f6f-4ac0-a469-432799c12549',
+        'nik': 1455367523219750,
+        'nama': 'Rijalul Ghad',
+        'jinshi': 'l',
+        'tempat_lahir': 'Makasar',
+        'tanggal_lahir': '1983-01-28',
+        'tanggal_masuk': '2019-08-12'
+    }
 
-        # secure switching in muria.init is still buggy
-        # so let just stict to 'https' literally now
-        request.cls.protocol = (
-            "https"
-        )  # if config.getboolean('security', 'secure') else 'http'
-        request.cls.person = person
-        request.cls.someone = someone
-        request.cls.creds = creds
-        request.cls.password_string = password_string
-        request.cls.user = user
-        request.cls.wewenang = wewenang
+    request.cls.protocol = ("https")
+
+    request.cls.orang = Orang.get(id=orang['id']) \
+        if Orang.exists(id=orang['id']) else Orang(**orang)
+
+    password_string = 'supersecret'
+    hashed, salt = ('0d2f943bf584cc8d2181bb6678c6a8cdd459e43b231720f4a69b735d07e50910', '56d7a4c162c754262f90f345ac67c1841c715b3c')
+
+    pengguna = {
+        'orang': request.cls.orang,
+        'username': 'rijalul.ghad',
+        'email': 'rijalul.ghad@gmail.com',
+        'password': hashed,
+        'salt': salt,
+        'suspended': False
+    }
+
+    request.cls.pengguna = Pengguna.get(username=pengguna['username']) \
+        if Pengguna.exists(username=pengguna['username']) else Pengguna(**pengguna)
+
+    kewenangan = {
+        'pengguna': request.cls.pengguna,
+        'wewenang': 4
+    }
+
+    request.cls.kewenangan = Kewenangan.get(pengguna=kewenangan['pengguna']) \
+        if Kewenangan.exists(pengguna=kewenangan['pengguna']) else Kewenangan(**kewenangan)
+
+    # roles
+    request.cls.roles = [x.nama for x in request.cls.pengguna.kewenangan.wewenang]
+
+    request.cls.password_string = password_string
