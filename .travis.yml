@@ -1,0 +1,19 @@
+language: python
+python:
+  - '3.5'
+  - '3.6'
+  - 'pypy-5.7'
+stages:
+  - test
+  - deploy
+before_install:
+  - sudo apt-get update -qq
+install:
+  - sudo apt-get install -y -qq sqlite3 libsqlite3-dev
+  - pip install --upgrade pip
+  - pip install -r requirement-devel.txt
+script:
+  - coverage run --source=muria,tests -m pytest tests -vv
+after_success:
+  - coverage report -m
+deploy: skip
